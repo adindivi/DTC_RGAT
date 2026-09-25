@@ -68,7 +68,7 @@ class KnowledgeGraphService:
             rel = e.get("rel", "")
             src = e.get("source", "")
             dst = e.get("target", "")
-            if rel == "SW_IN":
+            if rel in ("SW_IN", "SW_LOGIC"):
                 self.dtc_to_ecus[src].add(dst)
             elif rel == "HW_MAP":
                 self.dtc_to_conns[src].add(dst)
@@ -460,7 +460,7 @@ class KnowledgeGraphService:
                         dtc_vis_id,
                         ecu_id,
                         "#8e8e93",
-                        "SW_IN (논리)",
+                        "SW_LOGIC (진단 로직)",
                         width=1.5,
                         dashes=False,
                     )

@@ -7,6 +7,7 @@ DTC 지식 그래프 진단 웹 애플리케이션
 """
 import argparse
 import logging
+import re
 import sys
 import threading
 import time
@@ -64,6 +65,16 @@ app = Flask(__name__)
 def index():
     return render_template_string(HTML_TEMPLATE)
 
+@app.route("/report")
+@app.route("/guide")
+def report():
+    """최종 완결 정리 보고서 제공 라우트"""
+    report_path = Path(__file__).resolve().parent / "최종정리.html"
+    if report_path.exists():
+        with open(report_path, "r", encoding="utf-8") as f:
+            return f.read()
+    return "Report not found", 404
+
 @app.route("/api/search")
 def search():
     """DTC 코드 자동완성 검색 API"""
@@ -98,8 +109,13 @@ def api_analyze():
             "detail": f"Received type: {type(raw_codes).__name__}"
         }), 400
 
-    # 유효한 문자열 코드 추출 및 정제
-    codes = [str(c).upper().strip() for c in raw_codes if str(c).strip()]
+    # 유효한 문자열 코드 추출 및 정제 (쉼표/공백 다중 입력 방어)
+    codes = []
+    for c in raw_codes:
+        for sub_c in re.split(r"[\s,;\n\r\t]+", str(c)):
+            clean_c = sub_c.upper().strip()
+            if clean_c and clean_c not in codes:
+                codes.append(clean_c)
     if not codes:
         return jsonify({
             "error": "분석할 DTC 코드를 1개 이상 입력해주세요.",
@@ -308,6 +324,7 @@ header{background:var(--surface);border-bottom:1px solid var(--hairline);padding
     <div class="autocomplete" id="ac-dropdown"></div>
     <button class="btn-analyze" id="btn-analyze" onclick="doAnalyze()">분석하기</button>
     <button class="btn-clear" onclick="clearAll()">초기화</button>
+    <a href="/report" target="_blank" style="text-decoration:none;"><button class="btn-clear" style="color:var(--primary);font-weight:700;">📖 원리해설서</button></a>
   </div>
 </header>
 
@@ -315,6 +332,7 @@ header{background:var(--surface);border-bottom:1px solid var(--hairline);padding
 <div class="examples-bar">
   <span style="font-size:11px;color:var(--muted);font-weight:600;">예시</span>
   <div class="examples">
+    <button class="ex-btn" style="border-color:#2563eb;color:#2563eb;font-weight:700;" onclick="setExample(['B100552','C128387','C164387','C166987'])">⚡ ACU_B 연쇄 폭발 (4개 제어기)</button>
     <button class="ex-btn" onclick="setExample(['C136887','B160300','C128387','U029387'])">B-CAN 통신 다발</button>
     <button class="ex-btn" onclick="setExample(['C162887','C161487','C128387','C161C86'])">C-CAN 관련 다발</button>
     <button class="ex-btn" onclick="setExample(['B160300','C110216','C110117'])">배터리 전원 관련</button>
@@ -350,6 +368,7 @@ header{background:var(--surface);border-bottom:1px solid var(--hairline);padding
         <div class="leg-item"><div class="leg-dot" style="background:#ffffff;border:1.5px solid var(--secondary);border-radius:2px;width:10px;height:8px;"></div>ECU (▭)</div>
         <div class="leg-item"><div class="leg-dot" style="background:#ffffff;border:1.5px solid #86868b;"></div>커넥터 (●)</div>
         <div class="leg-item"><div class="leg-dot" style="background:var(--primary);border:2px solid var(--primary);width:11px;height:11px;"></div>#1 근본원인 (★)</div>
+        <div class="leg-item"><div style="width:18px;height:0;border-top:2px solid #8e8e93;"></div>SW_LOGIC (진단 로직)</div>
         <div class="leg-item"><div style="width:18px;height:0;border-top:2px solid var(--primary);"></div>검증된 배선</div>
         <div class="leg-item"><div style="width:18px;height:0;border-top:2px dashed var(--muted);"></div>추론된 배선</div>
       </div>
@@ -387,15 +406,21 @@ const inp = document.getElementById('dtc-input');
 const wrap = document.getElementById('tag-wrap');
 const acd  = document.getElementById('ac-dropdown');
 
-function addTag(code) {
-  code = code.toUpperCase().trim();
-  if (!code || tags.includes(code)) return;
-  tags.push(code);
-  const span = document.createElement('span');
-  span.className = 'dtc-tag';
-  span.dataset.code = code;
-  span.innerHTML = `${code} <span class="rm" onclick="removeTag('${code}')">✕</span>`;
-  wrap.insertBefore(span, inp);
+function addTag(inputStr) {
+  if (!inputStr) return;
+  // 쉼표(,), 세미콜론(;), 공백, 줄바꿈, 탭 등으로 다중 코드 분리
+  const rawCodes = inputStr.split(/[\s,;\n\r\t]+/);
+  rawCodes.forEach(c => {
+    const code = c.toUpperCase().trim();
+    if (code && !tags.includes(code)) {
+      tags.push(code);
+      const span = document.createElement('span');
+      span.className = 'dtc-tag';
+      span.dataset.code = code;
+      span.innerHTML = `${code} <span class="rm" onclick="removeTag('${code}')">✕</span>`;
+      wrap.insertBefore(span, inp);
+    }
+  });
   inp.value = '';
   closeAC();
 }
@@ -427,11 +452,16 @@ function setExample(codes) {
   doAnalyze();
 }
 
-// 자동완성
+// 자동완성 및 다중 입력 감지
 let acTimer = null;
 inp.addEventListener('input', () => {
   clearTimeout(acTimer);
   const q = inp.value.trim();
+  // 쉼표나 세미콜론이 포함되어 있으면 즉시 태그들로 자동 분리
+  if (q.includes(',') || q.includes(';')) {
+    addTag(q);
+    return;
+  }
   if (q.length < 1) { closeAC(); return; }
   acTimer = setTimeout(async () => {
     try {
@@ -444,7 +474,23 @@ inp.addEventListener('input', () => {
   }, 120);
 });
 
+// 복사 붙여넣기로 여러 개 코드가 들어올 때 자동 분리 처리
+inp.addEventListener('paste', e => {
+  const pasteData = (e.clipboardData || window.clipboardData).getData('text');
+  if (pasteData && /[\s,;\n\r\t]/.test(pasteData)) {
+    e.preventDefault();
+    addTag(pasteData);
+  }
+});
+
 inp.addEventListener('keydown', e => {
+  if (e.key === ',' || e.key === ';') {
+    e.preventDefault();
+    if (inp.value.trim()) {
+      addTag(inp.value.trim());
+    }
+    return;
+  }
   if (e.key === 'ArrowDown') { acIdx = Math.min(acIdx+1, acData.length-1); renderAC(); e.preventDefault(); }
   else if (e.key === 'ArrowUp') { acIdx = Math.max(acIdx-1, -1); renderAC(); e.preventDefault(); }
   else if (e.key === 'Enter') {
