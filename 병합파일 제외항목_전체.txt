@@ -1,0 +1,64 @@
+======================================================================
+파일3에서 그래프 생성 시 제외된 항목 전체 목록
+(기준: GSW DTC 코드 전체.csv)
+======================================================================
+
+[1] GSW에 코드 자체가 없음 — 48개
+----------------------------------------------------------------------
+  NO=11    B020031    ECU=ADAS_PRK_MCU    커넥터=FBPR_FRNT12 / FRNT_FBPR11
+  NO=13    B02008C    ECU=ADAS_PRK_MCU    커넥터=FBPR_FRNT12 / FRNT_FBPR11
+  NO=12    B020093    ECU=ADAS_PRK_MCU    커넥터=FBPR_FRNT12 / FRNT_FBPR11
+  NO=14    B020096    ECU=ADAS_PRK_MCU    커넥터=FBPR_FRNT12 / FRNT_FBPR11
+  NO=183   B020131    ECU=ADAS_PRK_MCU    커넥터=FLRS_TGEX11 / TGEX_FLRS12
+  NO=185   B02018C    ECU=ADAS_PRK_MCU    커넥터=FLRS_TGEX11 / TGEX_FLRS12
+  NO=184   B020193    ECU=ADAS_PRK_MCU    커넥터=FLRS_TGEX11 / TGEX_FLRS12
+  NO=186   B020196    ECU=ADAS_PRK_MCU    커넥터=FLRS_TGEX11 / TGEX_FLRS12
+  NO=144   B020231    ECU=ADAS_PRK_MCU    커넥터=FLRS_DRDR11 / DRDR_FLRS12
+  NO=146   B02028C    ECU=ADAS_PRK_MCU    커넥터=FLRS_DRDR11 / DRDR_FLRS12
+  NO=145   B020293    ECU=ADAS_PRK_MCU    커넥터=FLRS_DRDR11 / DRDR_FLRS12
+  NO=147   B020296    ECU=ADAS_PRK_MCU    커넥터=FLRS_DRDR11 / DRDR_FLRS12
+  NO=152   B020331    ECU=ADAS_PRK_MCU    커넥터=FLRS_DRAS11 / DRAS_FLRS12
+  NO=155   B02038C    ECU=ADAS_PRK_MCU    커넥터=FLRS_DRAS11 / DRAS_FLRS12
+  NO=153   B020393    ECU=ADAS_PRK_MCU    커넥터=FLRS_DRAS11 / DRAS_FLRS12
+  NO=154   B020396    ECU=ADAS_PRK_MCU    커넥터=FLRS_DRAS11 / DRAS_FLRS12
+  NO=182   B020831    ECU=ADAS_PRK_MCU    커넥터=FLRS_TGEX11 / TGEX_FLRS12
+  NO=45    B109052    ECU=CLU             커넥터=FRNT_FPEM11 / FPRM_FRNT12
+  NO=264   B127513    ECU=AIRCON          커넥터=FRT_MODE_ACT
+  NO=269   B14291B    ECU=ISCM            커넥터=ACU_A
+  NO=453   B149000    ECU=ISCM            커넥터=ALR_SNSR / ALR_SNSR_H
+  NO=167   B167C00    ECU=SMK             커넥터=DRRL_FLRS11 / FLRS_DRRL12 / FLRS_DRRL11_WAV / DRRL_FLRS12_WAV
+  NO=141   B167D00    ECU=SMK             커넥터=FLRS_MAIN51 / MAIN_FLRS52
+  NO=87    B168688    ECU=AIRCON          커넥터=FRNT_MAIN11 / MAIN_FRTN12
+  NO=691   B16B700    ECU=ADAS_PRK_MCU    커넥터=FRT_VIEW_CAMERA
+  NO=279   B20401B    ECU=ISCM            커넥터=ACU_A
+  NO=266   B20451B    ECU=ISCM            커넥터=ACU_A
+  NO=33    B221187    ECU=AIRCON          커넥터=PCB_CONT_C
+  NO=545   B24B600    ECU=PTG             커넥터=SPINDLE_LH
+  NO=550   B24B700    ECU=PTG             커넥터=SPINDLE_RH
+  NO=673   B250200    ECU=ISCM            커넥터=OHC_LP
+  NO=326   B26A987    ECU=FR_CMR          커넥터=CLOCK SPRING
+  NO=180   B27F087    ECU=UWB_BLE_M       커넥터=FLRS_RFRR21 / RFRR_FLRS22
+  NO=704   C164C87    ECU=RR_C_RADAR      커넥터=C_RADAR_RL
+  NO=693   C200D86    ECU=ADAS_PRK_MCU    커넥터=FRT_VIEW_CAMERA
+  NO=377   C28C568    ECU=FR_CMR          커넥터=WHEEL_SNSR_FL
+  NO=692   C290086    ECU=ADAS_PRK_MCU    커넥터=FRT_VIEW_CAMERA
+  NO=694   C292386    ECU=ADAS_PRK_MCU    커넥터=FRT_VIEW_CAMERA
+  NO=727   P0C4212    ECU=BMS             커넥터=INLET_TEMP
+  NO=341   P1B8000    ECU=BMS             커넥터=BATT_HTR_TEMP_SNSR
+  NO=342   P1B8100    ECU=BMS             커넥터=BATT_HTR_TEMP_SNSR
+  NO=10    U080F86    ECU=ADAS_PRK_MCU    커넥터=FBPR_FRNT12 / FRNT_FBPR11
+  NO=82    U082887    ECU=ADAS_PRK_MCU    커넥터=FRNT_MAIN11 / MAIN_FRTN12
+  NO=28    U08BA07    ECU=VPC             커넥터=PCB_CONT_C
+  NO=29    U08BA8C    ECU=VPC             커넥터=PCB_CONT_C
+  NO=346   U18AF8C    ECU=VPC             커넥터=RS_MODULE
+  NO=30    U18BA8C    ECU=VPC             커넥터=PCB_CONT_C
+  NO=51    U225A87    ECU=FR_CMR          커넥터=FLRS_FRNT11 / FRNT_FLRS12
+
+[2] ECU 불일치 (코드는 있으나 GSW ECU와 다름) — 6개
+----------------------------------------------------------------------
+  NO=80    C128387    파일3ECU=EBB             GSW정답ECU=['ABS/ESC']  커넥터=FLRS_MAIN11 / MAIN_FLRS12
+  NO=39    C161C87    파일3ECU=ABS/ESC         GSW정답ECU=['EBB']  커넥터=FRNT_FPEM11 / FPRM_FRNT12
+  NO=81    C181487    파일3ECU=EBB             GSW정답ECU=['ABS/ESC']  커넥터=FLRS_MAIN11 / MAIN_FLRS12
+  NO=32    C182587    파일3ECU=ABS/ESC         GSW정답ECU=['EBB']  커넥터=PCB_CONT_C
+  NO=24    U077C8C    파일3ECU=MCU_F           GSW정답ECU=['ICCU', 'VPC']  커넥터=CCHR_FRNT11 / FRNT_CCHR12
+  NO=35    U131787    파일3ECU=ADAS_PRK_MCU    GSW정답ECU=['LCC']  커넥터=FRNT_FPEM11 / FPRM_FRNT12
