@@ -22,6 +22,8 @@ DEFAULT_ALPHA: float = 0.7  # 구조 점수(2-Hop 배선 도달 비율) 가중�
 DEFAULT_BETA: float  = 0.3  # RGAT 임베딩 유사도 가중치
 DEFAULT_TOP_K: int   = 20   # 상위 추천 커넥터 개수
 EMBED_DIM: int       = 64   # 임베딩 벡터 차원
+USE_TOPOLOGY_MASK: bool = True  # 2-Hop 배선 도달 제약 마스킹 활성화 여부
+
 
 # 서버 기본 설정
 DEFAULT_HOST: str = "0.0.0.0"

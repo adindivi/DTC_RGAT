@@ -133,10 +133,17 @@ class KnowledgeGraphService:
         }
         return sorted(ecus)
 
-    def analyze(self, input_codes: list[str]) -> dict[str, Any]:
+    def analyze(
+        self,
+        input_codes: list[str],
+        topology_mask: bool = True,
+        top_k: int | None = None,
+    ) -> dict[str, Any]:
         """
         입력된 다중 DTC 코드를 기반으로 하이브리드 근본원인 랭킹 및 시각화 데이터 도출
+        - topology_mask=True: 2-Hop 배선 도달 가능 커넥터에 집중하여 360개 비연결 노이즈 차단
         """
+        target_top_k = top_k if top_k is not None else self.top_k
         dtc_info: list[dict[str, Any]] = []
         unknown: list[str] = []
 
@@ -195,6 +202,8 @@ class KnowledgeGraphService:
                 "results": [],
                 "vis_nodes": [],
                 "vis_edges": [],
+                "topology_mask_applied": False,
+                "reachable_conns_count": 0,
             }
 
         # ── 1. 마스터 검증 직결 HW_MAP 매핑 집계 ───────────────────────
@@ -206,9 +215,11 @@ class KnowledgeGraphService:
 
         # ── 2. 구조 점수 (2-Hop 배선 도달 비율) 계산 ─────────────────
         struct_hit: dict[str, set[str]] = defaultdict(set)
+        all_reachable_conns: set[str] = set()
         for info in dtc_info:
             for cid in info["struct_conns"]:
                 struct_hit[cid].add(info["code"])
+                all_reachable_conns.add(cid)
 
         struct_norm = np.array(
             [len(struct_hit.get(c, ())) / n_valid for c in self.conn_ids]
@@ -220,8 +231,16 @@ class KnowledgeGraphService:
         min_v, max_v = rgat_raw.min(), rgat_raw.max()
         rgat_norm = (rgat_raw - min_v) / (max_v - min_v + 1e-9)
 
-        # ── 4. 하이브리드 점수 산출 ──────────────────────────────────
+        # ── 4. 하이브리드 점수 산출 및 토폴로지 마스킹 ────────────────
         final_scores = self.alpha * struct_norm + self.beta * rgat_norm
+
+        mask_active = bool(topology_mask and all_reachable_conns)
+        effective_scores = final_scores.copy()
+        if mask_active:
+            # 2-Hop 물리 배선 도달이 불가능한 커넥터(순수 노이즈) 마스킹 격리
+            for ci, cid in enumerate(self.conn_ids):
+                if cid not in all_reachable_conns:
+                    effective_scores[ci] = -1e9
 
         # ── 5. 순위 리스트 조립 ──────────────────────────────────────
         results: list[dict[str, Any]] = []
@@ -232,7 +251,7 @@ class KnowledgeGraphService:
             verified_conn_codes, key=lambda c: -len(verified_conn_codes[c])
         )
         for cid in sorted_verified:
-            if len(results) >= self.top_k:
+            if len(results) >= target_top_k:
                 break
             ci = self.conn_id_to_idx.get(cid, -1)
             cnd = self.node_by_id.get(cid, {})
@@ -251,14 +270,18 @@ class KnowledgeGraphService:
                     "hit_codes": hit_codes,
                     "conn_ecus": self._get_conn_ecus(cid),
                     "verified": True,
+                    "is_reachable": True,
                 }
             )
             verified_added.add(cid)
 
-        # 2순위: 하이브리드 점수 기반 커넥터
-        ranked_indices = np.argsort(final_scores)[::-1]
+        # 2순위: 하이브리드 점수 기반 커넥터 (마스킹 적용)
+        ranked_indices = np.argsort(effective_scores)[::-1]
         for ci in ranked_indices:
-            if len(results) >= self.top_k:
+            if len(results) >= target_top_k:
+                break
+            if mask_active and effective_scores[ci] < -1e8:
+                # 도달 가능한 후보군을 모두 채웠으면 비연결 노이즈 커넥터 배제
                 break
             cid = self.conn_ids[ci]
             if cid in verified_added:
@@ -279,8 +302,10 @@ class KnowledgeGraphService:
                     "hit_codes": hit_codes,
                     "conn_ecus": self._get_conn_ecus(cid),
                     "verified": False,
+                    "is_reachable": bool(cid in all_reachable_conns),
                 }
             )
+
 
         # ── 6. vis.js 계층형 그래프 데이터 빌드 ──────────────────────
         vis_nodes, vis_edges = self._build_vis_graph(
@@ -300,6 +325,8 @@ class KnowledgeGraphService:
             "results": results,
             "vis_nodes": vis_nodes,
             "vis_edges": vis_edges,
+            "topology_mask_applied": mask_active,
+            "reachable_conns_count": len(all_reachable_conns),
         }
 
     def _build_vis_graph(

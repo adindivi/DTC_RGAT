@@ -109,7 +109,8 @@ def api_analyze():
     logger.info(f"Incoming analysis request for {len(codes)} codes: {codes}")
 
     try:
-        result = graph_service.analyze(codes)
+        use_mask = bool(data.get("topology_mask", True))
+        result = graph_service.analyze(codes, topology_mask=use_mask)
         elapsed = (time.perf_counter() - start_time) * 1000
 
         if result.get("unknown"):
@@ -572,10 +573,11 @@ function renderRCPanel(data) {
     const dots = data.dtc_info.map(d =>
       `<span class="rc-dot ${r.hit_codes.includes(d.code)?'hit':'miss'}">${d.code}</span>`).join('');
     const vmark = r.verified ? '<span style="font-size:10px;background:rgba(0,113,227,.1);color:var(--primary);padding:1px 7px;border-radius:980px;margin-left:6px;font-weight:600;">검증</span>' : '';
+    const reachBadge = (!r.verified && r.is_reachable) ? '<span style="font-size:10px;background:rgba(52,199,89,.12);color:#2e7d32;padding:1px 7px;border-radius:980px;margin-left:6px;font-weight:600;">배선일치</span>' : '';
     const scoreStr = r.verified ? '<span style="font-size:11px;color:var(--primary);font-weight:600;">마스터 직접 매핑</span>' : r.final_score.toFixed(3);
     html += `<div class="rc-card ${cls}" onclick="focusConn('${r.conn_id}')">
       <div class="rc-rank ${rnk}">#${r.rank}  ${r.location||''}</div>
-      <div class="rc-name">${r.name}${vmark}</div>
+      <div class="rc-name">${r.name}${vmark}${reachBadge}</div>
       <div class="rc-bar-wrap">
         <div class="rc-bar"><div class="rc-bar-fill" style="width:${Math.min(r.final_score/2,1)*100}%;"></div></div>
         <div class="rc-score">${scoreStr}</div>

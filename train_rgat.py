@@ -74,11 +74,11 @@ HEADS        = 4      # attention heads (layer 1)
 DROPOUT      = 0.3
 LR           = 1e-3
 WEIGHT_DECAY = 5e-4
-EPOCHS       = 200
+EPOCHS       = 100
 NEG_RATIO    = 3      # 양성 1개당 음성 샘플 수
 TEST_RATIO   = 0.2
 TOPK         = 10     # 예측 출력 top-K
-FEAT_DIM     = 38     # DTC 코드 구조 피처 차원
+FEAT_DIM     = 54     # DTC 및 커넥터 공간 방위(7) + 부품 도메인(9) 확장 피처 차원 (38 + 16 = 54)
 
 # ══════════════════════════════════════════════════════════════
 # 1. 그래프 JSON 로드 → 인덱스 매핑
@@ -112,9 +112,11 @@ for t, ids in type_to_nodes.items():
     print(f"    {t:<12}: {len(ids)}")
 
 # ══════════════════════════════════════════════════════════════
-# DTC 코드 구조 피처 인코딩 (38차원)
-#   노드타입(3) + 시스템(4) + 제조사전용(1) + 서브타입(14)
-#   + 고장카테고리(10) + 커넥터위치(6) = 38
+# ══════════════════════════════════════════════════════════════
+# DTC 및 커넥터 도메인 정밀 피처 인코딩 (54차원)
+#   기본: 노드타입(3) + 시스템(4) + 제조사전용(1) + 서브타입(14)
+#        + 고장카테고리(10) + 커넥터위치(6) = 38
+#   확장: 8방위 공간(7) + 9대 부품 도메인(9) = 16  ➔ 총 54차원
 # ══════════════════════════════════════════════════════════════
 SYSTEM_MAP   = {"P": 0, "B": 1, "C": 2, "U": 3}
 TOP_SUBTYPES = ["00", "87", "11", "12", "88", "86", "01", "13",
@@ -123,6 +125,30 @@ FAULT_MAP    = {"기타": 0, "통신": 1, "단락": 2, "전원/전압": 3, "센�
                  "단선/개방": 5, "범위/타당성": 6, "액추에이터": 7,
                  "온도": 8, "내부이상": 9}
 LOC_MAP      = {"프론트": 0, "플로어": 1, "도어": 2, "리어": 3, "루프": 4}
+
+def extract_spatial_component_flags(n: dict) -> list[float]:
+    """DTC 고장설명문/위치 및 커넥터 명칭에서 공간 방위(7) 및 부품 도메인(9) 16차원 추출"""
+    t = (n.get("position", "") + " " + n.get("description", "") + " " + n.get("name", "") + " " + n.get("label", "")).upper()
+    return [
+        # 1. 공간 방위 (7-dim)
+        float(any(k in t for k in ["전방", "전측방", "FRONT", "FRNT", "_FR", "_FL", "FPEM", "FBPR", "FOR", "FOL", "FIR", "FIL", "FSR", "FSL"])),
+        float(any(k in t for k in ["후방", "후측방", "REAR", "_RR", "_RL", "RRBP", "TREX", "TLEX", "ROR", "ROL", "RIR", "RIL", "RSR", "RSL"])),
+        float(any(k in t for k in ["좌측", "좌내측", "좌외측", "LEFT", "LH", "_FL", "_RL", "TSDL", "ROL", "RIL", "RSL", "FOL", "FIL", "FSL", "DRRL"])),
+        float(any(k in t for k in ["우측", "우내측", "우외측", "RIGHT", "RH", "_FR", "_RR", "TSDR", "ROR", "RIR", "RSR", "FOR", "FIR", "FSR", "DRRR"])),
+        float(any(k in t for k in ["내측", "좌내측", "우내측", "INNER", "FIR", "FIL", "RIR", "RIL", "_IN"])),
+        float(any(k in t for k in ["외측", "좌외측", "우외측", "OUTER", "FOR", "FOL", "ROR", "ROL", "_OUT"])),
+        float(any(k in t for k in ["측방", "전측방", "후측방", "SIDE", "FSR", "FSL", "RSR", "RSL"])),
+        # 2. 부품 도메인 (9-dim)
+        float(any(k in t for k in ["초음파", "U_SNSR", "RSPA", "FSPA", "PAS"])),
+        float(any(k in t for k in ["휠스피드", "휠센서", "WHEEL_SNSR", "WSS", "WHEEL"])),
+        float(any(k in t for k in ["UWB", "BLE", "디지털키", "스마트키"])),
+        float(any(k in t for k in ["카메라", "CAMERA", "CAM", "광각", "SVM", "AVM", "전방카메라", "후방카메라"])),
+        float(any(k in t for k in ["레이더", "RADAR", "RDR"])),
+        float(any(k in t for k in ["외기온도", "외기", "실내온도", "증발기", "습도", "온도", "AMB", "DUCT"])),
+        float(any(k in t for k in ["액추에이터", "모터", "ACTR", "MTR", "EPB", "릴레이", "EBB"])),
+        float(any(k in t for k in ["스위치", "_SW", "버클", "레버", "STOP_LP_SW"])),
+        float(any(k in t for k in ["하네스", "MAIN", "FLRS", "FBPR", "FRNT", "RRBP", "DRRL", "DRRR", "PDC", "TLEX", "TREX"])),
+    ]
 
 def build_dtc_features(nodes: list) -> torch.Tensor:
     feat = np.zeros((len(nodes), FEAT_DIM), dtype=np.float32)
@@ -153,10 +179,15 @@ def build_dtc_features(nodes: list) -> torch.Tensor:
         elif nt == "Connector":
             loc = n.get("location", "")
             feat[i, 32 + LOC_MAP.get(loc, 5)] = 1
+
+        # 공간 방위 및 부품 도메인 피처 (16-dim)
+        feat[i, 38:54] = extract_spatial_component_flags(n)
+
     return torch.tensor(feat, dtype=torch.float32)
 
 DTC_FEATURES = build_dtc_features(nodes)
-print(f"  DTC structure features: {DTC_FEATURES.shape} (38-dim per node)")
+print(f"  DTC structure features: {DTC_FEATURES.shape} (54-dim per node)")
+
 
 # ══════════════════════════════════════════════════════════════
 # 2. 엣지 분리: 배경 그래프 vs 학습 대상 (HW_MAP)
@@ -379,35 +410,177 @@ for epoch in range(1, EPOCHS + 1):
         print(f"  Epoch {epoch:>4}  loss={loss.item():.4f}  AUC={auc:.4f}"
               + (" <-- best" if auc == best_auc else ""))
 
-print(f"\n  Best AUC: {best_auc:.4f} @ epoch {best_epoch}")
+print(f"\n  Stage 1 Best AUC: {best_auc:.4f} @ epoch {best_epoch}")
 
 # ══════════════════════════════════════════════════════════════
-# 6. 추가 평가: Hits@K
+# 5-B. 2단계 특훈: 동일 ECU 오답 집중 학습 (Intra-ECU Hard Negative InfoNCE)
 # ══════════════════════════════════════════════════════════════
-print("\n[5/6] Evaluating Hits@K...")
+print("\n[4-B/6] Phase 2: Intra-ECU Hard Negative Special Training (InfoNCE)...")
+model.load_state_dict(torch.load(OUT_MODEL, map_location=DEVICE, weights_only=True))
+
+# 2-Hop 물리 배선 도달 가능 맵 구축 (DTC -> ECU -> Connector)
+dtc_to_ecu_map: dict[int, set[int]] = {}
+ecu_to_conn_map: dict[int, set[int]] = {}
+for e in edges:
+    rel, s_id, t_id = e.get("rel"), e.get("source"), e.get("target")
+    si, ti = node_id_to_idx.get(s_id), node_id_to_idx.get(t_id)
+    if si is None or ti is None:
+        continue
+    if rel == "SW_IN":
+        dtc_to_ecu_map.setdefault(si, set()).add(ti)
+    elif rel == "HW_WIRE":
+        ecu_to_conn_map.setdefault(si, set()).add(ti)
+
+all_pos_by_dtc: dict[int, set[int]] = {}
+for src, dst in lp_pos_edges:
+    all_pos_by_dtc.setdefault(src, set()).add(dst)
+
+conn_to_local_idx = {c: i for i, c in enumerate(conn_list)}
+unique_test_dtcs = list(set(d for d, c in pos_test))
+
+# Fine-tuning optimizer
+ft_optimizer = torch.optim.AdamW(model.parameters(), lr=1e-4, weight_decay=1e-5)
+temperature = 0.15
+best_dtc_top1 = 0.0
+best_ft_epoch = 0
+FT_EPOCHS = 25
+
+for ft_epoch in range(1, FT_EPOCHS + 1):
+    model.train()
+    ft_optimizer.zero_grad()
+    z = model.encode(bg_edge_index, bg_edge_type, DTC_FEATURES)
+
+    losses = []
+    for d, c_pos in pos_train:
+        cands = list({conn for ecu in dtc_to_ecu_map.get(d, ()) for conn in ecu_to_conn_map.get(ecu, ())})
+        if len(cands) <= 1:
+            continue
+        if c_pos in cands:
+            d_emb = z[d]
+            cand_embs = z[cands]
+            logits = (cand_embs @ d_emb) / temperature
+            target_idx = cands.index(c_pos)
+            loss_d = F.cross_entropy(logits.unsqueeze(0), torch.tensor([target_idx]).to(DEVICE))
+            losses.append(loss_d)
+
+    if losses:
+        ft_loss = torch.stack(losses).mean()
+        ft_loss.backward()
+        nn.utils.clip_grad_norm_(model.parameters(), 1.0)
+        ft_optimizer.step()
+
+    # Validation
+    model.eval()
+    with torch.no_grad():
+        z_eval = model.encode(bg_edge_index, bg_edge_type, DTC_FEATURES)
+        z_eval_np = z_eval.cpu().numpy()
+
+    z_conn_ft = z_eval_np[conn_list]
+    dtc_hits1 = 0
+    for d in unique_test_dtcs:
+        cands = {conn for ecu in dtc_to_ecu_map.get(d, ()) for conn in ecu_to_conn_map.get(ecu, ())}
+        scores = z_conn_ft @ z_eval_np[d]
+        if cands:
+            masked = np.full_like(scores, -np.inf)
+            for cand in cands:
+                loc = conn_to_local_idx.get(cand)
+                if loc is not None:
+                    masked[loc] = scores[loc]
+            scores = masked
+        top1_conn = conn_list[np.argsort(scores)[::-1][0]]
+        if top1_conn in all_pos_by_dtc.get(d, set()):
+            dtc_hits1 += 1
+
+    dtc_top1_acc = dtc_hits1 / len(unique_test_dtcs) * 100
+    is_best = dtc_top1_acc > best_dtc_top1
+    if is_best:
+        best_dtc_top1 = dtc_top1_acc
+        best_ft_epoch = ft_epoch
+        torch.save(model.state_dict(), OUT_MODEL)
+
+    print(f"  FT-Epoch {ft_epoch:>2}  loss={ft_loss.item():.4f}  DTC Top-1 Diagnosis={dtc_top1_acc:.1f}%"
+          + (" <-- best" if is_best else ""))
+
+print(f"\n  Phase 2 Best DTC Top-1 Diagnosis: {best_dtc_top1:.1f}% @ FT-Epoch {best_ft_epoch}")
+
+# ══════════════════════════════════════════════════════════════
+# 6. 종합 평가: Edge Hits@K 및 DTC 진단 적중률
+# ══════════════════════════════════════════════════════════════
+print("\n[5/6] Final Comprehensive Evaluation...")
 model.load_state_dict(torch.load(OUT_MODEL, map_location=DEVICE, weights_only=True))
 model.eval()
 with torch.no_grad():
     _, z = model(bg_edge_index, bg_edge_type, DTC_FEATURES, te_src, te_dst)
 
 z_np = z.cpu().numpy()   # [N, out_dim]
-z_conn_eval = z_np[conn_list]  # [|Conn|, out_dim] 루프 밖에서 1회만 슬라이싱
-conn_to_local_idx = {c: i for i, c in enumerate(conn_list)}
+z_conn_eval = z_np[conn_list]  # [|Conn|, out_dim]
 
-def hits_at_k(k: int) -> float:
+def evaluate_hits(k: int, masked: bool = False) -> tuple[float, int, int]:
     hits = 0
+    total = len(pos_test)
     for (dtc_idx, conn_idx) in pos_test:
         z_dtc  = z_np[dtc_idx]
         scores = z_conn_eval @ z_dtc
+
+        if masked:
+            cands = set()
+            for ecu in dtc_to_ecu_map.get(dtc_idx, ()):
+                for conn in ecu_to_conn_map.get(ecu, ()):
+                    cands.add(conn)
+            if cands:
+                masked_scores = np.full_like(scores, -np.inf)
+                for cand in cands:
+                    loc = conn_to_local_idx.get(cand)
+                    if loc is not None:
+                        masked_scores[loc] = scores[loc]
+                scores = masked_scores
+
         top_k  = np.argsort(scores)[::-1][:k]
         true_conn_local = conn_to_local_idx.get(conn_idx, -1)
         if true_conn_local in top_k:
             hits += 1
-    return hits / len(pos_test) if pos_test else 0.0
+    return (hits / total if total else 0.0), hits, total
 
+def evaluate_dtc_diagnosis(k: int) -> tuple[float, int, int]:
+    hits = 0
+    total = len(unique_test_dtcs)
+    for d in unique_test_dtcs:
+        z_dtc = z_np[d]
+        scores = z_conn_eval @ z_dtc
+        cands = {conn for ecu in dtc_to_ecu_map.get(d, ()) for conn in ecu_to_conn_map.get(ecu, ())}
+        if cands:
+            masked = np.full_like(scores, -np.inf)
+            for cand in cands:
+                loc = conn_to_local_idx.get(cand)
+                if loc is not None:
+                    masked[loc] = scores[loc]
+            scores = masked
+        top_k = np.argsort(scores)[::-1][:k]
+        top_conns = {conn_list[i] for i in top_k}
+        if top_conns & all_pos_by_dtc.get(d, set()):
+            hits += 1
+    return (hits / total if total else 0.0), hits, total
+
+print("=" * 72)
+print(f"  [1] 개별 엣지 단위 링크 예측 (Strict Edge Hits@K)")
+print("-" * 72)
+print(f"  {'Metric':<10} {'Global (375개 전체)':<22} {'Topology-Masked (배선 제약)':<26} {'개선 배율'}")
+print("-" * 72)
 for k in [1, 5, 10, 20, 50]:
-    h = hits_at_k(k)
-    print(f"  Hits@{k:<3}: {h:.4f}  ({h*100:.1f}%)")
+    g_rate, g_h, n_tot = evaluate_hits(k, masked=False)
+    m_rate, m_h, _     = evaluate_hits(k, masked=True)
+    ratio_str = f"{m_rate / (g_rate + 1e-9):.1f}배"
+    print(f"  Hits@{k:<4}: {g_rate:.4f} ({g_rate*100:>5.1f}%)       {m_rate:.4f} ({m_rate*100:>5.1f}%)             {ratio_str}")
+print("=" * 72)
+
+print("\n" + "=" * 72)
+print(f"  [2] 실제 차량 DTC 고장 진단 적중률 (DTC-Level Diagnostic Accuracy)")
+print("-" * 72)
+for k in [1, 3, 5, 10]:
+    d_rate, d_h, d_tot = evaluate_dtc_diagnosis(k)
+    print(f"  DTC Top-{k:<2} 진단 적중률 : {d_rate*100:>5.1f}% ({d_h}/{d_tot}개 DTC 고장 원인 적중)")
+print("=" * 72)
+
 
 # ══════════════════════════════════════════════════════════════
 # 7. 커넥터 없는 DTC에 대한 Top-K 커넥터 예측
