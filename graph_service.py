@@ -473,17 +473,16 @@ class KnowledgeGraphService:
                     dashes=False,
                 )
 
-                # ECU -> Top 5 커넥터 (HW_WIRE 물리 배선)
+                # ECU -> Top 5 커넥터 (HW_WIRE 물리 배선: 차량 하네스 설계 회로도에 100% 실재하는 물리 배선)
                 connecting_conns = self.ecu_to_conns.get(ecu_id, set()) & top5_conn_ids
                 for conn_id in connecting_conns:
-                    is_direct = any(conn_id in self.dtc_to_conns.get(nid, set()) for nid in nids)
                     add_edge(
                         ecu_id,
                         conn_id,
                         "#0071e3",
                         "HW_WIRE (물리 배선)",
                         width=2.5,
-                        dashes=(not is_direct),
+                        dashes=False,
                     )
 
             # 경로 B: DTC -> Connector 직접 연결 (HW_MAP 마스터 직접 검증 링크 보존)
@@ -498,5 +497,30 @@ class KnowledgeGraphService:
                         width=2.5,
                         dashes=False,
                     )
+
+        # 경로 C: 회로도상 배선이 없지만 AI(RGAT)가 유사도로 추천한 가상 경로 (AI_HW_WIRE: 연하늘 점선)
+        # (회로도상 전선 연결이 확인되지 않지만 AI가 센서 특성/고장 증상 유사도로만 강력하게 의심하여 추천한 가상 경로)
+        vis_node_ids = {n["id"] for n in vis_nodes}
+        for r in top5_results:
+            cid = r["conn_id"]
+            if not r.get("is_reachable", True):
+                # 물리 배선이 닿지 않는 추천 커넥터는 활성화된 대표 제어기와 AI_HW_WIRE 점선 연결
+                linked = False
+                for info in dtc_info:
+                    for nid in self.code_to_nids.get(info["code"], []):
+                        for eid in self.dtc_to_ecus.get(nid, ()):
+                            if eid in vis_node_ids:
+                                add_edge(
+                                    eid,
+                                    cid,
+                                    "#93c5fd",
+                                    "AI_HW_WIRE (추론물리관계)",
+                                    width=2.0,
+                                    dashes=True,
+                                )
+                                linked = True
+                                break
+                        if linked:
+                            break
 
         return vis_nodes, vis_edges

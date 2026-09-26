@@ -20,3 +20,6 @@ webapp.log
 *.tmp
 ~$*
 *.xlsx#*
+
+# Live Verification Screenshots
+live_verified_*.png

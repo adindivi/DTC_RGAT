@@ -247,9 +247,14 @@ header{background:var(--surface);border-bottom:1px solid var(--hairline);padding
 .map-toolbar span{font-size:12px;color:var(--muted);}
 .tb-btn{background:var(--surface);border:1px solid var(--hairline-strong);color:var(--fg);border-radius:980px;padding:6px 14px;font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;transition:all .15s ease;display:inline-flex;align-items:center;justify-content:center;gap:6px;}
 .tb-btn:hover{border-color:var(--primary);color:var(--primary);}
-.legend{display:flex;gap:12px;flex-wrap:wrap;margin-left:auto;}
+.legend{display:flex;gap:10px;flex-wrap:wrap;margin-left:auto;align-items:center;}
 .leg-item{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted);font-weight:500;}
 .leg-pill{width:14px;height:8px;border-radius:980px;display:inline-block;}
+.leg-toggle{cursor:pointer;padding:3px 8px;border-radius:980px;border:1px solid rgba(37,99,235,0.25);background:rgba(37,99,235,0.04);transition:all .15s ease;user-select:none;}
+.leg-toggle:hover{background:rgba(37,99,235,.1);border-color:#2563eb;}
+.leg-toggle.off{opacity:.45;border-color:var(--hairline-strong);background:transparent;}
+.leg-toggle.off span{text-decoration:line-through;}
+.leg-toggle.off .hw-map-badge{background:var(--fog)!important;color:var(--muted)!important;text-decoration:none!important;}
 #network{flex:1;}
 
 .state-msg{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:8px;color:var(--muted);text-align:center;padding:20px;}
@@ -347,6 +352,7 @@ header{background:var(--surface);border-bottom:1px solid var(--hairline);padding
     <button class="ex-btn" onclick="setExample(['C162887','C161487','C128387','C161C86'])">C-CAN 관련 다발</button>
     <button class="ex-btn" onclick="setExample(['B160300','C110216','C110117'])">배터리 전원 관련</button>
     <button class="ex-btn" onclick="setExample(['C136887','C136987','C137087','C137187'])">초음파 센서 다발</button>
+    <button class="ex-btn" style="border:1.5px dashed #0284c7;color:#0284c7;background:rgba(2,132,199,0.06);font-weight:700;" onclick="setExample(['B122901','B123001','B234301','B240301'])" title="회로도 미등록 ➔ RGAT 임베딩 유사도로 AI_HW_WIRE (추론물리관계) 점선 추천">공조 센서 다발 (AI_HW_WIRE)</button>
   </div>
 </div>
 
@@ -389,10 +395,14 @@ header{background:var(--surface);border-bottom:1px solid var(--hairline);padding
         <div class="leg-item"><div class="leg-pill" style="background:#ffedd5;border:1.5px solid #fb923c;"></div>담당 ECU</div>
         <div class="leg-item"><div class="leg-pill" style="background:#e0f2fe;border:1.5px solid #7dd3fc;"></div>커넥터</div>
         <div class="leg-item"><div class="leg-pill" style="background:#1e293b;border:1.5px solid #0f172a;"></div>#1 근본원인</div>
-        <div class="leg-item"><div style="width:16px;height:0;border-top:2px solid #64748b;"></div>SW_LOGIC (진단)</div>
-        <div class="leg-item"><div style="width:16px;height:0;border-top:2px solid #2563eb;"></div>HW_MAP 아치선 (직접검증)</div>
-        <div class="leg-item"><div style="width:16px;height:0;border-top:2px solid #3b82f6;"></div>HW_WIRE (물리배선)</div>
-        <div class="leg-item"><div style="width:16px;height:0;border-top:2px dashed #93c5fd;"></div>추론 배선</div>
+        <div class="leg-item"><div style="width:16px;height:0;border-top:2px solid #64748b;"></div>SW_LOGIC (로직관계)</div>
+        <div class="leg-item leg-toggle" id="leg-hw-map" onclick="toggleHwMap()" title="클릭하여 HW_MAP (검증매핑) 선 켜기/끄기 토글">
+          <div style="width:16px;height:0;border-top:2px solid #2563eb;"></div>
+          <span>HW_MAP (검증매핑)</span>
+          <span class="hw-map-badge" id="hw-map-badge" style="font-size:9px;padding:1px 5px;border-radius:980px;background:rgba(37,99,235,0.14);color:#2563eb;font-weight:700;margin-left:2px;">ON</span>
+        </div>
+        <div class="leg-item"><div style="width:16px;height:0;border-top:2px solid #3b82f6;"></div>HW_WIRE (물리관계)</div>
+        <div class="leg-item" title="회로도상에는 전선 연결이 확인되지 않지만, AI(RGAT)가 센서 특성/고장 증상 유사도로만 강력하게 의심하여 추천한 가상 경로"><div style="width:16px;height:0;border-top:2px dashed #93c5fd;"></div>AI_HW_WIRE (추론물리관계)</div>
       </div>
     </div>
     <div id="network-wrap" style="flex:1;position:relative;min-height:0;">
@@ -418,6 +428,9 @@ let tags = [];
 let acData = [];
 let acIdx  = -1;
 let network = null;
+let vn = null;
+let ve = null;
+let hwMapVisible = true;
 let physicsOn = false;
 let hierarchicalOn = true;
 let lastResult = null;
@@ -789,7 +802,7 @@ const GROUPS = {
 };
 
 function buildNetwork(data) {
-  const vn = new vis.DataSet(data.vis_nodes.map(n => ({
+  vn = new vis.DataSet(data.vis_nodes.map(n => ({
     id: n.id,
     label: n.label,
     title: n.title,
@@ -800,12 +813,14 @@ function buildNetwork(data) {
     group: n.group
   })));
 
-  const ve = new vis.DataSet(data.vis_edges.map((e,i) => {
+  ve = new vis.DataSet(data.vis_edges.map((e,i) => {
     const isDirect = e.title && e.title.includes('HW_MAP');
+    const isAiWire = e.title && e.title.includes('AI_HW_WIRE');
     const isWire = e.title && e.title.includes('HW_WIRE');
     let edgeColor = '#64748b';
     if (isDirect) edgeColor = '#2563eb';
-    else if (isWire) edgeColor = e.dashes ? '#93c5fd' : '#3b82f6';
+    else if (isAiWire || e.dashes) edgeColor = '#93c5fd';
+    else if (isWire) edgeColor = '#3b82f6';
     else edgeColor = '#64748b';
 
     // [계층형 마인드맵 엣지 기본 곡률]
@@ -826,6 +841,7 @@ function buildNetwork(data) {
       title: e.title,
       dashes: e.dashes || false,
       smooth: smoothOpt,
+      hidden: isDirect ? !hwMapVisible : false,
     };
   }));
 
@@ -908,13 +924,15 @@ function applySelectiveEdgeSmooth(vn, ve) {
       // [사용자 요구사항] 실제로 중간 ECU와 겹치는 HW_map 선만 위로 우회하는 아치형 다리선(Bridge Arc) 적용!
       updates.push({
         id: e.id,
-        smooth: { enabled: true, type: 'curvedCW', roundness: 0.22 }
+        smooth: { enabled: true, type: 'curvedCW', roundness: 0.22 },
+        hidden: !hwMapVisible
       });
     } else {
       // 겹치지 않고 대각선으로 자연스럽게 뻗어나가는 선들은 일반 수평 S-Curve(cubicBezier) 유지!
       updates.push({
         id: e.id,
-        smooth: { enabled: true, type: 'cubicBezier', forceDirection: 'horizontal', roundness: 0.6 }
+        smooth: { enabled: true, type: 'cubicBezier', forceDirection: 'horizontal', roundness: 0.6 },
+        hidden: !hwMapVisible
       });
     }
   });
@@ -942,6 +960,38 @@ function toggleViewMode() {
   }
   if (lastResult) buildNetwork(lastResult);
 }
+
+// ── HW_MAP (검증매핑) 표시 켜기/끄기 토글 ───────────────────────
+function toggleHwMap() {
+  if (!network || !ve) return;
+  hwMapVisible = !hwMapVisible;
+
+  const updates = [];
+  ve.get().forEach(e => {
+    if (e.title && e.title.includes('HW_MAP')) {
+      updates.push({ id: e.id, hidden: !hwMapVisible });
+    }
+  });
+
+  if (updates.length > 0) {
+    ve.update(updates);
+  }
+
+  const toggleEl = document.getElementById('leg-hw-map');
+  const badgeEl = document.getElementById('hw-map-badge');
+  if (toggleEl && badgeEl) {
+    if (hwMapVisible) {
+      toggleEl.classList.remove('off');
+      badgeEl.textContent = 'ON';
+      showToast('HW_MAP (검증매핑) 선이 표시됩니다.', 'info');
+    } else {
+      toggleEl.classList.add('off');
+      badgeEl.textContent = 'OFF';
+      showToast('HW_MAP (검증매핑) 선이 숨겨졌습니다. (순수 3단계 파이프라인 모드)', 'info');
+    }
+  }
+}
+
 function focusConn(connId) {
   if (!network) return;
   switchTab('rc');
@@ -975,22 +1025,44 @@ function closeModal() {
   document.getElementById('app-modal').classList.remove('active');
 }
 
-function showToast(msg, type = 'info') {
+let toastTimer = null;
+function showToast(msg, type = 'info', duration = 1400) {
   const wrap = document.getElementById('toast-wrap');
+  if (!wrap) return;
+
+  // 기존 타이머 취소 및 이전 토스트 즉시 정리 (화면에 항상 최대 1개 싱글톤 유지)
+  if (toastTimer) {
+    clearTimeout(toastTimer);
+    toastTimer = null;
+  }
+  wrap.innerHTML = '';
+
   const t = document.createElement('div');
   t.className = `toast ${type}`;
   t.textContent = msg;
   wrap.appendChild(t);
   requestAnimationFrame(() => t.classList.add('show'));
-  setTimeout(() => {
+
+  toastTimer = setTimeout(() => {
     t.classList.remove('show');
-    setTimeout(() => t.remove(), 300);
-  }, 2800);
+    setTimeout(() => {
+      if (t.parentNode === wrap) t.remove();
+    }, 250);
+  }, duration);
 }
 
-// URL 쿼리 파라미터(?codes=C136887,B160300...) 자동 입력 및 분석 지원
+// URL 쿼리 파라미터(?codes=C136887,B160300... &hwmap=off) 자동 입력 및 분석 지원
 window.addEventListener('DOMContentLoaded', () => {
   const params = new URLSearchParams(window.location.search);
+  if (params.get('hwmap') === 'off') {
+    hwMapVisible = false;
+    const toggleEl = document.getElementById('leg-hw-map');
+    const badgeEl = document.getElementById('hw-map-badge');
+    if (toggleEl && badgeEl) {
+      toggleEl.classList.add('off');
+      badgeEl.textContent = 'OFF';
+    }
+  }
   const codesParam = params.get('codes') || params.get('q');
   if (codesParam) {
     addTag(codesParam);
