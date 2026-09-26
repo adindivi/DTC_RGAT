@@ -1,0 +1,18 @@
+{
+  "name": "DTC 지식 그래프 진단 시스템",
+  "short_name": "DTC 진단기",
+  "description": "차량 전장 하네스 DTC 커넥터 근본원인 AI 진단기 (갤럭시 모바일 PWA)",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#0071e3",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='46' fill='%230071e3'/><circle cx='50' cy='50' r='18' fill='%23ffffff'/><circle cx='25' cy='25' r='10' fill='%2338bdf8'/><circle cx='75' cy='75' r='10' fill='%2338bdf8'/><line x1='25' y1='25' x2='50' y2='50' stroke='%23ffffff' stroke-width='4'/><line x1='75' y1='75' x2='50' y2='50' stroke='%23ffffff' stroke-width='4'/></svg>",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+# Built application files
+build/
+app/build/
+
+# Local configuration file (SDK location, etc.)
+local.properties
+
+# Gradle cache and wrapper binary
+.gradle/
+
+# Android Studio and IntelliJ IDEA
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Python bytecode
+__pycache__/
+*.py[cod]
+
+# OS generated
+.DS_Store
+Thumbs.db

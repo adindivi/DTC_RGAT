@@ -1,0 +1,1801 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#0071e3">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>DTC 지식 그래프 진단기 (갤럭시 모바일)</title>
+<link rel="manifest" href="/manifest.json">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.9/dist/vis-network.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.9/dist/dist/vis-network.min.css">
+<style>
+:root {
+  --primary: #0071e3;
+  --primary-hover: #0077ed;
+  --primary-light: rgba(0, 113, 227, 0.08);
+  --bg: #f8fafc;
+  --surface: #ffffff;
+  --fg: #0f172a;
+  --muted: #64748b;
+  --hairline: rgba(0, 0, 0, 0.08);
+  --hairline-strong: rgba(0, 0, 0, 0.14);
+  --danger: #ef4444;
+  --success: #10b981;
+  --amber: #f59e0b;
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; word-break: keep-all; overflow-wrap: break-word; }
+html, body {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: -apple-system, BlinkMacSystemFont, "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", Roboto, sans-serif;
+  font-size: 14px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── 전체 모바일 컨테이너 ── */
+.mobile-app {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  background: var(--surface);
+  box-shadow: 0 0 30px rgba(0,0,0,0.06);
+  position: relative;
+  overflow: hidden;
+  min-width: 0;
+}
+
+/* ── 상단 앱바 ── */
+.app-header {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--hairline);
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+  z-index: 50;
+  min-width: 0;
+}
+.app-logo {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--fg);
+  letter-spacing: -0.3px;
+  flex-shrink: 0;
+}
+.app-logo .status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--success);
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
+}
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+.icon-btn {
+  background: var(--bg);
+  border: 1px solid var(--hairline-strong);
+  border-radius: 980px;
+  padding: 4px 7px;
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--fg);
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  cursor: pointer;
+  min-height: 28px;
+  white-space: nowrap;
+}
+.icon-btn:active { transform: scale(0.96); }
+
+/* ── DTC 입력 & 예시 바 ── */
+.search-container {
+  padding: 8px 12px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--hairline);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex-shrink: 0;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+}
+.tag-input-box {
+  background: var(--bg);
+  border: 1.5px solid var(--hairline-strong);
+  border-radius: 12px;
+  padding: 6px 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  min-height: 44px;
+  transition: border-color .15s ease;
+  min-width: 0;
+  max-width: 100%;
+}
+.tag-input-box:focus-within {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.12);
+}
+.dtc-tag {
+  background: var(--primary-light);
+  border: 1px solid rgba(0, 113, 227, 0.25);
+  color: var(--primary);
+  padding: 3px 8px;
+  border-radius: 980px;
+  font-size: 12px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+.dtc-tag .rm {
+  cursor: pointer;
+  color: var(--muted);
+  width: 16px;
+  height: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: bold;
+}
+.tag-input-box input {
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 13px;
+  color: var(--fg);
+  flex: 1;
+  min-width: 60px;
+  height: 28px;
+}
+
+/* 모바일 터치 친화적 자동완성 드롭다운 */
+.autocomplete {
+  position: absolute;
+  top: 60px;
+  left: 12px;
+  right: 12px;
+  background: var(--surface);
+  border: 1px solid var(--hairline-strong);
+  border-radius: 14px;
+  z-index: 999;
+  max-height: 220px;
+  overflow-y: auto;
+  display: none;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.14);
+  -webkit-overflow-scrolling: touch;
+}
+.ac-item {
+  padding: 10px 14px;
+  cursor: pointer;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 1px solid var(--hairline);
+  transition: background .1s ease;
+}
+.ac-item:last-child { border-bottom: none; }
+.ac-item:active { background: var(--bg); }
+.ac-code { color: var(--primary); font-weight: 700; min-width: 78px; font-family: monospace; font-variant-numeric: tabular-nums; }
+.ac-ecu { color: var(--secondary); font-size: 11px; min-width: 60px; font-weight: 600; }
+.ac-desc { color: var(--muted); font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
+
+/* 액션 버튼 그룹 (원클릭 진단 & 초기화) */
+.action-row {
+  display: flex;
+  gap: 8px;
+}
+.btn-primary {
+  flex: 2;
+  background: var(--primary);
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 44px;
+  transition: background .15s ease, transform .1s ease;
+}
+.btn-primary:active { transform: scale(0.97); background: var(--primary-hover); }
+.btn-primary:disabled { background: #94a3b8; cursor: not-allowed; opacity: 0.85; }
+.btn-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2.5px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: spin 0.75s linear infinite;
+  display: inline-block;
+  flex-shrink: 0;
+}
+.btn-secondary {
+  flex: 1;
+  background: var(--bg);
+  border: 1px solid var(--hairline-strong);
+  color: var(--muted);
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+.btn-secondary:active { transform: scale(0.97); background: #f1f5f9; }
+
+/* 수평 스크롤 예시 칩 */
+.presets-scroll {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding: 2px 0;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+.presets-scroll::-webkit-scrollbar { display: none; }
+.preset-chip {
+  flex-shrink: 0;
+  background: var(--bg);
+  border: 1px solid var(--hairline-strong);
+  color: var(--fg);
+  padding: 6px 12px;
+  border-radius: 980px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.preset-chip:active { transform: scale(0.96); }
+.preset-chip.highlight {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: var(--primary-light);
+}
+
+/* ── [Rule 3] 현대적 세그먼트 컨트롤 탭 (Segmented Control) ── */
+.segmented-tabs-bar {
+  padding: 6px 12px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--hairline);
+  flex-shrink: 0;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+.segmented-container {
+  display: flex;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  background: #f1f5f9;
+  border-radius: 12px;
+  padding: 3px;
+  gap: 3px;
+}
+.segmented-item {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 9px 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+  border-radius: 9px;
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+  min-height: 40px;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.segmented-item.active {
+  background: var(--surface);
+  color: var(--primary);
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+.segmented-item:active { transform: scale(0.98); }
+
+/* ── 메인 뷰 컨테이너 (탭별 화면 전환) ── */
+.view-viewport {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+.tab-view {
+  display: none;
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  padding: 10px 8px;
+  -webkit-overflow-scrolling: touch;
+}
+.tab-view.active {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── [Rule 2 & 4] 모바일 카드 디자인 (Anti-Squishing & Two-Row Hierarchy) ── */
+.rc-card-mobile {
+  background: var(--surface);
+  border: 1px solid var(--hairline-strong);
+  border-radius: 14px;
+  padding: 11px 12px;
+  margin-bottom: 9px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+  transition: transform .15s ease, border-color .15s ease;
+  min-width: 0;
+  max-width: 100%;
+}
+.rc-card-mobile:active { transform: scale(0.98); }
+.rc-card-mobile.rank1 {
+  border-color: rgba(37, 99, 235, 0.5);
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.04) 0%, rgba(37, 99, 235, 0.01) 100%);
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.08);
+}
+
+/* 1행: 타이틀 (가변 weight + Ellipsis) ── 고정 뱃지 (softWrap=false) */
+.card-row-1 {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  min-width: 0;
+}
+.card-title-wrap {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  overflow: hidden;
+}
+.card-rank-badge {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--primary);
+  background: var(--primary-light);
+  padding: 2px 6px;
+  border-radius: 980px;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+.card-title {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--fg);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.card-status-badge {
+  flex-shrink: 0;
+  white-space: nowrap;
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 980px;
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--success);
+}
+.card-status-badge.score {
+  background: var(--primary-light);
+  color: var(--primary);
+}
+
+/* 2행: 부가 메타데이터 및 ECU 태그 */
+.card-row-2 {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.card-progress-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.card-bar {
+  flex: 1;
+  height: 5px;
+  border-radius: 4px;
+  background: #e2e8f0;
+  overflow: hidden;
+}
+.card-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  background: var(--primary);
+}
+.card-detail-text {
+  font-size: 12px;
+  color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.card-tags-row {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  margin-top: 2px;
+}
+.mini-pill {
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 6px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.mini-pill.hit { background: var(--primary-light); color: var(--primary); }
+.mini-pill.miss { background: #f1f5f9; color: var(--muted); }
+
+/* ── 탭 2: 마인드맵 캔버스 ── */
+#tab-map {
+  padding: 0;
+  position: relative;
+  overflow: hidden;
+}
+#network-canvas {
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+}
+.map-floating-bar {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  right: 10px;
+  display: flex;
+  gap: 6px;
+  justify-content: space-between;
+  pointer-events: none;
+  z-index: 20;
+}
+.floating-btn {
+  pointer-events: auto;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--hairline-strong);
+  border-radius: 980px;
+  padding: 7px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--fg);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+}
+.floating-btn.active {
+  background: var(--primary);
+  color: #ffffff;
+  border-color: var(--primary);
+}
+.floating-btn:active { transform: scale(0.96); }
+
+/* ── 탭 3: DTC 정보 (가독성 & 줄바꿈 최적화) ── */
+.dtc-card-mobile {
+  background: var(--surface);
+  border: 1px solid var(--hairline-strong);
+  border-left: 4px solid var(--primary);
+  border-radius: 14px;
+  padding: 13px 14px;
+  margin-bottom: 9px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  min-width: 0;
+}
+.dtc-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.dtc-card-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+.dtc-code-badge {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--primary);
+  letter-spacing: -0.3px;
+}
+.dtc-cat-badge {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+  background: #f1f5f9;
+  padding: 2px 8px;
+  border-radius: 980px;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+.dtc-meta-pills {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.dtc-ecu-line {
+  font-size: 12px;
+  color: #334155;
+  line-height: 1.45;
+}
+.dtc-ecu-line span {
+  color: var(--muted);
+  font-weight: 500;
+  margin-right: 4px;
+}
+.dtc-desc-line {
+  font-size: 12.5px;
+  color: var(--fg);
+  line-height: 1.5;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+  background: #f8fafc;
+  border-radius: 8px;
+  padding: 8px 10px;
+  border: 1px solid var(--hairline);
+}
+
+/* ── 미려한 빈 상태 안내 (Empty States) ── */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 20px;
+  text-align: center;
+  gap: 12px;
+}
+.empty-icon-circle {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--primary-light);
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 2px;
+}
+.empty-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--fg);
+  letter-spacing: -0.2px;
+}
+.empty-desc {
+  font-size: 12.5px;
+  color: var(--muted);
+  line-height: 1.55;
+  max-width: 290px;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
+/* ── 64D 잠재공간 모바일 바텀 시트 (Bottom Sheet) ── */
+.bottom-sheet-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(3px);
+  z-index: 999;
+  display: none;
+  align-items: flex-end;
+  justify-content: center;
+}
+.bottom-sheet-overlay.active { display: flex; }
+.bottom-sheet {
+  background: #0f172a;
+  color: #ffffff;
+  width: 100%;
+  max-width: 600px;
+  border-radius: 20px 20px 0 0;
+  padding: 16px 18px 24px;
+  box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  animation: slideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+.sheet-handle {
+  width: 36px;
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.2);
+  margin: 0 auto 6px;
+}
+.sheet-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.sheet-title {
+  font-size: 15px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.sheet-close {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: #ffffff;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  cursor: pointer;
+}
+#latent-canvas-mobile {
+  width: 100%;
+  height: 230px;
+  background: #020617;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+.latent-legend-mobile {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.7);
+  justify-content: center;
+}
+.legend-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 3px;
+}
+
+/* ── QR 코드 모달 (PC ↔ 갤럭시 원터치 연동) ── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+.modal-overlay.active { display: flex; }
+.modal-card {
+  background: var(--surface);
+  border-radius: 18px;
+  padding: 22px;
+  width: 100%;
+  max-width: 360px;
+  text-align: center;
+  box-shadow: 0 12px 36px rgba(0,0,0,0.18);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.qr-code-img {
+  width: 190px;
+  height: 190px;
+  margin: 0 auto;
+  border-radius: 12px;
+  border: 1px solid var(--hairline-strong);
+  padding: 8px;
+  background: #ffffff;
+}
+.modal-url-box {
+  background: #f1f5f9;
+  border: 1px solid var(--hairline-strong);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--primary);
+  word-break: break-all;
+  user-select: all;
+}
+
+/* ── 상태 토스트 ── */
+.toast-msg {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: rgba(15, 23, 42, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: #ffffff;
+  padding: 10px 18px;
+  border-radius: 980px;
+  font-size: 13px;
+  font-weight: 600;
+  z-index: 2000;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap;
+}
+.toast-msg.show {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
+
+/* ── 로딩 스피너 ── */
+.loading-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 100;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+.spinner {
+  width: 34px;
+  height: 34px;
+  border: 3.5px solid #e2e8f0;
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── 스마트폰 소형 화면 반응형 최적화 (갤럭시 Z플립 커버, 소형 기기 ≤ 380px) ── */
+@media (max-width: 380px) {
+  .app-header { padding: 6px 8px; }
+  .app-logo { font-size: 13px; gap: 4px; }
+  .header-actions { gap: 3px; }
+  .icon-btn { padding: 3px 6px; font-size: 10px; min-height: 26px; }
+  .segmented-item { font-size: 11.5px; padding: 7px 3px; gap: 3px; min-height: 36px; }
+  .preset-chip { font-size: 11px; padding: 5px 9px; }
+  .floating-btn { font-size: 10.5px; padding: 5px 8px; gap: 3px; }
+  .rc-card-mobile { padding: 9px 10px; }
+  .card-title { font-size: 12.5px; }
+  .card-status-badge { font-size: 10px; padding: 2px 6px; }
+  .dtc-code-badge { font-size: 13.5px; }
+}
+
+/* ── 태블릿 & 폴더블 펼침 대화면 최적화 (≥ 601px) ── */
+@media (min-width: 601px) {
+  .mobile-app {
+    margin: 16px auto;
+    height: calc(100% - 32px);
+    border-radius: 24px;
+    border: 1px solid var(--hairline-strong);
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.1);
+  }
+}
+</style>
+</head>
+<body>
+
+<div class="mobile-app">
+  <!-- 상단 앱바 -->
+  <header class="app-header">
+    <div class="app-logo">
+      <span class="status-dot"></span>
+      <span>DTC Mobile</span>
+    </div>
+    <div class="header-actions">
+      <a class="icon-btn" href="/report" target="_blank" style="text-decoration:none;color:inherit;display:inline-flex;align-items:center;gap:3px;">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+        해설서
+      </a>
+      <button class="icon-btn" onclick="openQrModal()">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+        QR
+      </button>
+      <button class="icon-btn" onclick="toggleXRayMode()" id="btn-xray-mobile">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+        X-Ray
+      </button>
+    </div>
+  </header>
+
+  <!-- DTC 입력창 & 추천 칩 -->
+  <div class="search-container" style="position:relative;">
+    <div class="tag-input-box" id="tag-box" onclick="document.getElementById('mobile-dtc-input').focus()">
+      <div id="tags-wrapper" style="display:contents;"></div>
+      <input id="mobile-dtc-input" placeholder="DTC 코드 입력 (예: C128387)" autocomplete="off" spellcheck="false">
+    </div>
+    <div class="autocomplete" id="mobile-ac-dropdown"></div>
+
+    <!-- 예시 빠른 선택 칩 -->
+    <div class="presets-scroll">
+      <button class="preset-chip highlight" onclick="setPreset(['B100552','C128387','C164387','C166987'])">ACU_B 연쇄 고장</button>
+      <button class="preset-chip" onclick="setPreset(['C136887','B160300','C128387','U029387'])">B-CAN 통신</button>
+      <button class="preset-chip" onclick="setPreset(['C162887','C161487','C128387','C161C86'])">C-CAN 다발</button>
+      <button class="preset-chip" onclick="setPreset(['B160300','C110216','C110117'])">배터리 전원</button>
+      <button class="preset-chip" onclick="setPreset(['C128387','B122901','B234301','B240301'])">제동·공조 (HW+AI)</button>
+    </div>
+
+    <!-- 원클릭 진단 액션 바 -->
+    <div class="action-row">
+      <button class="btn-primary" id="btn-do-analyze" onclick="executeAnalyze()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        진단 분석 시작
+      </button>
+      <button class="btn-secondary" onclick="clearDTCs()">초기화</button>
+    </div>
+  </div>
+
+  <!-- [Rule 3] 세그먼트 컨트롤 탭 바 -->
+  <div class="segmented-tabs-bar">
+    <div class="segmented-container">
+      <div class="segmented-item active" id="tab-btn-ranking" onclick="switchMobileTab('ranking')">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+        1순위 순위
+      </div>
+      <div class="segmented-item" id="tab-btn-map" onclick="switchMobileTab('map')">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg>
+        지식 그래프
+      </div>
+      <div class="segmented-item" id="tab-btn-dtc" onclick="switchMobileTab('dtc')">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+        DTC 상세
+      </div>
+    </div>
+  </div>
+
+  <!-- 메인 뷰 영역 -->
+  <main class="view-viewport">
+    <!-- 1. 순위 리스트 뷰 -->
+    <section class="tab-view active" id="tab-ranking">
+      <div id="rc-cards-container">
+        <div class="empty-state">
+          <div class="empty-icon-circle">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>
+          </div>
+          <div class="empty-title">진단 대기 중</div>
+          <div class="empty-desc">상단의 추천 프리셋(예: ACU_B 연쇄 고장)을 누르거나 DTC 코드를 입력하여 1순위 원인을 분석하세요.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. 마인드맵 캔버스 뷰 -->
+    <section class="tab-view" id="tab-map">
+      <div class="map-floating-bar">
+        <button class="floating-btn" onclick="fitMobileNetwork()">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"></polyline><polyline points="9 21 3 21 3 15"></polyline><line x1="21" y1="3" x2="14" y2="10"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>
+          전체 맞춤
+        </button>
+        <button class="floating-btn active" id="btn-hw-wire" onclick="toggleMobileHwWires()">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="2" y1="12" x2="22" y2="12"></line></svg>
+          HW 결선
+        </button>
+        <button class="floating-btn active" id="btn-ai-wire" onclick="toggleMobileAiWires()">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-dasharray="3 3"><line x1="2" y1="12" x2="22" y2="12"></line></svg>
+          AI 결선
+        </button>
+        <button class="floating-btn" onclick="openLatentSheet()">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+          64D
+        </button>
+      </div>
+      <div id="network-canvas"></div>
+    </section>
+
+    <!-- 3. DTC 상세 뷰 -->
+    <section class="tab-view" id="tab-dtc">
+      <div id="dtc-cards-container">
+        <div class="empty-state">
+          <div class="empty-icon-circle">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+          </div>
+          <div class="empty-title">DTC 상세 목록 대기 중</div>
+          <div class="empty-desc">진단 분석이 완료되면 입력된 DTC의 제어기, 서브타입, 장착 위치 및 상세 설명이 여기에 표시됩니다.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 로딩 오버레이 -->
+    <div class="loading-overlay" id="loading-overlay">
+      <div class="spinner"></div>
+      <div style="font-size:14px;font-weight:700;color:var(--fg);letter-spacing:-0.2px;">RGAT 지식 그래프 분석 중...</div>
+      <div style="font-size:12px;color:var(--muted);">64차원 잠재 공간 임베딩 및 연결망 추론</div>
+    </div>
+  </main>
+</div>
+
+<!-- 64D 잠재공간 바텀시트 모달 -->
+<div class="bottom-sheet-overlay" id="latent-sheet-overlay" onclick="closeLatentSheet(event)">
+  <div class="bottom-sheet" onclick="event.stopPropagation()">
+    <div class="sheet-handle"></div>
+    <div class="sheet-header">
+      <div class="sheet-title">
+        <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#10b981;"></span>
+        64차원 잠재 공간 t-SNE 투영 (1,705 노드)
+      </div>
+      <button class="sheet-close" onclick="closeLatentSheet()">&times;</button>
+    </div>
+    <div id="latent-mobile-status" style="font-size:12px;color:#94a3b8;min-height:18px;">
+      노드 터치 시 실시간 하이라이트 동기화
+    </div>
+    <canvas id="latent-canvas-mobile" width="560" height="230"></canvas>
+    <div class="latent-legend-mobile">
+      <span><span class="legend-dot" style="background:#ef4444;"></span>P 동력</span>
+      <span><span class="legend-dot" style="background:#f59e0b;"></span>C 섀시</span>
+      <span><span class="legend-dot" style="background:#8b5cf6;"></span>B 바디</span>
+      <span><span class="legend-dot" style="background:#0284c7;"></span>U 통신</span>
+      <span><span class="legend-dot" style="background:#10b981;"></span>커넥터</span>
+      <span><span class="legend-dot" style="background:#94a3b8;"></span>제어기</span>
+    </div>
+  </div>
+</div>
+
+<!-- QR 코드 모바일 공유 모달 -->
+<div class="modal-overlay" id="qr-modal-overlay" onclick="closeQrModal(event)">
+  <div class="modal-card" onclick="event.stopPropagation()">
+    <div style="font-size: 26px; line-height: 1;">📱</div>
+    <h3 style="font-size:16px;font-weight:700;color:var(--fg);letter-spacing:-0.3px;">갤럭시 모바일 접속</h3>
+    <p style="font-size:12px;color:var(--muted);line-height:1.5;word-break:keep-all;">동일한 Wi-Fi 또는 핫스팟에 연결된 갤럭시 카메라로 비추면 즉시 동기화됩니다.</p>
+    <img id="qr-image" class="qr-code-img" src="" alt="접속 QR 코드">
+    <div class="modal-url-box" id="mobile-url-text"></div>
+    <div style="display:flex;gap:8px;margin-top:4px;">
+      <button class="btn-primary" onclick="copyMobileUrl()" style="flex:1;">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+        주소 복사
+      </button>
+      <button class="btn-secondary" onclick="closeQrModal()" style="flex:1;">닫기</button>
+    </div>
+  </div>
+</div>
+
+<!-- 토스트 알림 -->
+<div class="toast-msg" id="toast"></div>
+
+<script>
+// ── PWA 서비스 워커 등록 ─────────────────────────────────────
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(err => console.log('SW fail:', err));
+  });
+}
+
+// ── 전역 상태 관리 ──────────────────────────────────────────
+let tags = [];
+let network = null;
+let vn = null;
+let ve = null;
+let currentResult = null;
+let xrayMode = true;
+let isDimmed = false;
+let nodeOrig = new Map();
+let edgeOrig = new Map();
+let activeEdgesSet = null;
+
+let latentPoints = null;
+let selectedNodeId = null;
+let radarRadius = 2;
+let radarAnim = null;
+
+const inp = document.getElementById('mobile-dtc-input');
+const tagWrap = document.getElementById('tags-wrapper');
+
+// ── 태그 입력 로직 ──────────────────────────────────────────
+function renderTags() {
+  tagWrap.innerHTML = tags.map(t =>
+    `<span class="dtc-tag">${t}<span class="rm" onclick="removeTag('${t}')">&times;</span></span>`
+  ).join('');
+}
+
+function addTag(code) {
+  const parts = code.split(/[\s,;\n\r\t]+/);
+  parts.forEach(p => {
+    const clean = p.trim().toUpperCase();
+    if (clean && !tags.includes(clean)) tags.push(clean);
+  });
+  renderTags();
+  inp.value = '';
+}
+
+function removeTag(code) {
+  tags = tags.filter(t => t !== code);
+  renderTags();
+}
+
+function clearDTCs() {
+  tags = [];
+  renderTags();
+  inp.value = '';
+  renderEmptyStates();
+  if (network) { network.destroy(); network = null; }
+  showToast('입력이 초기화되었습니다.');
+}
+
+function renderEmptyStates() {
+  const rcContainer = document.getElementById('rc-cards-container');
+  if (rcContainer) {
+    rcContainer.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon-circle">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>
+        </div>
+        <div class="empty-title">진단 대기 중</div>
+        <div class="empty-desc">상단의 추천 프리셋(예: ACU_B 연쇄 고장)을 누르거나 DTC 코드를 입력하여 1순위 원인을 분석하세요.</div>
+      </div>
+    `;
+  }
+  const dtcContainer = document.getElementById('dtc-cards-container');
+  if (dtcContainer) {
+    dtcContainer.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon-circle">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+        </div>
+        <div class="empty-title">DTC 상세 목록 대기 중</div>
+        <div class="empty-desc">진단 분석이 완료되면 입력된 DTC의 제어기, 서브타입, 장착 위치 및 상세 설명이 여기에 표시됩니다.</div>
+      </div>
+    `;
+  }
+}
+
+function setPreset(presetCodes) {
+  tags = [];
+  presetCodes.forEach(c => addTag(c));
+  executeAnalyze();
+}
+
+inp.addEventListener('keydown', e => {
+  if (e.key === 'Enter' || e.key === ',' || e.key === ';') {
+    e.preventDefault();
+    if (inp.value.trim()) addTag(inp.value.trim());
+    else if (tags.length) executeAnalyze();
+    closeAC();
+  }
+});
+
+// ── 모바일 자동완성 검색 연동 ────────────────────────────────
+let acTimer = null;
+let acData = [];
+
+inp.addEventListener('input', () => {
+  clearTimeout(acTimer);
+  const q = inp.value.trim();
+  if (q.includes(',') || q.includes(';')) {
+    addTag(q);
+    closeAC();
+    return;
+  }
+  if (q.length < 1) { closeAC(); return; }
+  acTimer = setTimeout(async () => {
+    try {
+      const res = await fetch(`/api/search?q=${encodeURIComponent(q)}`);
+      acData = await res.json();
+      renderAC();
+    } catch(err) {
+      console.error("Autocomplete failed:", err);
+    }
+  }, 120);
+});
+
+function renderAC() {
+  const acd = document.getElementById('mobile-ac-dropdown');
+  if (!acd || !acData.length) { closeAC(); return; }
+  acd.style.display = 'block';
+  acd.innerHTML = acData.map(d =>
+    `<div class="ac-item" onclick="addTag('${d.code}'); closeAC();">
+      <span class="ac-code">${d.code}</span>
+      <span class="ac-ecu">${d.ecu}</span>
+      <span class="ac-desc">${d.desc}</span>
+    </div>`
+  ).join('');
+}
+
+function closeAC() {
+  const acd = document.getElementById('mobile-ac-dropdown');
+  if (acd) acd.style.display = 'none';
+  acData = [];
+}
+
+document.addEventListener('click', e => {
+  const box = document.getElementById('tag-box');
+  const acd = document.getElementById('mobile-ac-dropdown');
+  if (box && acd && !box.contains(e.target) && !acd.contains(e.target)) {
+    closeAC();
+  }
+});
+
+// ── 세그먼트 컨트롤 탭 전환 (Rule 3) ─────────────────────────
+function switchMobileTab(tabName) {
+  document.querySelectorAll('.segmented-item').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.tab-view').forEach(el => el.classList.remove('active'));
+
+  const btn = document.getElementById(`tab-btn-${tabName}`);
+  const view = document.getElementById(`tab-${tabName}`);
+  if (btn) btn.classList.add('active');
+  if (view) view.classList.add('active');
+
+  if (tabName === 'map' && network) {
+    setTimeout(() => {
+      network.setSize('100%', '100%');
+      network.redraw();
+      network.fit({ animation: { duration: 350, easingFunction: 'easeInOutQuad' } });
+    }, 120);
+  }
+}
+
+// ── 고장 진단 실행 ──────────────────────────────────────────
+async function executeAnalyze() {
+  closeAC();
+  if (inp.value.trim()) addTag(inp.value.trim());
+  if (!tags.length) {
+    showToast('DTC 코드를 최소 1개 이상 입력하세요.');
+    return;
+  }
+
+  const btnAnalyze = document.getElementById('btn-do-analyze');
+  if (btnAnalyze) {
+    btnAnalyze.disabled = true;
+    btnAnalyze.innerHTML = `
+      <span class="btn-spinner"></span>
+      분석 중...
+    `;
+  }
+  document.getElementById('loading-overlay').style.display = 'flex';
+  try {
+    const res = await fetch('/api/analyze', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ codes: tags })
+    });
+    const data = await res.json();
+    if (!res.ok || data.error) {
+      showToast(data.error || '분석 실패');
+      return;
+    }
+
+    if (data.unknown && data.unknown.length > 0) {
+      showToast(`미등록 코드 제외됨: ${data.unknown.join(', ')}`);
+    }
+
+    currentResult = data;
+    renderMobileRanking(data);
+    renderMobileDtcInfo(data);
+    buildMobileGraph(data);
+    showToast(`분석 완료 (1순위: ${data.results[0]?.name || 'N/A'})`);
+
+  } catch (err) {
+    showToast('서버 연결 실패');
+    console.error(err);
+  } finally {
+    document.getElementById('loading-overlay').style.display = 'none';
+    if (btnAnalyze) {
+      btnAnalyze.disabled = false;
+      btnAnalyze.innerHTML = `
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        진단 분석 시작
+      `;
+    }
+  }
+}
+
+// ── [Rule 2 & 4] 모바일 순위 카드 렌더링 ────────────────────
+function renderMobileRanking(data) {
+  const container = document.getElementById('rc-cards-container');
+  if (!data.results || !data.results.length) {
+    container.innerHTML = '<div class="empty-state"><div class="empty-title">결과 없음</div><div class="empty-desc">일치하는 커넥터 원인을 찾을 수 없습니다.</div></div>';
+    return;
+  }
+
+  const n = data.dtc_info.length;
+  let html = '';
+
+  data.results.forEach((r, idx) => {
+    const isRank1 = r.rank === 1;
+    const scoreVal = typeof r.final_score === 'number' ? r.final_score : (typeof r.score === 'number' ? r.score : 0);
+    const badgeText = r.verified ? '마스터 검증' : `점수 ${scoreVal.toFixed(3)}`;
+    const badgeCls = r.verified ? 'card-status-badge' : 'card-status-badge score';
+
+    html += `
+    <div class="rc-card-mobile ${isRank1 ? 'rank1' : ''}" onclick="focusConnectorFromCard('${r.name}')">
+      <!-- 1행: 타이틀 & 고정 뱃지 (Anti-Squishing) -->
+      <div class="card-row-1">
+        <div class="card-title-wrap">
+          <span class="card-rank-badge">#${r.rank}</span>
+          <span class="card-title" title="${r.name}">${r.name}</span>
+        </div>
+        <span class="${badgeCls}">${badgeText}</span>
+      </div>
+
+      <!-- 2행: 진행률 및 연관 DTC/ECU 메타데이터 -->
+      <div class="card-row-2">
+        <div class="card-progress-wrap">
+          <div class="card-bar">
+            <div class="card-bar-fill" style="width:${(r.n_hit/n)*100}%;"></div>
+          </div>
+          <span style="font-size:11.5px;font-weight:700;color:var(--primary);min-width:32px;font-variant-numeric:tabular-nums;">${r.n_hit}/${n}</span>
+        </div>
+        <div class="card-detail-text"><span>연결 제어기:</span> <strong>${r.conn_ecus ? r.conn_ecus.join(', ') : '정보 없음'}</strong></div>
+        <div class="card-tags-row">
+          ${data.dtc_info.map(d => `<span class="mini-pill ${r.hit_codes.includes(d.code)?'hit':'miss'}">${d.code}</span>`).join('')}
+        </div>
+      </div>
+    </div>`;
+  });
+
+  container.innerHTML = html;
+}
+
+// ── DTC 상세 렌더링 (풍부한 시스템·서브타입·위치 메타데이터) ──
+function renderMobileDtcInfo(data) {
+  const container = document.getElementById('dtc-cards-container');
+  if (!data.dtc_info || !data.dtc_info.length) return;
+
+  container.innerHTML = data.dtc_info.map(d => {
+    const sysBadge = d.system_name
+      ? `<span class="mini-pill" style="background:#e0f2fe;color:#0369a1;">${d.system_code}: ${d.system_name}</span>`
+      : '';
+    const mfrBadge = d.mfr_specific === 'True'
+      ? `<span class="mini-pill" style="background:rgba(0,113,227,0.08);color:var(--primary);">제조사 전용</span>`
+      : `<span class="mini-pill" style="background:#f1f5f9;color:var(--muted);">SAE 표준</span>`;
+    const stBadge = d.subtype_name
+      ? `<span class="mini-pill" style="background:#fef3c7;color:#b45309;">${d.subtype_code}: ${d.subtype_name}</span>`
+      : (d.subtype_code ? `<span class="mini-pill" style="background:#f1f5f9;color:var(--muted);">${d.subtype_code}</span>` : '');
+    const posBadge = d.position
+      ? `<span class="mini-pill" style="background:#ecfdf5;color:#047857;">${d.position}</span>`
+      : '';
+
+    return `
+    <div class="dtc-card-mobile">
+      <div class="dtc-card-header">
+        <div class="dtc-card-title-wrap">
+          <span class="dtc-code-badge">${d.code}</span>
+          ${sysBadge}
+        </div>
+        <span class="dtc-cat-badge">${d.cat || '기타'}</span>
+      </div>
+      <div class="dtc-meta-pills">
+        ${mfrBadge} ${stBadge} ${posBadge}
+      </div>
+      <div class="dtc-ecu-line"><span>담당 제어기:</span> <strong>${d.ecu_names.join(', ')}</strong></div>
+      <div class="dtc-desc-line">${d.desc || '상세 설명 없음'}</div>
+    </div>`;
+  }).join('');
+}
+
+// ── 배선 필터 토글 제어 (HW 결선 / AI 추론 결선) ────────────
+let hwWiresVisible = true;
+let aiWiresVisible = true;
+
+function toggleMobileHwWires() {
+  if (!ve) return;
+  hwWiresVisible = !hwWiresVisible;
+  const btn = document.getElementById('btn-hw-wire');
+  if (btn) btn.classList.toggle('active', hwWiresVisible);
+  applyWireVisibilityFilter();
+  showToast(hwWiresVisible ? 'HW 물리 결선 표시' : 'HW 물리 결선 숨김');
+}
+
+function toggleMobileAiWires() {
+  if (!ve) return;
+  aiWiresVisible = !aiWiresVisible;
+  const btn = document.getElementById('btn-ai-wire');
+  if (btn) btn.classList.toggle('active', aiWiresVisible);
+  applyWireVisibilityFilter();
+  showToast(aiWiresVisible ? 'AI 추론 결선 표시' : 'AI 추론 결선 숨김');
+}
+
+function applyWireVisibilityFilter() {
+  if (!ve) return;
+  const updates = [];
+  ve.get().forEach(e => {
+    const isDirect = !e.dashes;
+    let visible = true;
+    if (isDirect && !hwWiresVisible) visible = false;
+    if (!isDirect && !aiWiresVisible) visible = false;
+    updates.push({
+      id: e.id,
+      hidden: !visible
+    });
+  });
+  ve.update(updates);
+}
+
+// ── 노드 상세 토스트 안내 ───────────────────────────────────
+function showNodeDetailsToast(nid) {
+  if (!currentResult) return;
+  const clean = nid.replace(/^VIS_DTC::/, '').replace(/^ECU::/, '').replace(/^CONN::/, '').trim();
+  let typeStr = '노드';
+  let desc = '';
+  if (nid.startsWith('VIS_DTC::') || currentResult.dtc_info.some(d => d.code === clean)) {
+    typeStr = 'DTC 코드';
+    const found = currentResult.dtc_info.find(d => d.code === clean);
+    desc = found ? `${found.ecu_names.join(', ')} / ${found.desc || ''}` : '';
+  } else if (nid.startsWith('ECU::')) {
+    typeStr = '제어기(ECU)';
+  } else {
+    typeStr = '커넥터(후보)';
+    const found = currentResult.results.find(r => r.name === clean);
+    if (found) desc = `순위 #${found.rank} · 연관 ${found.n_hit}/${currentResult.dtc_info.length}개`;
+  }
+  showToast(`[${typeStr}] ${clean} ${desc ? '— ' + desc : ''}`);
+}
+
+// ── 카드 클릭 시 캔버스 전환 및 노드 포커스 ─────────────────
+function focusConnectorFromCard(connName) {
+  switchMobileTab('map');
+  setTimeout(() => {
+    if (!network || !vn) return;
+    const all = vn.get();
+    const target = all.find(n => n.id === connName || (n.label && n.label.includes(connName)));
+    if (target) {
+      network.selectNodes([target.id]);
+      network.focus(target.id, { scale: 1.5, animation: { duration: 400, easingFunction: 'easeInOutQuad' } });
+      if (xrayMode) applyMobileXRay(target.id);
+      syncLatentHighlight(target.id);
+      showNodeDetailsToast(target.id);
+    }
+  }, 100);
+}
+
+// ── vis.js 모바일 그래프 구성 ───────────────────────────────
+const MOBILE_GROUPS = {
+  dtc_input: {
+    shape: 'box',
+    shapeProperties: { borderRadius: 16 },
+    margin: { top: 8, bottom: 8, left: 14, right: 14 },
+    color: { background: '#fee2e2', border: '#fca5a5' },
+    font: { color: '#991b1b', size: 12, bold: true, face: 'Pretendard, -apple-system, sans-serif' }
+  },
+  ecu: {
+    shape: 'box',
+    shapeProperties: { borderRadius: 16 },
+    margin: { top: 8, bottom: 8, left: 14, right: 14 },
+    color: { background: '#ffedd5', border: '#fdba74' },
+    font: { color: '#9a3412', size: 12, bold: true, face: 'Pretendard, -apple-system, sans-serif' }
+  },
+  conn_top1: {
+    shape: 'box',
+    shapeProperties: { borderRadius: 18 },
+    margin: { top: 10, bottom: 10, left: 18, right: 18 },
+    color: { background: '#1e293b', border: '#0f172a' },
+    font: { color: '#ffffff', size: 13, bold: true, face: 'Pretendard, -apple-system, sans-serif' },
+    shadow: { enabled: true, color: 'rgba(30,41,59,0.3)', size: 8 }
+  },
+  conn_top: {
+    shape: 'box',
+    shapeProperties: { borderRadius: 16 },
+    margin: { top: 7, bottom: 7, left: 14, right: 14 },
+    color: { background: '#e0f2fe', border: '#7dd3fc' },
+    font: { color: '#0369a1', size: 11, bold: true, face: 'Pretendard, -apple-system, sans-serif' }
+  },
+  conn: {
+    shape: 'box',
+    shapeProperties: { borderRadius: 16 },
+    margin: { top: 6, bottom: 6, left: 12, right: 12 },
+    color: { background: '#f1f5f9', border: '#cbd5e1' },
+    font: { color: '#475569', size: 10, face: 'Pretendard, -apple-system, sans-serif' }
+  }
+};
+
+function buildMobileGraph(data) {
+  vn = new vis.DataSet(data.vis_nodes.map(n => ({
+    id: n.id,
+    label: n.label,
+    level: n.level,
+    group: n.group
+  })));
+
+  ve = new vis.DataSet(data.vis_edges.map((e, i) => {
+    const isDirect = e.title && e.title.includes('HW_MAP');
+    const isAiWire = (e.title && e.title.includes('AI_HW_WIRE')) || e.dashes;
+    let col = isDirect ? '#2563eb' : (isAiWire ? '#93c5fd' : '#64748b');
+    return {
+      id: i,
+      from: e.from,
+      to: e.to,
+      color: { color: col, highlight: '#2563eb' },
+      width: isDirect ? 2.5 : 1.8,
+      dashes: isAiWire,
+      smooth: { enabled: true, type: 'cubicBezier', forceDirection: 'horizontal', roundness: 0.6 }
+    };
+  }));
+
+  const container = document.getElementById('network-canvas');
+  if (network) { network.destroy(); network = null; }
+
+  network = new vis.Network(container, { nodes: vn, edges: ve }, {
+    groups: MOBILE_GROUPS,
+    layout: {
+      hierarchical: {
+        enabled: true,
+        direction: 'LR',
+        levelSeparation: 190,
+        nodeSpacing: 50,
+        treeSpacing: 70
+      }
+    },
+    physics: { enabled: false },
+    interaction: { hover: false, multiselect: false, zoomView: true, dragView: true },
+    nodes: { borderWidth: 1.5 },
+    edges: { smooth: { enabled: true } }
+  });
+
+  network.on('click', params => {
+    if (params.nodes && params.nodes.length) {
+      const nid = params.nodes[0];
+      if (xrayMode) applyMobileXRay(nid);
+      syncLatentHighlight(nid);
+      showNodeDetailsToast(nid);
+    } else {
+      if (isDimmed) restoreMobileStyles();
+    }
+  });
+
+  network.once('afterDrawing', () => {
+    if (network) {
+      network.setSize('100%', '100%');
+      network.fit();
+    }
+  });
+
+  backupMobileStyles();
+  applyWireVisibilityFilter();
+}
+
+function fitMobileNetwork() {
+  if (network) network.fit({ animation: { duration: 350, easingFunction: 'easeInOutQuad' } });
+}
+
+// ── 엑스레이 디밍 (스트로크 왜곡 원천 차단) ─────────────────
+function backupMobileStyles() {
+  if (!vn || !ve) return;
+  nodeOrig.clear();
+  edgeOrig.clear();
+  vn.get().forEach(n => {
+    const grp = MOBILE_GROUPS[n.group] || {};
+    nodeOrig.set(n.id, {
+      color: grp.color,
+      font: grp.font,
+      borderWidth: 1.5,
+      shadow: grp.shadow || false
+    });
+  });
+  ve.get().forEach(e => {
+    edgeOrig.set(e.id, { color: e.color, width: e.width });
+  });
+}
+
+function applyMobileXRay(centerId) {
+  if (!vn || !ve || !network) return;
+  if (!nodeOrig.size) backupMobileStyles();
+
+  const activeNodes = new Set([centerId]);
+  const activeEdges = new Set();
+  const allEdges = ve.get();
+
+  allEdges.forEach(e => {
+    if (e.from === centerId || e.to === centerId) {
+      activeEdges.add(e.id);
+      activeNodes.add(e.from === centerId ? e.to : e.from);
+    }
+  });
+
+  allEdges.forEach(e => {
+    if (activeNodes.has(e.from) && activeNodes.has(e.to)) {
+      activeEdges.add(e.id);
+    }
+  });
+
+  isDimmed = true;
+  activeEdgesSet = activeEdges;
+
+  const nodeUpdates = [];
+  vn.get().forEach(n => {
+    const orig = nodeOrig.get(n.id);
+    if (n.id === centerId) {
+      nodeUpdates.push({
+        id: n.id,
+        color: orig ? orig.color : undefined,
+        font: orig ? orig.font : undefined, // 스트로크 중첩 없이 원본 폰트 보존!
+        borderWidth: 3,
+        shadow: { enabled: true, color: 'rgba(37,99,235,0.8)', size: 16 }
+      });
+    } else if (activeNodes.has(n.id)) {
+      nodeUpdates.push({
+        id: n.id,
+        color: orig ? orig.color : undefined,
+        font: orig ? orig.font : undefined,
+        borderWidth: 1.5,
+        shadow: orig ? orig.shadow : false
+      });
+    } else {
+      nodeUpdates.push({
+        id: n.id,
+        color: { background: 'rgba(241,245,249,0.15)', border: 'rgba(203,213,225,0.2)' },
+        font: { color: 'rgba(148,163,184,0.2)' },
+        borderWidth: 1,
+        shadow: false
+      });
+    }
+  });
+
+  const edgeUpdates = [];
+  ve.get().forEach(e => {
+    const orig = edgeOrig.get(e.id);
+    if (activeEdges.has(e.id)) {
+      edgeUpdates.push({ id: e.id, color: orig ? orig.color : undefined, width: 2.4 });
+    } else {
+      edgeUpdates.push({ id: e.id, color: { color: 'rgba(226,232,240,0.12)' }, width: 0.8 });
+    }
+  });
+
+  vn.update(nodeUpdates);
+  ve.update(edgeUpdates);
+}
+
+function restoreMobileStyles() {
+  if (!isDimmed || !vn || !ve) return;
+  const nu = [];
+  vn.get().forEach(n => {
+    const o = nodeOrig.get(n.id);
+    if (o) nu.push({ id: n.id, color: o.color, font: o.font, borderWidth: o.borderWidth, shadow: o.shadow });
+  });
+  const eu = [];
+  ve.get().forEach(e => {
+    const o = edgeOrig.get(e.id);
+    if (o) eu.push({ id: e.id, color: o.color, width: o.width });
+  });
+  vn.update(nu);
+  ve.update(eu);
+  isDimmed = false;
+  activeEdgesSet = null;
+}
+
+function toggleXRayMode() {
+  xrayMode = !xrayMode;
+  const btn = document.getElementById('btn-xray-mobile');
+  if (btn) {
+    btn.innerHTML = `
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+      ${xrayMode ? 'X-Ray' : 'X-Ray OFF'}
+    `;
+    btn.classList.toggle('active', xrayMode);
+  }
+  showToast(xrayMode ? '엑스레이 포커스 켜짐' : '엑스레이 포커스 꺼짐');
+  if (!xrayMode && isDimmed) restoreMobileStyles();
+}
+
+// ── 64차원 잠재 공간 바텀 시트 ──────────────────────────────
+async function openLatentSheet() {
+  const overlay = document.getElementById('latent-sheet-overlay');
+  overlay.classList.add('active');
+
+  if (!latentPoints) {
+    try {
+      const res = await fetch('/api/latent-space');
+      const data = await res.json();
+      latentPoints = data.points || [];
+    } catch(err) {
+      console.error(err);
+    }
+  }
+
+  renderLatentMobileCanvas();
+  startMobileRadar();
+}
+
+function closeLatentSheet(e) {
+  if (e && e.target !== e.currentTarget && !e.target.classList.contains('sheet-close')) return;
+  document.getElementById('latent-sheet-overlay').classList.remove('active');
+  stopMobileRadar();
+}
+
+function renderLatentMobileCanvas() {
+  const cvs = document.getElementById('latent-canvas-mobile');
+  if (!cvs || !latentPoints) return;
+  const ctx = cvs.getContext('2d');
+  const W = cvs.width, H = cvs.height;
+  ctx.clearRect(0, 0, W, H);
+
+  const colors = { 'P':'#ef4444', 'C':'#f59e0b', 'B':'#8b5cf6', 'U':'#0284c7', 'CONN':'#10b981', 'ECU':'#94a3b8' };
+  for (let i = 0; i < latentPoints.length; i++) {
+    const pt = latentPoints[i];
+    ctx.fillStyle = colors[pt.domain] || '#64748b';
+    ctx.beginPath();
+    ctx.arc(pt.x * W, pt.y * H, pt.type === 'Connector' ? 2.2 : (pt.type === 'ECU' ? 2.8 : 1.6), 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  if (selectedNodeId) {
+    const clean = selectedNodeId.replace(/^VIS_DTC::/, '').replace(/^ECU::/, '').replace(/^CONN::/, '').trim();
+    const pt = latentPoints.find(p => p.code === clean || p.id.includes(clean) || (p.name && p.name === clean));
+    if (pt) {
+      const px = pt.x * W, py = pt.y * H;
+      ctx.save();
+      const alpha = Math.max(0, 1 - radarRadius / 18);
+      ctx.strokeStyle = `rgba(20, 184, 166, ${alpha})`;
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.arc(px, py, radarRadius, 0, Math.PI * 2);
+      ctx.stroke();
+
+      ctx.fillStyle = '#14b8a6';
+      ctx.beginPath();
+      ctx.arc(px, py, 4.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+  }
+}
+
+function syncLatentHighlight(nid) {
+  selectedNodeId = nid;
+  radarRadius = 2;
+  const clean = nid.replace(/^VIS_DTC::/, '').replace(/^ECU::/, '').replace(/^CONN::/, '').trim();
+  const tip = document.getElementById('latent-mobile-status');
+  if (tip) tip.innerHTML = `선택 노드: <strong style="color:#38bdf8;">${clean}</strong> 동기화 중`;
+  renderLatentMobileCanvas();
+}
+
+function startMobileRadar() {
+  if (radarAnim) cancelAnimationFrame(radarAnim);
+  function loop() {
+    if (selectedNodeId) {
+      radarRadius += 0.5;
+      if (radarRadius > 18) radarRadius = 2;
+      renderLatentMobileCanvas();
+    }
+    radarAnim = requestAnimationFrame(loop);
+  }
+  radarAnim = requestAnimationFrame(loop);
+}
+
+function stopMobileRadar() {
+  if (radarAnim) { cancelAnimationFrame(radarAnim); radarAnim = null; }
+}
+
+// ── QR 코드 모달 및 공유 ────────────────────────────────────
+let currentMobileUrl = window.location.href;
+
+async function openQrModal() {
+  try {
+    const res = await fetch('/api/server-info');
+    const info = await res.json();
+    currentMobileUrl = info.mobile_url;
+  } catch(e) {
+    currentMobileUrl = window.location.href;
+  }
+
+  const qrImg = document.getElementById('qr-image');
+  const urlTxt = document.getElementById('mobile-url-text');
+  qrImg.onerror = () => {
+    qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(currentMobileUrl)}`;
+  };
+  qrImg.src = '/api/qr-code';
+  urlTxt.textContent = currentMobileUrl;
+
+  document.getElementById('qr-modal-overlay').classList.add('active');
+}
+
+function closeQrModal(e) {
+  if (e && e.target !== e.currentTarget) return;
+  document.getElementById('qr-modal-overlay').classList.remove('active');
+}
+
+function copyMobileUrl() {
+  navigator.clipboard.writeText(currentMobileUrl).then(() => {
+    showToast('접속 주소가 클립보드에 복사되었습니다.');
+  }).catch(() => {
+    showToast('주소 복사에 실패했습니다.');
+  });
+}
+
+// ── 토스트 도우미 ───────────────────────────────────────────
+let toastTimer = null;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  if (!t) return;
+  t.textContent = msg;
+  t.classList.add('show');
+  if (toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+// ── URL 파라미터 초기화 및 딥테스트 지원 ─────────────────────
+window.addEventListener('DOMContentLoaded', () => {
+  const params = new URLSearchParams(window.location.search);
+  const codes = params.get('codes') || params.get('q');
+  const acParam = params.get('ac');
+  const sheetParam = params.get('sheet');
+  const qrParam = params.get('qr');
+
+  if (acParam) {
+    inp.value = acParam;
+    fetch(`/api/search?q=${encodeURIComponent(acParam)}`)
+      .then(r => r.json())
+      .then(d => {
+        acData = d;
+        renderAC();
+      })
+      .catch(err => console.error(err));
+  }
+
+  if (codes) {
+    addTag(codes);
+    executeAnalyze().then(() => {
+      const tab = params.get('tab');
+      if (tab) switchMobileTab(tab);
+      const focusParam = params.get('focus');
+      if (focusParam) focusConnectorFromCard(focusParam);
+      if (sheetParam === 'latent') openLatentSheet();
+      if (qrParam === '1') openQrModal();
+    });
+  } else {
+    const tab = params.get('tab');
+    if (tab) switchMobileTab(tab);
+    if (sheetParam === 'latent') openLatentSheet();
+    if (qrParam === '1') openQrModal();
+  }
+});
+</script>
+</body>
+</html>
