@@ -44,6 +44,7 @@ class KnowledgeGraphService:
         self.conn_embs: np.ndarray = np.empty((0, 64))
         self.dtc_master_dedup: list[dict[str, str]] = []
         self.base_dir: Path = graph_path.parent
+        self._latent_points_cache: list[dict[str, Any]] | None = None
 
         self._load_data(graph_path, embed_path)
 
@@ -132,11 +133,18 @@ class KnowledgeGraphService:
         return sorted(self.conn_to_ecus.get(cid, set()))
 
     def get_latent_space_points(self) -> list[dict[str, Any]]:
-        """64차원 노드 임베딩의 2D t-SNE 투영 좌표 목록 반환 (캐시 파일 기반)"""
+        """64차원 노드 임베딩의 2D t-SNE 투영 좌표 목록 반환 (인메모리 캐싱 적용)"""
+        if self._latent_points_cache is not None:
+            return self._latent_points_cache
+
         latent_file = self.base_dir / "rgat_latent_2d.json"
         if latent_file.exists():
-            with open(latent_file, "r", encoding="utf-8") as f:
-                return json.load(f)
+            try:
+                with open(latent_file, "r", encoding="utf-8") as f:
+                    self._latent_points_cache = json.load(f)
+                    return self._latent_points_cache
+            except Exception as e:
+                logger.error(f"Failed to load latent space cache from {latent_file}: {e}")
         return []
 
     def analyze(
@@ -245,9 +253,9 @@ class KnowledgeGraphService:
         effective_scores = final_scores.copy()
         if mask_active:
             # 2-Hop 물리 배선 도달이 불가능한 커넥터(순수 노이즈) 마스킹 격리
-            for ci, cid in enumerate(self.conn_ids):
-                if cid not in all_reachable_conns:
-                    effective_scores[ci] = -1e9
+            for conn_idx, conn_id in enumerate(self.conn_ids):
+                if conn_id not in all_reachable_conns:
+                    effective_scores[conn_idx] = -1e9
 
         # ── 5. 순위 리스트 조립 ──────────────────────────────────────
         results: list[dict[str, Any]] = []
@@ -257,59 +265,59 @@ class KnowledgeGraphService:
         sorted_verified = sorted(
             verified_conn_codes, key=lambda c: -len(verified_conn_codes[c])
         )
-        for cid in sorted_verified:
+        for conn_id in sorted_verified:
             if len(results) >= target_top_k:
                 break
-            ci = self.conn_id_to_idx.get(cid, -1)
-            cnd = self.node_by_id.get(cid, {})
-            hit_codes = sorted(verified_conn_codes[cid])
+            conn_idx = self.conn_id_to_idx.get(conn_id, -1)
+            conn_node = self.node_by_id.get(conn_id, {})
+            hit_codes = sorted(verified_conn_codes[conn_id])
             results.append(
                 {
                     "rank": len(results) + 1,
-                    "conn_id": cid,
-                    "name": cnd.get("name", cid),
-                    "location": cnd.get("location", ""),
+                    "conn_id": conn_id,
+                    "name": conn_node.get("name", conn_id),
+                    "location": conn_node.get("location", ""),
                     "final_score": 2.0,
                     "struct_score": 2.0,
-                    "rgat_score": float(rgat_norm[ci]) if ci >= 0 else 0.0,
+                    "rgat_score": float(rgat_norm[conn_idx]) if conn_idx >= 0 else 0.0,
                     "n_hit": len(hit_codes),
                     "n_valid": n_valid,
                     "hit_codes": hit_codes,
-                    "conn_ecus": self._get_conn_ecus(cid),
+                    "conn_ecus": self._get_conn_ecus(conn_id),
                     "verified": True,
                     "is_reachable": True,
                 }
             )
-            verified_added.add(cid)
+            verified_added.add(conn_id)
 
         # 2순위: 하이브리드 점수 기반 커넥터 (마스킹 적용)
         ranked_indices = np.argsort(effective_scores)[::-1]
-        for ci in ranked_indices:
+        for conn_idx in ranked_indices:
             if len(results) >= target_top_k:
                 break
-            if mask_active and effective_scores[ci] < -1e8:
+            if mask_active and effective_scores[conn_idx] < -1e8:
                 # 도달 가능한 후보군을 모두 채웠으면 비연결 노이즈 커넥터 배제
                 break
-            cid = self.conn_ids[ci]
-            if cid in verified_added:
+            conn_id = self.conn_ids[conn_idx]
+            if conn_id in verified_added:
                 continue
-            cnd = self.node_by_id.get(cid, {})
-            hit_codes = sorted(struct_hit.get(cid, ()))
+            conn_node = self.node_by_id.get(conn_id, {})
+            hit_codes = sorted(struct_hit.get(conn_id, ()))
             results.append(
                 {
                     "rank": len(results) + 1,
-                    "conn_id": cid,
-                    "name": cnd.get("name", cid),
-                    "location": cnd.get("location", ""),
-                    "final_score": round(float(final_scores[ci]), 4),
-                    "struct_score": round(float(struct_norm[ci]), 4),
-                    "rgat_score": round(float(rgat_norm[ci]), 4),
+                    "conn_id": conn_id,
+                    "name": conn_node.get("name", conn_id),
+                    "location": conn_node.get("location", ""),
+                    "final_score": round(float(final_scores[conn_idx]), 4),
+                    "struct_score": round(float(struct_norm[conn_idx]), 4),
+                    "rgat_score": round(float(rgat_norm[conn_idx]), 4),
                     "n_hit": len(hit_codes),
                     "n_valid": n_valid,
                     "hit_codes": hit_codes,
-                    "conn_ecus": self._get_conn_ecus(cid),
+                    "conn_ecus": self._get_conn_ecus(conn_id),
                     "verified": False,
-                    "is_reachable": bool(cid in all_reachable_conns),
+                    "is_reachable": bool(conn_id in all_reachable_conns),
                 }
             )
 
@@ -342,14 +350,17 @@ class KnowledgeGraphService:
         top5_results: list[dict[str, Any]],
         n_valid: int,
     ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
-        """Top-5 커넥터와 관련된 3계층(DTC -> ECU -> Connector) 시각화 노드 및 엣지 생성"""
+        """
+        Top-5 커넥터와 관련된 3계층(DTC -> ECU -> Connector) 시각화 노드 및 엣지 생성
+        - SRP 준수: 커넥터 노드, DTC/ECU 계층, AI 가상 경로 생성을 독립 함수로 분리
+        """
         vis_nodes: list[dict[str, Any]] = []
         vis_edges: list[dict[str, Any]] = []
         added_node_ids: set[str] = set()
         added_edge_keys: set[tuple[str, str, str]] = set()
 
         def add_node(
-            nid: str,
+            node_id: str,
             label: str,
             group: str,
             title: str,
@@ -357,11 +368,11 @@ class KnowledgeGraphService:
             shape: str = "dot",
             level: int = 0,
         ) -> None:
-            if nid not in added_node_ids:
-                added_node_ids.add(nid)
+            if node_id not in added_node_ids:
+                added_node_ids.add(node_id)
                 vis_nodes.append(
                     {
-                        "id": nid,
+                        "id": node_id,
                         "label": label,
                         "group": group,
                         "title": title,
@@ -372,20 +383,20 @@ class KnowledgeGraphService:
                 )
 
         def add_edge(
-            frm: str,
-            to: str,
+            from_node: str,
+            to_node: str,
             color: str,
             title: str,
             width: float = 1.5,
             dashes: bool = False,
         ) -> None:
-            key = (frm, to, title)
+            key = (from_node, to_node, title)
             if key not in added_edge_keys:
                 added_edge_keys.add(key)
                 vis_edges.append(
                     {
-                        "from": frm,
-                        "to": to,
+                        "from": from_node,
+                        "to": to_node,
                         "color": {"color": color},
                         "width": width,
                         "arrows": {"to": {"scaleFactor": 0.5}},
@@ -394,50 +405,76 @@ class KnowledgeGraphService:
                     }
                 )
 
-        top5_conn_ids = {r["conn_id"] for r in top5_results}
+        # 1. Level 2: 커넥터 노드 등록 (오른쪽 종단)
+        top5_conn_ids = self._create_connector_nodes(top5_results, n_valid, add_node)
 
-        # Level 2: 커넥터 노드 등록 (오른쪽 종단)
-        for r in top5_results:
-            cid = r["conn_id"]
-            cnm = r["name"]
-            rank_n = r["rank"]
-            n_hit = r["n_hit"]
-            vtag = "[검증] " if r.get("verified") else ""
+        # 2. Level 0 (DTC) -> Level 1 (ECU) -> Level 2 (Connector) 계층 및 물리 배선 구축
+        self._create_dtc_and_ecu_hierarchy(dtc_info, top5_conn_ids, add_node, add_edge)
+
+        # 3. AI_HW_WIRE 가상 추천 배선 등록
+        self._create_ai_inferred_wires(vis_nodes, vis_edges, dtc_info, top5_results, add_edge)
+
+        return vis_nodes, vis_edges
+
+    def _create_connector_nodes(
+        self,
+        top5_results: list[dict[str, Any]],
+        n_valid: int,
+        add_node: Any,
+    ) -> set[str]:
+        """Level 2: 커넥터 노드 등록 (오른쪽 종단)"""
+        top5_conn_ids: set[str] = {r["conn_id"] for r in top5_results}
+        for result in top5_results:
+            conn_id = result["conn_id"]
+            conn_name = result["name"]
+            rank_num = result["rank"]
+            n_hit = result["n_hit"]
+            verified_tag = "[검증] " if result.get("verified") else ""
             group = (
                 "conn_top1"
-                if rank_n == 1
-                else ("conn_top" if rank_n <= 3 else "conn")
+                if rank_num == 1
+                else ("conn_top" if rank_num <= 3 else "conn")
             )
-            size = 32 if rank_n == 1 else (24 if rank_n <= 3 else 18)
-            short_name = cnm.split("/")[0].strip() if "/" in cnm else cnm
+            size = 32 if rank_num == 1 else (24 if rank_num <= 3 else 18)
+            short_name = conn_name.split("/")[0].strip() if "/" in conn_name else conn_name
             display_name = short_name[:18] + ("…" if len(short_name) > 18 else "")
 
             add_node(
-                nid=cid,
+                node_id=conn_id,
                 label=display_name,
                 group=group,
-                title=f"{vtag}커넥터: {cnm}\n연결 DTC: {n_hit}/{n_valid}개\n순위: #{rank_n}\n점수: {r['final_score']}",
+                title=(
+                    f"{verified_tag}커넥터: {conn_name}\n"
+                    f"연결 DTC: {n_hit}/{n_valid}개\n"
+                    f"순위: #{rank_num}\n"
+                    f"점수: {result['final_score']}"
+                ),
                 size=size,
                 shape="box",
                 level=2,
             )
+        return top5_conn_ids
 
-        # Level 0 (DTC) -> Level 1 (ECU) -> Level 2 (Connector) 경로 구축
-        # [원칙 1] 입력된 모든 DTC는 1열(Level 0)에 100% 무조건 등록 (전수 표기)
-        # [원칙 2] 각 DTC의 담당 ECU(Level 1)를 연결하며, Top 5와 무관한 ECU는 독립 브랜치로 표시
-        # [원칙 3] DTC -> Connector 직접 연결(HW_MAP) 관계 보존 (웹앱에서 아치형 우회 곡선으로 렌더링)
+    def _create_dtc_and_ecu_hierarchy(
+        self,
+        dtc_info: list[dict[str, Any]],
+        top5_conn_ids: set[str],
+        add_node: Any,
+        add_edge: Any,
+    ) -> None:
+        """Level 0 (DTC) -> Level 1 (ECU) -> Level 2 (Connector) 인과 계층 및 물리 배선 구축"""
         for info in dtc_info:
             code = info["code"]
             cat = info.get("cat", "") or "기타"
             dtc_vis_id = f"VIS_DTC::{code}"
             dtc_title = f"DTC: {code}\n카테고리: {cat}\n{info.get('desc', '')}"
 
-            # 1. Level 0: DTC 노드 무조건 생성 (전수 표기 보장)
+            # 1. Level 0: DTC 노드 전수 표기 보장
             add_node(
-                dtc_vis_id,
-                code,
-                "dtc_input",
-                dtc_title,
+                node_id=dtc_vis_id,
+                label=code,
+                group="dtc_input",
+                title=dtc_title,
                 size=22,
                 shape="box",
                 level=0,
@@ -447,80 +484,87 @@ class KnowledgeGraphService:
             nids = self.code_to_nids.get(code, [])
             all_ecus: list[str] = []
             for nid in nids:
-                for eid in self.dtc_to_ecus.get(nid, ()):
-                    if eid not in all_ecus:
-                        all_ecus.append(eid)
+                for ecu_id in self.dtc_to_ecus.get(nid, ()):
+                    if ecu_id not in all_ecus:
+                        all_ecus.append(ecu_id)
 
             # Top 5 커넥터와 물리 배선(HW_WIRE)이 닿는 ECU를 최우선 선택
             connected_ecus = [
-                eid for eid in all_ecus
-                if (self.ecu_to_conns.get(eid, set()) & top5_conn_ids)
+                ecu_id for ecu_id in all_ecus
+                if (self.ecu_to_conns.get(ecu_id, set()) & top5_conn_ids)
             ]
-            # 만약 Top 5와 연결된 ECU가 없다면(독립 계통), 1순위 대표 ECU 표시 (예: BCM, ICCU 등)
             target_ecus = connected_ecus if connected_ecus else (all_ecus[:1] if all_ecus else [])
 
             for ecu_id in target_ecus:
                 ecu_name = self.node_by_id.get(ecu_id, {}).get("name", "?")
                 add_node(
-                    ecu_id,
-                    ecu_name,
-                    "ecu",
-                    f"ECU: {ecu_name}",
+                    node_id=ecu_id,
+                    label=ecu_name,
+                    group="ecu",
+                    title=f"ECU: {ecu_name}",
                     size=20,
                     shape="box",
                     level=1,
                 )
                 # DTC -> ECU (SW_LOGIC 로직관계)
                 add_edge(
-                    dtc_vis_id,
-                    ecu_id,
-                    "#64748b",
-                    "SW_LOGIC (로직관계)",
+                    from_node=dtc_vis_id,
+                    to_node=ecu_id,
+                    color="#64748b",
+                    title="SW_LOGIC (로직관계)",
                     width=1.5,
                     dashes=False,
                 )
 
-                # ECU -> Top 5 커넥터 (HW_WIRE 물리관계: 차량 하네스 설계 회로도에 100% 실재하는 물리 배선)
+                # ECU -> Top 5 커넥터 (HW_WIRE 물리관계)
                 connecting_conns = self.ecu_to_conns.get(ecu_id, set()) & top5_conn_ids
                 for conn_id in connecting_conns:
                     add_edge(
-                        ecu_id,
-                        conn_id,
-                        "#3b82f6",
-                        "HW_WIRE (물리관계)",
+                        from_node=ecu_id,
+                        to_node=conn_id,
+                        color="#3b82f6",
+                        title="HW_WIRE (물리관계)",
                         width=2.5,
                         dashes=False,
                     )
 
-            # 경로 B: DTC -> Connector 직접 연결 (HW_MAP 마스터 직접 검증 링크 보존)
+            # DTC -> Connector 직접 연결 (HW_MAP 마스터 직접 검증 링크 보존)
             for nid in nids:
                 direct_conns = self.dtc_to_conns.get(nid, set()) & top5_conn_ids
                 for conn_id in direct_conns:
                     add_edge(
-                        dtc_vis_id,
-                        conn_id,
-                        "#2563eb",
-                        "HW_MAP (검증매핑)",
+                        from_node=dtc_vis_id,
+                        to_node=conn_id,
+                        color="#2563eb",
+                        title="HW_MAP (검증매핑)",
                         width=2.5,
                         dashes=False,
                     )
 
-        # 경로 C: 회로도상 배선이 없지만 AI(RGAT)가 유사도로 추천한 가상 경로 (AI_HW_WIRE: 연하늘 점선)
+    def _create_ai_inferred_wires(
+        self,
+        vis_nodes: list[dict[str, Any]],
+        vis_edges: list[dict[str, Any]],
+        dtc_info: list[dict[str, Any]],
+        top5_results: list[dict[str, Any]],
+        add_edge: Any,
+    ) -> None:
+        """회로도상 물리 배선이 없지만 AI(RGAT)가 유사도로 추천한 가상 경로 (AI_HW_WIRE: 연하늘 점선)"""
         # C-1. 회로도상 물리 배선이 확인되지 않는 비도달 커넥터 (is_reachable == False)
         vis_node_ids = {n["id"] for n in vis_nodes}
-        for r in top5_results:
-            cid = r["conn_id"]
-            if not r.get("is_reachable", True):
+        for result in top5_results:
+            conn_id = result["conn_id"]
+            if not result.get("is_reachable", True):
                 linked = False
                 for info in dtc_info:
                     for nid in self.code_to_nids.get(info["code"], []):
-                        for eid in self.dtc_to_ecus.get(nid, ()):
-                            if eid in vis_node_ids:
+                        for ecu_id in self.dtc_to_ecus.get(nid, ()):
+                            if ecu_id in vis_node_ids:
                                 add_edge(
-                                    eid,
-                                    cid,
-                                    "#93c5fd",
-                                    "AI_HW_WIRE (추론물리관계)",
+                                    from_node=ecu_id,
+                                    to_node=conn_id,
+                                    color="#93c5fd",
+                                    title="AI_HW_WIRE (추론물리관계)",
                                     width=2.0,
                                     dashes=True,
                                 )
@@ -529,25 +573,22 @@ class KnowledgeGraphService:
                         if linked:
                             break
 
-        # C-2. 활성화된 제어기 중 Top 5 커넥터와 물리 배선이 하나도 없는 제어기 (예: 회로도 미등록 센서 제어기 LCC 등)
-        # AI(RGAT)가 도출한 최우선 근본원인 및 주요 상위 커넥터로 AI_HW_WIRE 가상 경로 연결
+        # C-2. 활성화된 제어기 중 Top 5 커넥터와 물리 배선이 하나도 없는 제어기
         ecus_with_hw = {
             e["from"] for e in vis_edges if e.get("title") and "HW_WIRE" in e["title"] and not e.get("dashes")
         }
         vis_ecus = [n["id"] for n in vis_nodes if n.get("group") == "ecu"]
-        unlinked_ecus = [eid for eid in vis_ecus if eid not in ecus_with_hw]
+        unlinked_ecus = [ecu_id for ecu_id in vis_ecus if ecu_id not in ecus_with_hw]
 
         if top5_results:
             target_conns = [r["conn_id"] for r in top5_results[:2]]
-            for eid in unlinked_ecus:
-                for cid in target_conns:
+            for ecu_id in unlinked_ecus:
+                for target_conn_id in target_conns:
                     add_edge(
-                        eid,
-                        cid,
-                        "#93c5fd",
-                        "AI_HW_WIRE (추론물리관계)",
+                        from_node=ecu_id,
+                        to_node=target_conn_id,
+                        color="#93c5fd",
+                        title="AI_HW_WIRE (추론물리관계)",
                         width=2.0,
                         dashes=True,
                     )
-
-        return vis_nodes, vis_edges

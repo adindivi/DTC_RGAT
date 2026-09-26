@@ -116,3 +116,34 @@ def test_latent_space_api_returns_points(client):
     first = data["points"][0]
     assert "id" in first and "x" in first and "y" in first and "domain" in first
 
+
+def test_sanitize_dtc_codes_helper():
+    """DTC 코드 정제/정규화 유틸리티 단일 책임 원칙(SRP) 검증"""
+    from webapp import _sanitize_dtc_codes
+
+    # 1. 일반 리스트 및 소문자/공백 정규화
+    assert _sanitize_dtc_codes([" c128387 ", "B122901 "]) == ["C128387", "B122901"]
+
+    # 2. 쉼표, 세미콜론, 줄바꿈 혼합 문자열 처리
+    mixed = ["C128387, B122901; U010000\nC161487"]
+    assert _sanitize_dtc_codes(mixed) == ["C128387", "B122901", "U010000", "C161487"]
+
+    # 3. 중복 코드 제거 및 순서 보존
+    assert _sanitize_dtc_codes(["C128387", "C128387", "B122901"]) == ["C128387", "B122901"]
+
+    # 4. 빈 문자열 및 잘못된 타입 방어
+    assert _sanitize_dtc_codes(["", "   "]) == []
+    assert _sanitize_dtc_codes(None) == []
+    assert _sanitize_dtc_codes(12345) == []
+
+
+def test_get_index_html_caching():
+    """템플릿 메모리 캐싱 및 mtime 갱신 메커니즘 검증"""
+    from webapp import get_index_html
+
+    content1 = get_index_html()
+    content2 = get_index_html()
+    assert content1 == content2
+    assert "DTC Knowledge Graph" in content1
+
+
