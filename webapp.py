@@ -100,6 +100,19 @@ def search():
         logger.error(f"Error during search with query '{request.args.get('q')}': {e}", exc_info=True)
         return jsonify([]), 500
 
+@app.route("/api/latent-space")
+def latent_space():
+    """64차원 잠재 공간 t-SNE 2D 프로젝션 좌표 반환 API"""
+    try:
+        points = graph_service.get_latent_space_points()
+        return jsonify({
+            "count": len(points),
+            "points": points,
+        })
+    except Exception as e:
+        logger.error(f"Error retrieving latent space: {e}", exc_info=True)
+        return jsonify({"error": "잠재 공간 좌표를 로드하는 중 오류가 발생했습니다.", "detail": str(e)}), 500
+
 @app.route("/api/analyze", methods=["POST"])
 def api_analyze():
     """
@@ -282,6 +295,7 @@ header{background:rgba(255,255,255,0.88);backdrop-filter:blur(20px) saturate(180
 .tb-btn{background:var(--surface);border:1px solid var(--hairline-strong);color:var(--fg);border-radius:980px;padding:6px 14px;font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;transition:transform .15s cubic-bezier(0.34,1.56,0.64,1),border-color .15s ease,color .15s ease,background .15s ease;display:inline-flex;align-items:center;justify-content:center;gap:6px;}
 .tb-btn:hover{border-color:var(--primary);color:var(--primary);background:rgba(0,113,227,.03);}
 .tb-btn:active{transform:scale(0.96);}
+.tb-btn.active{border-color:var(--primary);color:var(--primary);background:rgba(0,113,227,.08);font-weight:600;}
 .legend{display:flex;gap:10px;flex-wrap:wrap;margin-left:auto;align-items:center;}
 .leg-item{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted);font-weight:500;}
 .leg-pill{width:14px;height:8px;border-radius:980px;display:inline-block;}
@@ -427,6 +441,14 @@ header{background:rgba(255,255,255,0.88);backdrop-filter:blur(20px) saturate(180
         <span id="mode-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="6" y1="3" x2="6" y2="15"></line><circle cx="18" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><path d="M18 9a9 9 0 0 1-9 9"></path></svg></span>
         <span id="mode-text">계층형 마인드맵</span>
       </button>
+      <button class="tb-btn active" id="xray-btn" onclick="toggleXRayMode()" title="노드 클릭 시 1·2-Hop 배선만 남기고 무관한 노드를 반투명 처리하는 엑스레이 모드">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+        <span id="xray-text">엑스레이 ON</span>
+      </button>
+      <button class="tb-btn" id="latent-btn" onclick="toggleLatentHUD()" title="1,705개 노드의 64차원 t-SNE 2D 군집 투영 HUD 켜기/끄기">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polygon points="12 2 15 8 22 9 17 14 18 21 12 17 6 21 7 14 2 9 9 8 12 2"></polygon></svg>
+        <span id="latent-text">64D 잠재공간 HUD</span>
+      </button>
       <span id="node-count-info">노드 0개 · 엣지 0개</span>
       <div class="legend">
         <div class="leg-item"><div class="leg-pill" style="background:#fee2e2;border:1.5px solid #f87171;"></div>증상 DTC</div>
@@ -444,6 +466,29 @@ header{background:rgba(255,255,255,0.88);backdrop-filter:blur(20px) saturate(180
       </div>
     </div>
     <div id="network-wrap" style="flex:1;position:relative;min-height:0;">
+      <!-- 64차원 잠재 공간 t-SNE 2D 미니맵 투영 HUD 패널 -->
+      <div id="latent-hud" style="position:absolute;bottom:16px;right:16px;z-index:90;background:rgba(255,255,255,0.92);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(0,0,0,0.1);border-radius:14px;box-shadow:0 12px 32px -4px rgba(0,0,0,0.12);padding:12px;display:none;flex-direction:column;gap:8px;width:270px;animation:tossCascadeGlide .25s cubic-bezier(0.16,1,0.3,1);">
+        <div style="display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(0,0,0,0.06);padding-bottom:6px;">
+          <div style="font-size:11.5px;font-weight:700;color:var(--brand-dark);display:flex;align-items:center;gap:5px;">
+            <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#0d9488;box-shadow:0 0 6px #0d9488;"></span>
+            64D 잠재 공간 투영 (t-SNE)
+          </div>
+          <div style="display:flex;gap:4px;">
+            <button onclick="toggleLatentHUD()" style="background:transparent;border:none;color:var(--muted);cursor:pointer;padding:2px;font-size:12px;" title="닫기">✕</button>
+          </div>
+        </div>
+        <canvas id="latent-canvas" width="246" height="170" style="background:#090d16;border-radius:8px;display:block;cursor:crosshair;"></canvas>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;font-size:10px;color:var(--secondary);font-weight:600;padding-top:2px;">
+          <span style="display:inline-flex;align-items:center;gap:3px;"><span style="width:6px;height:6px;background:#ef4444;border-radius:50%;"></span>P 동력</span>
+          <span style="display:inline-flex;align-items:center;gap:3px;"><span style="width:6px;height:6px;background:#f59e0b;border-radius:50%;"></span>C 섀시</span>
+          <span style="display:inline-flex;align-items:center;gap:3px;"><span style="width:6px;height:6px;background:#8b5cf6;border-radius:50%;"></span>B 바디</span>
+          <span style="display:inline-flex;align-items:center;gap:3px;"><span style="width:6px;height:6px;background:#0284c7;border-radius:50%;"></span>U 통신</span>
+          <span style="display:inline-flex;align-items:center;gap:3px;"><span style="width:6px;height:6px;background:#10b981;border-radius:50%;"></span>커넥터</span>
+        </div>
+        <div id="latent-tooltip" style="font-size:10.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-height:16px;">
+          노드 선택 시 실시간 동기화
+        </div>
+      </div>
       <div class="state-msg" id="state-msg" style="position:absolute;inset:0;display:flex;">
         <div style="width:48px;height:48px;border-radius:14px;background:rgba(0,113,227,0.06);border:1px solid rgba(0,113,227,0.14);display:flex;align-items:center;justify-content:center;margin-bottom:6px;">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
@@ -984,6 +1029,10 @@ function buildNetwork(data) {
     // ④ [모빌리티 테크 명품] AI_HW_WIRE 살아있는 펄스 전류 (Live Nano Signal Flow) 등록
     network.on('afterDrawing', drawLiveNanoSignalFlow);
     startNanoSignalLoop();
+
+    // ⑤ 엑스레이 디밍 및 노드 선택 이벤트 리스너 등록
+    network.on('click', handleNetworkClick);
+    backupNetworkStyles();
   });
 }
 
@@ -1000,7 +1049,7 @@ function drawLiveNanoSignalFlow(ctx) {
 
   edges.forEach(e => {
     const isAiWire = (e.title && e.title.includes('AI_HW_WIRE')) || e.dashes;
-    if (!isAiWire || e.hidden) return;
+    if (!isAiWire || e.hidden || (isDimmed && currentActiveEdges && !currentActiveEdges.has(e.id))) return;
 
     const pFrom = pos[e.from];
     const pTo = pos[e.to];
@@ -1062,6 +1111,464 @@ function stopNanoSignalLoop() {
   if (nanoAnimFrameId) {
     cancelAnimationFrame(nanoAnimFrameId);
     nanoAnimFrameId = null;
+  }
+}
+
+// ── ⑤ 엑스레이 디밍 모드 (X-Ray / Focus Dimming) ─────────────────
+let xrayModeActive = true;
+let isDimmed = false;
+let nodeOriginalStyles = new Map();
+let edgeOriginalStyles = new Map();
+let currentActiveEdges = null;
+
+function toggleXRayMode() {
+  xrayModeActive = !xrayModeActive;
+  const btn = document.getElementById('xray-btn');
+  const txt = document.getElementById('xray-text');
+  if (btn) btn.classList.toggle('active', xrayModeActive);
+  if (txt) txt.textContent = xrayModeActive ? '엑스레이 ON' : '엑스레이 OFF';
+  showToast(xrayModeActive ? '엑스레이 디밍 모드가 활성화되었습니다. (노드 클릭 시 연관 배선만 강조)' : '엑스레이 디밍 모드가 비활성화되었습니다.', 'info');
+  if (!xrayModeActive && isDimmed) {
+    restoreOriginalStyles();
+  }
+}
+
+function backupNetworkStyles() {
+  if (!vn || !ve) return;
+  nodeOriginalStyles.clear();
+  edgeOriginalStyles.clear();
+  vn.get().forEach(n => {
+    const grp = GROUPS[n.group] || {};
+    nodeOriginalStyles.set(n.id, {
+      color: n.color ? JSON.parse(JSON.stringify(n.color)) : (grp.color ? JSON.parse(JSON.stringify(grp.color)) : null),
+      font: n.font ? JSON.parse(JSON.stringify(n.font)) : (grp.font ? JSON.parse(JSON.stringify(grp.font)) : null),
+      shadow: n.shadow !== undefined ? n.shadow : (grp.shadow !== undefined ? grp.shadow : true),
+      borderWidth: n.borderWidth || grp.borderWidth || 1.5,
+    });
+  });
+  ve.get().forEach(e => {
+    edgeOriginalStyles.set(e.id, {
+      color: e.color ? JSON.parse(JSON.stringify(e.color)) : null,
+      width: e.width || 2,
+    });
+  });
+}
+
+function handleNetworkClick(params) {
+  if (!network || !vn || !ve) return;
+
+  if (params.nodes && params.nodes.length > 0) {
+    const selectedId = params.nodes[0];
+    if (xrayModeActive) {
+      applyXRayDimming(selectedId);
+    }
+    if (latentHUDOpen) {
+      highlightLatentPoint(selectedId);
+    }
+  } else {
+    // 빈 캔버스 클릭 시 디밍 해제 및 잠재공간 하이라이트 해제
+    if (isDimmed) {
+      restoreOriginalStyles();
+    }
+    if (latentHUDOpen) {
+      clearLatentHighlight();
+    }
+  }
+}
+
+function applyXRayDimming(centerNodeId) {
+  if (!vn || !ve || !network) return;
+  if (nodeOriginalStyles.size === 0) backupNetworkStyles();
+
+  const centerNode = vn.get(centerNodeId);
+  if (!centerNode) return;
+
+  const centerLevel = centerNode.level !== undefined ? centerNode.level : (
+    centerNodeId.startsWith('VIS_DTC::') ? 0 : (centerNodeId.startsWith('ECU::') ? 1 : 2)
+  );
+
+  const activeNodes = new Set([centerNodeId]);
+  const activeEdges = new Set();
+  const allEdges = ve.get();
+  const allNodesMap = new Map(vn.get().map(n => [n.id, n]));
+
+  if (centerLevel === 0) {
+    // ── [Level 0: DTC 선택 시] ────────────────────────────────────────
+    // 1-Hop: 담당 ECU (및 직접 HW_MAP 연결 커넥터)
+    // 2-Hop: 담당 ECU에서 연결된 하위 커넥터만 활성화
+    // ※ 타 DTC나 무관한 ECU(RR_C_RADAR, ESHIFTER 등)의 역방향 누출 완전 차단!
+    const connectedEcus = new Set();
+
+    allEdges.forEach(e => {
+      if (e.hidden) return;
+      if (e.from === centerNodeId || e.to === centerNodeId) {
+        const otherId = e.from === centerNodeId ? e.to : e.from;
+        const otherNode = allNodesMap.get(otherId);
+        if (!otherNode) return;
+        if (otherNode.level === 1 || otherId.startsWith('ECU::')) {
+          connectedEcus.add(otherId);
+          activeNodes.add(otherId);
+          activeEdges.add(e.id);
+        } else if (otherNode.level === 2 || otherId.startsWith('CONN::')) {
+          activeNodes.add(otherId);
+          activeEdges.add(e.id);
+        }
+      }
+    });
+
+    // 2-Hop: 담당 ECU에서 뻗어나가는 커넥터 배선만 활성화
+    allEdges.forEach(e => {
+      if (e.hidden) return;
+      const fromEcu = connectedEcus.has(e.from);
+      const toEcu   = connectedEcus.has(e.to);
+      if (fromEcu || toEcu) {
+        const otherId = fromEcu ? e.to : e.from;
+        const otherNode = allNodesMap.get(otherId);
+        if (otherNode && (otherNode.level === 2 || otherId.startsWith('CONN::'))) {
+          activeNodes.add(otherId);
+          activeEdges.add(e.id);
+        }
+      }
+    });
+
+  } else if (centerLevel === 1) {
+    // ── [Level 1: ECU 선택 시] ────────────────────────────────────────
+    // 상위 유입 DTC (Level 0) + 하위 연결 커넥터 (Level 2)만 활성화
+    allEdges.forEach(e => {
+      if (e.hidden) return;
+      if (e.from === centerNodeId || e.to === centerNodeId) {
+        const otherId = e.from === centerNodeId ? e.to : e.from;
+        const otherNode = allNodesMap.get(otherId);
+        if (otherNode) {
+          activeNodes.add(otherId);
+          activeEdges.add(e.id);
+        }
+      }
+    });
+
+  } else {
+    // ── [Level 2: 커넥터 선택 시] ─────────────────────────────────────
+    // 1-Hop: 이 커넥터에 연결된 담당 ECU들 (Level 1)
+    // 2-Hop: 그 ECU들에서 발생한 증상 DTC들 (Level 0)
+    // ※ 타 커넥터나 무관한 ECU는 배제
+    const connectedEcus = new Set();
+
+    allEdges.forEach(e => {
+      if (e.hidden) return;
+      if (e.from === centerNodeId || e.to === centerNodeId) {
+        const otherId = e.from === centerNodeId ? e.to : e.from;
+        const otherNode = allNodesMap.get(otherId);
+        if (!otherNode) return;
+        if (otherNode.level === 1 || otherId.startsWith('ECU::')) {
+          connectedEcus.add(otherId);
+          activeNodes.add(otherId);
+          activeEdges.add(e.id);
+        } else if (otherNode.level === 0 || otherId.startsWith('VIS_DTC::')) {
+          activeNodes.add(otherId);
+          activeEdges.add(e.id);
+        }
+      }
+    });
+
+    // 2-Hop: 연결된 ECU들의 DTC 유입선 활성화
+    allEdges.forEach(e => {
+      if (e.hidden) return;
+      const fromEcu = connectedEcus.has(e.from);
+      const toEcu   = connectedEcus.has(e.to);
+      if (fromEcu || toEcu) {
+        const otherId = fromEcu ? e.to : e.from;
+        const otherNode = allNodesMap.get(otherId);
+        if (otherNode && (otherNode.level === 0 || otherId.startsWith('VIS_DTC::'))) {
+          activeNodes.add(otherId);
+          activeEdges.add(e.id);
+        }
+      }
+    });
+  }
+
+  isDimmed = true;
+  currentActiveEdges = activeEdges;
+
+  // 선택된 노드 레벨에 따른 아우라 글로우 색상 분기
+  let glowColor = 'rgba(37,99,235,0.75)'; // 기본 사파이어
+  if (centerLevel === 0) glowColor = 'rgba(239,68,68,0.85)'; // DTC: 강렬한 레드/로즈
+  else if (centerLevel === 1) glowColor = 'rgba(249,115,22,0.85)'; // ECU: 앰버/오렌지
+
+  const nodeUpdates = [];
+  vn.get().forEach(n => {
+    const orig = nodeOriginalStyles.get(n.id);
+    if (n.id === centerNodeId) {
+      // 선택된 중심 노드: 고휘도 아우라 글로우 + 두꺼운 테두리
+      nodeUpdates.push({
+        id: n.id,
+        color: orig ? orig.color : undefined,
+        font: orig && orig.font ? { ...orig.font, strokeWidth: 2, strokeColor: '#ffffff' } : undefined,
+        borderWidth: 3,
+        shadow: { enabled: true, color: glowColor, size: 18, x: 0, y: 0 }
+      });
+    } else if (activeNodes.has(n.id)) {
+      // 1·2-Hop 인과 연관 노드: 100% 원본 선명도 유지
+      nodeUpdates.push({
+        id: n.id,
+        color: orig ? orig.color : undefined,
+        font: orig ? orig.font : undefined,
+        borderWidth: orig ? orig.borderWidth : 1.5,
+        shadow: orig ? orig.shadow : true
+      });
+    } else {
+      // 무관한 노드: 12% Ghosting 디밍
+      nodeUpdates.push({
+        id: n.id,
+        color: {
+          background: 'rgba(241,245,249,0.14)',
+          border: 'rgba(203,213,225,0.18)',
+          highlight: { background: 'rgba(241,245,249,0.25)', border: 'rgba(203,213,225,0.35)' },
+          hover: { background: 'rgba(241,245,249,0.25)', border: 'rgba(203,213,225,0.35)' }
+        },
+        font: { color: 'rgba(148,163,184,0.18)' },
+        borderWidth: 1,
+        shadow: false
+      });
+    }
+  });
+
+  const edgeUpdates = [];
+  ve.get().forEach(e => {
+    const orig = edgeOriginalStyles.get(e.id);
+    if (activeEdges.has(e.id)) {
+      edgeUpdates.push({
+        id: e.id,
+        color: orig ? orig.color : undefined,
+        width: (orig ? orig.width : 2) + 0.6
+      });
+    } else {
+      edgeUpdates.push({
+        id: e.id,
+        color: { color: 'rgba(226,232,240,0.10)', highlight: 'rgba(226,232,240,0.16)', hover: 'rgba(226,232,240,0.16)' },
+        width: 0.8
+      });
+    }
+  });
+
+  vn.update(nodeUpdates);
+  ve.update(edgeUpdates);
+}
+
+function restoreOriginalStyles() {
+  if (!isDimmed || !vn || !ve) return;
+  const nodeUpdates = [];
+  vn.get().forEach(n => {
+    const orig = nodeOriginalStyles.get(n.id);
+    if (orig) {
+      nodeUpdates.push({
+        id: n.id,
+        color: orig.color,
+        font: orig.font,
+        borderWidth: orig.borderWidth,
+        shadow: orig.shadow
+      });
+    }
+  });
+  const edgeUpdates = [];
+  ve.get().forEach(e => {
+    const orig = edgeOriginalStyles.get(e.id);
+    if (orig) {
+      edgeUpdates.push({
+        id: e.id,
+        color: orig.color,
+        width: orig.width
+      });
+    }
+  });
+  vn.update(nodeUpdates);
+  ve.update(edgeUpdates);
+  isDimmed = false;
+  currentActiveEdges = null;
+}
+
+// ESC 키 입력 시 엑스레이 디밍 즉시 해제
+window.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    if (isDimmed) {
+      restoreOriginalStyles();
+      clearLatentHighlight();
+    }
+  }
+});
+
+// ── ⑥ 64차원 잠재 공간 t-SNE 2D 미니맵 투영 HUD ────────────────
+let latentHUDOpen = false;
+let latentPointsData = null;
+let selectedLatentNodeId = null;
+let radarAnimFrame = null;
+let radarRadius = 2;
+
+async function toggleLatentHUD() {
+  latentHUDOpen = !latentHUDOpen;
+  const hud = document.getElementById('latent-hud');
+  const btn = document.getElementById('latent-btn');
+  if (hud) hud.style.display = latentHUDOpen ? 'flex' : 'none';
+  if (btn) btn.classList.toggle('active', latentHUDOpen);
+
+  if (latentHUDOpen) {
+    if (!latentPointsData) {
+      try {
+        const res = await fetch('/api/latent-space');
+        const data = await res.json();
+        latentPointsData = data.points || [];
+      } catch (err) {
+        console.error('Failed to load latent space:', err);
+      }
+    }
+    if (selectedLatentNodeId) {
+      highlightLatentPoint(selectedLatentNodeId);
+    } else {
+      renderLatentCanvas();
+    }
+    startRadarLoop();
+    showToast('64D 잠재 공간 투영 HUD가 활성화되었습니다. (1,705개 노드)', 'info');
+  } else {
+    stopRadarLoop();
+  }
+}
+
+// 잠재공간 노드 검색 도우미 (DTC 코드 접두사, ECU명, 커넥터명 전수 매칭)
+function findLatentPoint(nodeId) {
+  if (!latentPointsData || !nodeId) return null;
+  // 1. 완전 일치 (id 또는 code)
+  let pt = latentPointsData.find(p => p.id === nodeId || p.code === nodeId);
+  if (pt) return pt;
+
+  // 2. 접두사(VIS_DTC::, ECU::, CONN::) 제거 후 순수 코드/명칭 매칭
+  const clean = nodeId.replace(/^VIS_DTC::/, '').replace(/^ECU::/, '').replace(/^CONN::/, '').trim();
+  pt = latentPointsData.find(p => p.code === clean || p.id.includes(clean) || (p.name && p.name === clean));
+  if (pt) return pt;
+
+  // 3. 서브스트링 및 복합명 매칭
+  pt = latentPointsData.find(p => (p.name && nodeId.includes(p.name)) || (p.code && nodeId.includes(p.code)) || (p.id && nodeId.includes(p.id)));
+  return pt || null;
+}
+
+function renderLatentCanvas() {
+  const canvas = document.getElementById('latent-canvas');
+  if (!canvas || !latentPointsData) return;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width;
+  const H = canvas.height;
+
+  ctx.clearRect(0, 0, W, H);
+
+  // 미세 그리드 배경
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.04)';
+  ctx.lineWidth = 1;
+  for (let x = 20; x < W; x += 35) {
+    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
+  }
+  for (let y = 20; y < H; y += 35) {
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+  }
+
+  const colorMap = {
+    'P': '#ef4444',
+    'C': '#f59e0b',
+    'B': '#8b5cf6',
+    'U': '#0284c7',
+    'CONN': '#10b981',
+    'ECU': '#94a3b8',
+    'OTHER': '#64748b'
+  };
+
+  // 1,705개 노드 2D 산점도 렌더링
+  for (let i = 0; i < latentPointsData.length; i++) {
+    const pt = latentPointsData[i];
+    const px = pt.x * W;
+    const py = pt.y * H;
+    const col = colorMap[pt.domain] || '#64748b';
+    const isConn = pt.type === 'Connector';
+    const isECU = pt.type === 'ECU';
+
+    ctx.fillStyle = col;
+    ctx.beginPath();
+    ctx.arc(px, py, isConn ? 2.2 : (isECU ? 3.0 : 1.6), 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // 선택된 노드 동심원 레이더 핑(Ping) 파동 효과
+  if (selectedLatentNodeId) {
+    const pt = findLatentPoint(selectedLatentNodeId);
+    if (pt) {
+      const px = pt.x * W;
+      const py = pt.y * H;
+
+      ctx.save();
+      const alpha = Math.max(0, 1 - radarRadius / 18);
+      ctx.strokeStyle = `rgba(20, 184, 166, ${alpha})`;
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.arc(px, py, radarRadius, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // 고휘도 중심 마커
+      ctx.fillStyle = '#14b8a6';
+      ctx.beginPath();
+      ctx.arc(px, py, 4.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 1.8;
+      ctx.stroke();
+      ctx.restore();
+    }
+  }
+}
+
+async function highlightLatentPoint(nodeId) {
+  selectedLatentNodeId = nodeId;
+  if (!latentPointsData) {
+    try {
+      const res = await fetch('/api/latent-space');
+      const data = await res.json();
+      latentPointsData = data.points || [];
+    } catch(err) {}
+  }
+  if (!latentPointsData) return;
+  const pt = findLatentPoint(nodeId);
+  const tip = document.getElementById('latent-tooltip');
+  if (pt && tip) {
+    const domainNames = { 'P':'파워트레인', 'C':'섀시', 'B':'바디', 'U':'통신/네트워크', 'CONN':'커넥터', 'ECU':'제어기' };
+    const domStr = domainNames[pt.domain] || pt.domain;
+    tip.innerHTML = `<strong>${pt.code}</strong> (${domStr} · ${pt.type})`;
+  } else if (tip) {
+    const clean = nodeId.replace(/^VIS_DTC::/, '').replace(/^ECU::/, '').replace(/^CONN::/, '').trim();
+    tip.innerHTML = `<strong>${clean}</strong>`;
+  }
+  radarRadius = 2;
+  renderLatentCanvas();
+}
+
+function clearLatentHighlight() {
+  selectedLatentNodeId = null;
+  const tip = document.getElementById('latent-tooltip');
+  if (tip) tip.textContent = '노드 선택 시 실시간 동기화';
+  renderLatentCanvas();
+}
+
+function startRadarLoop() {
+  if (radarAnimFrame) cancelAnimationFrame(radarAnimFrame);
+  function step() {
+    if (selectedLatentNodeId) {
+      radarRadius += 0.5;
+      if (radarRadius > 18) radarRadius = 2;
+      renderLatentCanvas();
+    }
+    radarAnimFrame = requestAnimationFrame(step);
+  }
+  radarAnimFrame = requestAnimationFrame(step);
+}
+
+function stopRadarLoop() {
+  if (radarAnimFrame) {
+    cancelAnimationFrame(radarAnimFrame);
+    radarAnimFrame = null;
   }
 }
 
@@ -1166,11 +1673,23 @@ function toggleHwMap() {
 }
 
 function focusConn(connId) {
-  if (!network) return;
+  if (!network || !vn) return;
   switchTab('rc');
   try {
-    network.selectNodes([connId]);
-    network.focus(connId, {scale:1.6, animation:{duration:500, easingFunction:'easeInOutQuad'}});
+    let targetId = connId;
+    const allNodes = vn.get();
+    const matched = allNodes.find(n => n.id === connId || n.id.includes(connId) || (n.label && n.label.includes(connId)));
+    if (matched) {
+      targetId = matched.id;
+    }
+    network.selectNodes([targetId]);
+    network.focus(targetId, {scale:1.6, animation:{duration:500, easingFunction:'easeInOutQuad'}});
+    if (xrayModeActive) {
+      applyXRayDimming(targetId);
+    }
+    if (latentHUDOpen) {
+      highlightLatentPoint(targetId);
+    }
   } catch(e) {}
 }
 
@@ -1236,10 +1755,29 @@ window.addEventListener('DOMContentLoaded', () => {
       badgeEl.textContent = 'OFF';
     }
   }
+  if (params.get('hud') === 'on') {
+    toggleLatentHUD();
+  }
   const codesParam = params.get('codes') || params.get('q');
   if (codesParam) {
     addTag(codesParam);
-    doAnalyze();
+    doAnalyze().then(() => {
+      const focusParam = params.get('focus');
+      if (focusParam) {
+        let attempts = 0;
+        const checkInterval = setInterval(() => {
+          attempts++;
+          if (network && vn && vn.get().length > 0) {
+            clearInterval(checkInterval);
+            setTimeout(() => {
+              focusConn(focusParam);
+            }, 100);
+          } else if (attempts > 30) {
+            clearInterval(checkInterval);
+          }
+        }, 100);
+      }
+    });
   }
 });
 </script>

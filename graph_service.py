@@ -43,6 +43,7 @@ class KnowledgeGraphService:
         self.conn_id_to_idx: dict[str, int] = {}
         self.conn_embs: np.ndarray = np.empty((0, 64))
         self.dtc_master_dedup: list[dict[str, str]] = []
+        self.base_dir: Path = graph_path.parent
 
         self._load_data(graph_path, embed_path)
 
@@ -129,6 +130,14 @@ class KnowledgeGraphService:
     def _get_conn_ecus(self, cid: str) -> list[str]:
         """특정 커넥터와 물리 배선(HW_WIRE)으로 연결된 ECU 이름 목록 O(1) 고속 조회"""
         return sorted(self.conn_to_ecus.get(cid, set()))
+
+    def get_latent_space_points(self) -> list[dict[str, Any]]:
+        """64차원 노드 임베딩의 2D t-SNE 투영 좌표 목록 반환 (캐시 파일 기반)"""
+        latent_file = self.base_dir / "rgat_latent_2d.json"
+        if latent_file.exists():
+            with open(latent_file, "r", encoding="utf-8") as f:
+                return json.load(f)
+        return []
 
     def analyze(
         self,

@@ -102,3 +102,17 @@ def test_analyze_api_exceeds_max_codes_limit_returns_400(client):
     assert res.status_code == 400
     data = res.get_json()
     assert "1회 최대 분석 가능 코드" in data.get("error", "")
+
+
+def test_latent_space_api_returns_points(client):
+    """64차원 잠재 공간 t-SNE 2D 프로젝션 API 계약 및 데이터 정합성 확인"""
+    res = client.get("/api/latent-space")
+    assert res.status_code == 200
+    data = res.get_json()
+    assert "count" in data
+    assert "points" in data
+    assert data["count"] == 1705
+    assert len(data["points"]) == 1705
+    first = data["points"][0]
+    assert "id" in first and "x" in first and "y" in first and "domain" in first
+
