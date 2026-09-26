@@ -6,6 +6,7 @@ DTC 지식 그래프 진단 웹 애플리케이션
 - 사용자 친화적 예외 안내 모달 팝업 및 상태별 토스트 시스템
 """
 import argparse
+import functools
 import logging
 import re
 import sys
@@ -65,14 +66,27 @@ app = Flask(__name__)
 def index():
     return render_template_string(HTML_TEMPLATE)
 
+_report_cache = {"mtime": 0.0, "content": ""}
+
+def _load_report_html() -> str:
+    """원리해설서 HTML mtime 기반 동적 캐싱 (디스크 I/O 최적화 및 핫 리로드 지원)"""
+    report_path = Path(__file__).resolve().parent / "최종정리.html"
+    if report_path.exists():
+        mtime = report_path.stat().st_mtime
+        if mtime != _report_cache["mtime"]:
+            with open(report_path, "r", encoding="utf-8") as f:
+                _report_cache["content"] = f.read()
+            _report_cache["mtime"] = mtime
+        return _report_cache["content"]
+    return ""
+
 @app.route("/report")
 @app.route("/guide")
 def report():
     """최종 완결 정리 보고서 제공 라우트"""
-    report_path = Path(__file__).resolve().parent / "최종정리.html"
-    if report_path.exists():
-        with open(report_path, "r", encoding="utf-8") as f:
-            return f.read()
+    content = _load_report_html()
+    if content:
+        return content
     return "Report not found", 404
 
 @app.route("/api/search")
@@ -120,6 +134,14 @@ def api_analyze():
         return jsonify({
             "error": "분석할 DTC 코드를 1개 이상 입력해주세요.",
             "detail": "No valid non-empty DTC codes provided"
+        }), 400
+
+    # [보안/DoS 방어] 단일 요청 최대 분석 가능 코드 개수 상한 제한
+    MAX_DTC_CODES_LIMIT = 50
+    if len(codes) > MAX_DTC_CODES_LIMIT:
+        return jsonify({
+            "error": f"1회 최대 분석 가능 코드는 {MAX_DTC_CODES_LIMIT}개입니다.",
+            "detail": f"Submitted: {len(codes)} codes (exceeds limit: {MAX_DTC_CODES_LIMIT})"
         }), 400
 
     logger.info(f"Incoming analysis request for {len(codes)} codes: {codes}")

@@ -63,6 +63,7 @@ class KnowledgeGraphService:
 
         self.node_id_to_idx = {n["id"]: i for i, n in enumerate(self.nodes)}
         self.node_by_id = {n["id"]: n for n in self.nodes}
+        self.conn_to_ecus: dict[str, set[str]] = defaultdict(set)
 
         for e in self.edges:
             rel = e.get("rel", "")
@@ -74,6 +75,9 @@ class KnowledgeGraphService:
                 self.dtc_to_conns[src].add(dst)
             elif rel == "HW_WIRE":
                 self.ecu_to_conns[src].add(dst)
+                src_node = self.node_by_id.get(src, {})
+                if src_node.get("node_type") == "ECU":
+                    self.conn_to_ecus[dst].add(src_node.get("name", "?"))
 
         for n in self.nodes:
             if n.get("node_type") == "DTC":
@@ -123,15 +127,8 @@ class KnowledgeGraphService:
         return [d for d in self.dtc_master_dedup if q in d["code"]][:limit]
 
     def _get_conn_ecus(self, cid: str) -> list[str]:
-        """특정 커넥터와 물리 배선(HW_WIRE)으로 연결된 ECU 이름 목록 조회"""
-        ecus = {
-            self.node_by_id[e["source"]].get("name", "?")
-            for e in self.edges
-            if e.get("rel") == "HW_WIRE"
-            and e.get("target") == cid
-            and self.node_by_id.get(e["source"], {}).get("node_type") == "ECU"
-        }
-        return sorted(ecus)
+        """특정 커넥터와 물리 배선(HW_WIRE)으로 연결된 ECU 이름 목록 O(1) 고속 조회"""
+        return sorted(self.conn_to_ecus.get(cid, set()))
 
     def analyze(
         self,
@@ -169,7 +166,8 @@ class KnowledgeGraphService:
                 for nid in nids
                 if nid in self.node_id_to_idx
             ]
-            mean_emb = np.mean(embs, axis=0) if embs else np.zeros(64)
+            dim = self.embeddings.shape[1] if self.embeddings.ndim > 1 else 64
+            mean_emb = np.mean(embs, axis=0) if embs else np.zeros(dim)
 
             first_node = self.node_by_id.get(nids[0], {})
             dtc_info.append(
