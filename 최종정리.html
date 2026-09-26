@@ -1731,18 +1731,18 @@
         </ul>
       </div>
 
-      <!-- AI_HW_WIRE 실증 다발 고장 예시 블록 -->
-      <div class="gnn-box" style="margin-top:16px;border-color:#7dd3fc;background:#f0f9ff;">
-        <div style="font-size:16px;font-weight:800;color:#0369a1;margin-bottom:12px;display:flex;align-items:center;gap:8px;">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0284c7" stroke-width="2.5"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"></path></svg>
-          AI_HW_WIRE (추론물리관계) 실증: 공조 센서 다발 (B122901, B123001, B234301, B240301)
+      <!-- HW_WIRE & AI_HW_WIRE 동시 실증 복합 다발 고장 예시 블록 -->
+      <div class="gnn-box" style="margin-top:16px;border-color:#3b82f6;background:#f0f7ff;">
+        <div style="font-size:16px;font-weight:800;color:#1d4ed8;margin-bottom:12px;display:flex;align-items:center;gap:8px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"></path></svg>
+          HW_WIRE(물리관계 실선) + AI_HW_WIRE(추론물리관계 점선) 동시 실증: 제동·공조 복합 다발 (C128387, B122901, B234301, B240301)
         </div>
         <p style="font-size:14px;color:#334155;line-height:1.7;">
-          차량 하네스 회로도상에는 제어기(LCC)와 특정 고전압/열관리 커넥터 간의 구리선 연결 데이터가 미등록되어 있을 수 있습니다.<br>
-          상단 대시보드의 <strong>[공조 센서 다발 (AI_HW_WIRE)]</strong> 예시 버튼을 클릭하면, 
-          저압센서(<code>B122901</code>)·고압센서(<code>B123001</code>)·온도센서(<code>B234301</code>)·컴프레서(<code>B240301</code>) 4개 DTC가 입력되며, 
-          <strong>64차원 RGAT 그래프 어텐션 임베딩 유사도</strong>에 의해 물리 배선이 없는 고전압 PTC 히터 및 배터리 열관리 커넥터(<code>SBM_1</code>, <code>ICCU_11kW</code>, <code>INNER_PTC_HV_JB</code> 등)로 
-          <strong>연하늘 점선(AI_HW_WIRE) 가상 추천 경로</strong>가 정밀하게 도출되는 과정을 실시간으로 확인할 수 있습니다.
+          차량 복합 고장 발생 시, 하네스 회로도상 물리 구리선이 100% 실재하는 제어기(<code>ABS/ESC</code>)와 CAD 회로도상 배선 데이터가 미등록된 제어기(<code>LCC</code>)가 동시에 고장을 감지할 수 있습니다.<br>
+          상단 대시보드의 <strong>[제동·공조 복합 다발 (HW+AI)]</strong> 예시 버튼을 클릭하면, 
+          제동 통신(<code>C128387</code>)과 공조 센서 3종(<code>B122901</code>, <code>B234301</code>, <code>B240301</code>) 4개 DTC가 동시 입력되며,
+          <strong>ABS/ESC에서 뻗어나오는 파란색 실선(HW_WIRE 물리관계)</strong>과 <strong>LCC에서 뻗어나오는 연하늘 점선(AI_HW_WIRE 추론물리관계)</strong>이 
+          1순위 타깃 커넥터(<code>FLRS_MAIN51 / ACU_B</code>)로 동시에 수렴하는 <strong>하이브리드 지식그래프 추론의 진수</strong>를 실시간으로 확인할 수 있습니다.
         </p>
       </div>
     </div>

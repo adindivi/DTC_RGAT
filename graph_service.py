@@ -463,24 +463,24 @@ class KnowledgeGraphService:
                     shape="box",
                     level=1,
                 )
-                # DTC -> ECU (SW_LOGIC 진단 로직)
+                # DTC -> ECU (SW_LOGIC 로직관계)
                 add_edge(
                     dtc_vis_id,
                     ecu_id,
-                    "#8e8e93",
-                    "SW_LOGIC (진단 로직)",
+                    "#64748b",
+                    "SW_LOGIC (로직관계)",
                     width=1.5,
                     dashes=False,
                 )
 
-                # ECU -> Top 5 커넥터 (HW_WIRE 물리 배선: 차량 하네스 설계 회로도에 100% 실재하는 물리 배선)
+                # ECU -> Top 5 커넥터 (HW_WIRE 물리관계: 차량 하네스 설계 회로도에 100% 실재하는 물리 배선)
                 connecting_conns = self.ecu_to_conns.get(ecu_id, set()) & top5_conn_ids
                 for conn_id in connecting_conns:
                     add_edge(
                         ecu_id,
                         conn_id,
-                        "#0071e3",
-                        "HW_WIRE (물리 배선)",
+                        "#3b82f6",
+                        "HW_WIRE (물리관계)",
                         width=2.5,
                         dashes=False,
                     )
@@ -493,18 +493,17 @@ class KnowledgeGraphService:
                         dtc_vis_id,
                         conn_id,
                         "#2563eb",
-                        "HW_MAP (직접·검증)",
+                        "HW_MAP (검증매핑)",
                         width=2.5,
                         dashes=False,
                     )
 
         # 경로 C: 회로도상 배선이 없지만 AI(RGAT)가 유사도로 추천한 가상 경로 (AI_HW_WIRE: 연하늘 점선)
-        # (회로도상 전선 연결이 확인되지 않지만 AI가 센서 특성/고장 증상 유사도로만 강력하게 의심하여 추천한 가상 경로)
+        # C-1. 회로도상 물리 배선이 확인되지 않는 비도달 커넥터 (is_reachable == False)
         vis_node_ids = {n["id"] for n in vis_nodes}
         for r in top5_results:
             cid = r["conn_id"]
             if not r.get("is_reachable", True):
-                # 물리 배선이 닿지 않는 추천 커넥터는 활성화된 대표 제어기와 AI_HW_WIRE 점선 연결
                 linked = False
                 for info in dtc_info:
                     for nid in self.code_to_nids.get(info["code"], []):
@@ -522,5 +521,26 @@ class KnowledgeGraphService:
                                 break
                         if linked:
                             break
+
+        # C-2. 활성화된 제어기 중 Top 5 커넥터와 물리 배선이 하나도 없는 제어기 (예: 회로도 미등록 센서 제어기 LCC 등)
+        # AI(RGAT)가 도출한 최우선 근본원인 및 주요 상위 커넥터로 AI_HW_WIRE 가상 경로 연결
+        ecus_with_hw = {
+            e["from"] for e in vis_edges if e.get("title") and "HW_WIRE" in e["title"] and not e.get("dashes")
+        }
+        vis_ecus = [n["id"] for n in vis_nodes if n.get("group") == "ecu"]
+        unlinked_ecus = [eid for eid in vis_ecus if eid not in ecus_with_hw]
+
+        if top5_results:
+            target_conns = [r["conn_id"] for r in top5_results[:2]]
+            for eid in unlinked_ecus:
+                for cid in target_conns:
+                    add_edge(
+                        eid,
+                        cid,
+                        "#93c5fd",
+                        "AI_HW_WIRE (추론물리관계)",
+                        width=2.0,
+                        dashes=True,
+                    )
 
         return vis_nodes, vis_edges

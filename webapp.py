@@ -174,87 +174,103 @@ body{
 }
 .display{font-family:"SF Pro Display",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;}
 
-/* ── 헤더 ── */
-header{background:var(--surface);border-bottom:1px solid var(--hairline);padding:12px 20px;display:flex;align-items:center;gap:12px;flex-shrink:0;}
+/* ── 헤더 (티타늄 글래스모피즘 백드롭) ── */
+header{background:rgba(255,255,255,0.88);backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);border-bottom:1px solid var(--hairline);padding:12px 20px;display:flex;align-items:center;gap:12px;flex-shrink:0;position:sticky;top:0;z-index:100;}
 .logo{font-size:15px;font-weight:600;color:var(--fg);white-space:nowrap;letter-spacing:-.1px;}
 .logo .mark{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--primary);margin-right:7px;vertical-align:middle;}
 .input-area{display:flex;flex:1;gap:8px;align-items:center;flex-wrap:wrap;position:relative;}
-.tag-input-wrap{flex:1;min-width:260px;background:var(--fog);border:1px solid var(--hairline-strong);border-radius:10px;padding:6px 10px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;cursor:text;min-height:40px;}
+.tag-input-wrap{flex:1;min-width:260px;background:var(--fog);border:1px solid var(--hairline-strong);border-radius:10px;padding:6px 10px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;cursor:text;min-height:40px;transition:border-color .15s ease,box-shadow .15s ease;}
 .tag-input-wrap:focus-within{border-color:var(--primary);box-shadow:0 0 0 3px rgba(0,113,227,.12);}
-.dtc-tag{background:rgba(0,113,227,.1);border:1px solid rgba(0,113,227,.25);color:var(--primary);padding:3px 10px;border-radius:980px;font-size:12px;font-weight:600;display:flex;align-items:center;gap:5px;}
+.dtc-tag{background:rgba(0,113,227,.1);border:1px solid rgba(0,113,227,.25);color:var(--primary);padding:3px 10px;border-radius:980px;font-size:12px;font-weight:600;display:flex;align-items:center;gap:5px;font-variant-numeric:tabular-nums lining-nums;animation:tossTagPop .2s cubic-bezier(0.34,1.56,0.64,1) both;}
+@keyframes tossTagPop{from{opacity:0;transform:scale(0.85);}to{opacity:1;transform:scale(1);}}
 .dtc-tag .rm{cursor:pointer;color:var(--muted);width:15px;height:15px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;transition:all .15s ease;margin-left:2px;}
 .dtc-tag .rm:hover{background:rgba(255,59,48,.12);color:var(--danger);}
 .tag-input-wrap input{border:none;background:transparent;color:var(--fg);font-size:13px;outline:none;min-width:140px;flex:1;font-family:inherit;}
 .tag-input-wrap input::placeholder{color:var(--muted);}
-.btn-analyze{background:var(--primary);color:var(--on-primary);border:none;border-radius:980px;padding:10px 22px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;transition:background .15s ease;font-family:inherit;display:inline-flex;align-items:center;justify-content:center;gap:6px;}
-.btn-analyze:hover{background:#0077ed;}
-.btn-analyze:disabled{background:#c7c7cc;color:#8e8e93;cursor:not-allowed;}
-.btn-clear{background:transparent;color:var(--link);border:1px solid var(--link);border-radius:980px;padding:9px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:background .15s ease;display:inline-flex;align-items:center;justify-content:center;gap:6px;}
+
+/* 버튼 토스 스프링 햅틱 (:active { transform: scale(0.96) }) */
+.btn-analyze{background:var(--primary);color:var(--on-primary);border:none;border-radius:980px;padding:10px 22px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;transition:transform .15s cubic-bezier(0.34,1.56,0.64,1),background .15s ease,box-shadow .15s ease;font-family:inherit;display:inline-flex;align-items:center;justify-content:center;gap:6px;}
+.btn-analyze:hover{background:#0077ed;box-shadow:0 4px 14px rgba(0,113,227,.25);}
+.btn-analyze:active{transform:scale(0.96);}
+.btn-analyze:disabled{background:#c7c7cc;color:#8e8e93;cursor:not-allowed;transform:none!important;box-shadow:none!important;}
+
+.btn-clear{background:transparent;color:var(--link);border:1px solid var(--link);border-radius:980px;padding:9px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:transform .15s cubic-bezier(0.34,1.56,0.64,1),background .15s ease,border-color .15s ease;display:inline-flex;align-items:center;justify-content:center;gap:6px;}
 .btn-clear:hover{background:rgba(0,102,204,.06);}
+.btn-clear:active{transform:scale(0.96);}
 
 /* 자동완성 드롭다운 */
-.autocomplete{position:absolute;top:100%;left:0;right:80px;background:var(--surface);border:1px solid var(--hairline-strong);border-radius:12px;z-index:999;max-height:220px;overflow-y:auto;display:none;margin-top:6px;box-shadow:0 6px 16px rgba(0,0,0,.08);}
-.ac-item{padding:9px 14px;cursor:pointer;font-size:13px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--hairline);}
+.autocomplete{position:absolute;top:100%;left:0;right:80px;background:var(--surface);border:1px solid var(--hairline-strong);border-radius:12px;z-index:999;max-height:220px;overflow-y:auto;display:none;margin-top:6px;box-shadow:0 8px 24px rgba(0,0,0,.12);animation:tossDropdown .18s cubic-bezier(0.16,1,0.3,1) both;}
+@keyframes tossDropdown{from{opacity:0;transform:translateY(-6px);}to{opacity:1;transform:translateY(0);}}
+.ac-item{padding:9px 14px;cursor:pointer;font-size:13px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--hairline);transition:background .1s ease;}
 .ac-item:last-child{border-bottom:none;}
 .ac-item:hover,.ac-item.active{background:var(--fog);}
-.ac-code{color:var(--primary);font-weight:600;min-width:80px;font-family:monospace;}
+.ac-code{color:var(--primary);font-weight:600;min-width:80px;font-family:monospace;font-variant-numeric:tabular-nums;}
 .ac-ecu{color:var(--secondary);font-size:11px;min-width:70px;font-weight:600;}
 .ac-desc{color:var(--muted);font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 
 /* 예시 버튼 바 */
-.examples-bar{background:var(--surface);border-bottom:1px solid var(--hairline);padding:8px 20px;display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.examples-bar{background:rgba(255,255,255,0.92);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid var(--hairline);padding:8px 20px;display:flex;align-items:center;gap:8px;flex-shrink:0;}
 .examples{display:flex;gap:6px;flex-wrap:wrap;}
-.ex-btn{background:var(--surface);border:1px solid var(--hairline-strong);color:var(--secondary);border-radius:980px;padding:6px 14px;font-size:12px;font-weight:500;cursor:pointer;transition:all .15s ease;font-family:inherit;}
-.ex-btn:hover{border-color:var(--primary);color:var(--primary);}
+.ex-btn{background:var(--surface);border:1px solid var(--hairline-strong);color:var(--secondary);border-radius:980px;padding:6px 14px;font-size:12px;font-weight:500;cursor:pointer;transition:transform .15s cubic-bezier(0.34,1.56,0.64,1),border-color .15s ease,color .15s ease,background .15s ease;font-family:inherit;}
+.ex-btn:hover{border-color:var(--primary);color:var(--primary);background:rgba(0,113,227,.03);}
+.ex-btn:active{transform:scale(0.96);}
 
 /* ── 메인 레이아웃 ── */
 .main{display:flex;flex:1;overflow:hidden;}
 .left-panel{width:310px;min-width:310px;background:var(--surface);border-right:1px solid var(--hairline);display:flex;flex-direction:column;overflow:hidden;}
 .tabs-wrap{display:flex;border-bottom:1px solid var(--hairline);}
-.tab-btn{flex:1;padding:11px;text-align:center;font-size:12px;font-weight:600;cursor:pointer;color:var(--muted);border-bottom:2px solid transparent;display:flex;align-items:center;justify-content:center;gap:6px;}
+.tab-btn{flex:1;padding:11px;text-align:center;font-size:12px;font-weight:600;cursor:pointer;color:var(--muted);border-bottom:2px solid transparent;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .15s ease;}
+.tab-btn:active{transform:scale(0.98);}
 .tab-btn.active{color:var(--primary);border-bottom-color:var(--primary);}
 .panel-body{flex:1;overflow-y:auto;padding:12px;}
 .panel-body::-webkit-scrollbar{width:4px;}
 .panel-body::-webkit-scrollbar-thumb{background:var(--hairline-strong);border-radius:2px;}
 
-/* 근본원인 카드 */
-.rc-card{background:var(--surface);border-radius:12px;padding:12px 14px;margin-bottom:8px;cursor:pointer;border:1px solid var(--hairline-strong);transition:border-color .15s ease,background .15s ease;}
-.rc-card:hover{border-color:var(--primary);}
-.rc-card.rank1{border-color:var(--primary);background:rgba(0,113,227,.04);}
-.rc-rank{font-size:11px;font-weight:600;color:var(--muted);margin-bottom:4px;}
+/* 근본원인 카드 (애플 캐스케이드 글라이드 + 사파이어 앰비언트 글로우) */
+@keyframes tossCascadeGlide{from{opacity:0;transform:translateY(12px) scale(0.98);}to{opacity:1;transform:translateY(0) scale(1);}}
+.rc-card{background:var(--surface);border-radius:12px;padding:12px 14px;margin-bottom:8px;cursor:pointer;border:1px solid var(--hairline-strong);transition:transform .15s cubic-bezier(0.34,1.56,0.64,1),border-color .15s ease,background .15s ease,box-shadow .15s ease;animation:tossCascadeGlide .32s cubic-bezier(0.16,1,0.3,1) both;}
+.rc-card:hover{border-color:var(--primary);transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,.04);}
+.rc-card:active{transform:scale(0.98);}
+.rc-card.rank1{border-color:rgba(37,99,235,0.4);background:linear-gradient(135deg,rgba(37,99,235,.05) 0%,rgba(37,99,235,.01) 100%);box-shadow:0 4px 16px rgba(37,99,235,.08),inset 0 0 0 1px rgba(37,99,235,.15);}
+.rc-rank{font-size:11px;font-weight:600;color:var(--muted);margin-bottom:4px;font-variant-numeric:tabular-nums lining-nums;}
 .rc-rank.r1{color:var(--primary);}
 .rc-name{font-size:13px;font-weight:600;word-break:break-all;margin-bottom:6px;color:var(--fg);}
 .rc-bar-wrap{display:flex;align-items:center;gap:8px;}
 .rc-bar{flex:1;background:var(--fog);border-radius:4px;height:6px;overflow:hidden;}
-.rc-bar-fill{height:100%;border-radius:4px;background:var(--primary);transition:width .6s ease;}
-.rc-score{font-size:11px;font-weight:600;color:var(--primary);min-width:36px;text-align:right;}
+.rc-bar-fill{height:100%;border-radius:4px;background:var(--primary);transition:width .6s cubic-bezier(0.16,1,0.3,1);}
+.rc-score{font-size:11px;font-weight:600;color:var(--primary);min-width:36px;text-align:right;font-variant-numeric:tabular-nums lining-nums;letter-spacing:-0.02em;}
 .rc-dots{display:flex;gap:3px;margin-top:6px;flex-wrap:wrap;}
-.rc-dot{font-size:10px;padding:2px 7px;border-radius:980px;font-weight:600;}
+.rc-dot{font-size:10px;padding:2px 7px;border-radius:980px;font-weight:600;font-variant-numeric:tabular-nums;}
 .rc-dot.hit{background:rgba(0,113,227,.1);color:var(--primary);}
 .rc-dot.miss{background:var(--fog);color:var(--muted);}
 .rc-ecu{font-size:10px;color:var(--muted);margin-top:4px;}
 
 /* DTC 정보 카드 */
-.dtc-info-card{background:var(--surface);border-radius:12px;padding:10px 12px;margin-bottom:6px;border:1px solid var(--hairline-strong);border-left:3px solid var(--primary);}
-.dtc-code{font-size:13px;font-weight:600;color:var(--fg);font-family:monospace;}
+.dtc-info-card{background:var(--surface);border-radius:12px;padding:10px 12px;margin-bottom:6px;border:1px solid var(--hairline-strong);border-left:3px solid var(--primary);animation:tossCascadeGlide .32s cubic-bezier(0.16,1,0.3,1) both;transition:transform .15s ease,box-shadow .15s ease;}
+.dtc-info-card:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,.04);}
+.dtc-code{font-size:13px;font-weight:600;color:var(--fg);font-family:monospace;font-variant-numeric:tabular-nums;}
 .dtc-cat{font-size:10px;color:var(--muted);margin:2px 0;}
 .dtc-ecu{font-size:11px;color:var(--secondary);font-weight:600;}
 .dtc-desc{font-size:11px;color:var(--muted);margin-top:3px;}
 
 /* ── 중앙: 마인드맵 ── */
 .map-area{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;min-height:0;background:#f8fafc;}
-.map-toolbar{padding:8px 16px;background:var(--surface);border-bottom:1px solid var(--hairline);display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
-.map-toolbar span{font-size:12px;color:var(--muted);}
-.tb-btn{background:var(--surface);border:1px solid var(--hairline-strong);color:var(--fg);border-radius:980px;padding:6px 14px;font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;transition:all .15s ease;display:inline-flex;align-items:center;justify-content:center;gap:6px;}
-.tb-btn:hover{border-color:var(--primary);color:var(--primary);}
+.map-toolbar{padding:8px 16px;background:rgba(255,255,255,0.88);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid var(--hairline);display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.map-toolbar span{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums lining-nums;}
+.tb-btn{background:var(--surface);border:1px solid var(--hairline-strong);color:var(--fg);border-radius:980px;padding:6px 14px;font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;transition:transform .15s cubic-bezier(0.34,1.56,0.64,1),border-color .15s ease,color .15s ease,background .15s ease;display:inline-flex;align-items:center;justify-content:center;gap:6px;}
+.tb-btn:hover{border-color:var(--primary);color:var(--primary);background:rgba(0,113,227,.03);}
+.tb-btn:active{transform:scale(0.96);}
 .legend{display:flex;gap:10px;flex-wrap:wrap;margin-left:auto;align-items:center;}
 .leg-item{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted);font-weight:500;}
 .leg-pill{width:14px;height:8px;border-radius:980px;display:inline-block;}
 .leg-toggle{cursor:pointer;padding:3px 8px;border-radius:980px;border:1px solid rgba(37,99,235,0.25);background:rgba(37,99,235,0.04);transition:all .15s ease;user-select:none;}
 .leg-toggle:hover{background:rgba(37,99,235,.1);border-color:#2563eb;}
+.leg-toggle:active{transform:scale(0.96);}
 .leg-toggle.off{opacity:.45;border-color:var(--hairline-strong);background:transparent;}
 .leg-toggle.off span{text-decoration:line-through;}
 .leg-toggle.off .hw-map-badge{background:var(--fog)!important;color:var(--muted)!important;text-decoration:none!important;}
+@keyframes pulseDash{0%,100%{opacity:.65;transform:scaleX(.95);}50%{opacity:1;transform:scaleX(1.05);}}
+.leg-pulse-line{display:inline-block;width:16px;height:0;border-top:2px dashed #93c5fd;animation:pulseDash 2s ease-in-out infinite;transform-origin:center;}
 #network{flex:1;}
 
 .state-msg{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:8px;color:var(--muted);text-align:center;padding:20px;}
@@ -352,7 +368,7 @@ header{background:var(--surface);border-bottom:1px solid var(--hairline);padding
     <button class="ex-btn" onclick="setExample(['C162887','C161487','C128387','C161C86'])">C-CAN 관련 다발</button>
     <button class="ex-btn" onclick="setExample(['B160300','C110216','C110117'])">배터리 전원 관련</button>
     <button class="ex-btn" onclick="setExample(['C136887','C136987','C137087','C137187'])">초음파 센서 다발</button>
-    <button class="ex-btn" style="border:1.5px dashed #0284c7;color:#0284c7;background:rgba(2,132,199,0.06);font-weight:700;" onclick="setExample(['B122901','B123001','B234301','B240301'])" title="회로도 미등록 ➔ RGAT 임베딩 유사도로 AI_HW_WIRE (추론물리관계) 점선 추천">공조 센서 다발 (AI_HW_WIRE)</button>
+    <button class="ex-btn" style="border:1.5px dashed #2563eb;color:#2563eb;background:rgba(37,99,235,0.06);font-weight:700;" onclick="setExample(['C128387','B122901','B234301','B240301'])" title="제동(ABS/ESC) 물리 배선(HW_WIRE 실선) + 공조(LCC) 가상 추천선(AI_HW_WIRE 점선) 동시 표출">제동·공조 복합 다발 (HW+AI)</button>
   </div>
 </div>
 
@@ -402,7 +418,7 @@ header{background:var(--surface);border-bottom:1px solid var(--hairline);padding
           <span class="hw-map-badge" id="hw-map-badge" style="font-size:9px;padding:1px 5px;border-radius:980px;background:rgba(37,99,235,0.14);color:#2563eb;font-weight:700;margin-left:2px;">ON</span>
         </div>
         <div class="leg-item"><div style="width:16px;height:0;border-top:2px solid #3b82f6;"></div>HW_WIRE (물리관계)</div>
-        <div class="leg-item" title="회로도상에는 전선 연결이 확인되지 않지만, AI(RGAT)가 센서 특성/고장 증상 유사도로만 강력하게 의심하여 추천한 가상 경로"><div style="width:16px;height:0;border-top:2px dashed #93c5fd;"></div>AI_HW_WIRE (추론물리관계)</div>
+        <div class="leg-item" title="회로도상에는 전선 연결이 확인되지 않지만, AI(RGAT)가 센서 특성/고장 증상 유사도로만 강력하게 의심하여 추천한 가상 경로"><div class="leg-pulse-line"></div>AI_HW_WIRE (추론물리관계)</div>
       </div>
     </div>
     <div id="network-wrap" style="flex:1;position:relative;min-height:0;">
@@ -479,6 +495,7 @@ function clearAll() {
   document.querySelectorAll('.dtc-tag').forEach(el => el.remove());
   inp.value = '';
   closeAC();
+  stopNanoSignalLoop();
   document.getElementById('panel-rc').innerHTML = '<div style="color:var(--muted);font-size:13px;margin-top:20px;text-align:center;">DTC 코드를 입력하고<br>분석하기를 눌러주세요</div>';
   document.getElementById('panel-dtc').innerHTML = '<div style="color:var(--muted);font-size:13px;margin-top:20px;text-align:center;">DTC 코드를 입력하고<br>분석하기를 눌러주세요</div>';
   document.getElementById('state-msg').style.display = 'flex';
@@ -634,13 +651,52 @@ function showUnknownCodesModal(unknownCodes, validData) {
   });
 }
 
+// ── [애플 디자인 어워드 표준] 타뷸러 고정폭 롤링 티커 (Zero-Jitter Tabular Numbers) ──
+function animateNumber(el, start, end, decimals = 3, duration = 380) {
+  if (!el) return;
+  const startTime = performance.now();
+  function update(now) {
+    const elapsed = now - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+    const ease = 1 - Math.pow(1 - progress, 4); // Apple easeOutQuart
+    const val = start + (end - start) * ease;
+    el.textContent = val.toFixed(decimals);
+    if (progress < 1) {
+      requestAnimationFrame(update);
+    } else {
+      el.textContent = end.toFixed(decimals);
+    }
+  }
+  requestAnimationFrame(update);
+}
+
+function animateToolbarCounts(targetNodes, targetEdges, targetDtcs, duration = 350) {
+  const el = document.getElementById('node-count-info');
+  if (!el) return;
+  const startTime = performance.now();
+  function update(now) {
+    const elapsed = now - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+    const ease = 1 - Math.pow(1 - progress, 3);
+    const curNodes = Math.round(targetNodes * ease);
+    const curEdges = Math.round(targetEdges * ease);
+    const curDtcs  = Math.round(targetDtcs * ease);
+    el.textContent = `노드 ${curNodes}개 · 엣지 ${curEdges}개 · 분석 DTC ${curDtcs}개`;
+    if (progress < 1) {
+      requestAnimationFrame(update);
+    } else {
+      el.textContent = `노드 ${targetNodes}개 · 엣지 ${targetEdges}개 · 분석 DTC ${targetDtcs}개`;
+    }
+  }
+  requestAnimationFrame(update);
+}
+
 // ── 결과 렌더링 ───────────────────────────────────────────────
 function renderResult(data) {
   renderRCPanel(data);
   renderDTCPanel(data);
   buildNetwork(data);
-  document.getElementById('node-count-info').textContent =
-    `노드 ${data.vis_nodes.length}개 · 엣지 ${data.vis_edges.length}개 · 분석 DTC ${data.dtc_info.length}개`;
+  animateToolbarCounts(data.vis_nodes.length, data.vis_edges.length, data.dtc_info.length);
 }
 
 function renderRCPanel(data) {
@@ -649,21 +705,22 @@ function renderRCPanel(data) {
   let html = '';
   if (top) {
     const vbadge = top.verified ? ' <span style="font-size:10px;background:rgba(0,113,227,.1);color:var(--primary);padding:2px 8px;border-radius:980px;font-weight:600;display:inline-flex;align-items:center;gap:3px;"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><polyline points="9 12 11 14 15 10"></polyline></svg>마스터 검증</span>' : '';
-    html += `<div style="background:rgba(0,113,227,.05);border:1px solid rgba(0,113,227,.2);border-radius:12px;padding:12px 14px;margin-bottom:12px;">
+    const topScoreStr = top.verified ? ' · 마스터 직접 매핑' : ' · 점수 <span id="top-score-ticker" style="font-weight:700;">0.000</span>';
+    html += `<div style="background:rgba(0,113,227,.05);border:1px solid rgba(0,113,227,.2);border-radius:12px;padding:12px 14px;margin-bottom:12px;animation:tossCascadeGlide .28s cubic-bezier(0.16,1,0.3,1) both;">
       <div style="font-size:10px;font-weight:600;color:var(--primary);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px;">1순위 근본원인 후보</div>
       <div style="font-size:14px;font-weight:600;word-break:break-all;color:var(--fg);">${top.name}${vbadge}</div>
-      <div style="font-size:12px;color:var(--muted);margin-top:4px;">${top.n_hit}/${n}개 DTC 계통 연결${top.verified ? ' · 마스터 직접 매핑' : ' · 점수 ' + top.final_score.toFixed(3)}</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:4px;">${top.n_hit}/${n}개 DTC 계통 연결${topScoreStr}</div>
     </div>`;
   }
-  data.results.forEach(r => {
+  data.results.forEach((r, idx) => {
     const cls = r.rank===1 ? 'rank1' : '';
     const rnk = r.rank===1 ? 'r1' : '';
     const dots = data.dtc_info.map(d =>
       `<span class="rc-dot ${r.hit_codes.includes(d.code)?'hit':'miss'}">${d.code}</span>`).join('');
     const vmark = r.verified ? '<span style="font-size:10px;background:rgba(0,113,227,.1);color:var(--primary);padding:1px 7px;border-radius:980px;margin-left:6px;font-weight:600;display:inline-flex;align-items:center;gap:3px;"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><polyline points="9 12 11 14 15 10"></polyline></svg>검증</span>' : '';
     const reachBadge = (!r.verified && r.is_reachable) ? '<span style="font-size:10px;background:rgba(52,199,89,.12);color:#2e7d32;padding:1px 7px;border-radius:980px;margin-left:6px;font-weight:600;">배선일치</span>' : '';
-    const scoreStr = r.verified ? '<span style="font-size:11px;color:var(--primary);font-weight:600;">마스터 직접 매핑</span>' : r.final_score.toFixed(3);
-    html += `<div class="rc-card ${cls}" onclick="focusConn('${r.conn_id}')">
+    const scoreStr = r.verified ? '<span style="font-size:11px;color:var(--primary);font-weight:600;">마스터 직접 매핑</span>' : `<span id="rc-score-${idx}">0.000</span>`;
+    html += `<div class="rc-card ${cls}" style="animation-delay:${idx * 45}ms;" onclick="focusConn('${r.conn_id}')">
       <div class="rc-rank ${rnk}">#${r.rank}  ${r.location||''}</div>
       <div class="rc-name">${r.name}${vmark}${reachBadge}</div>
       <div class="rc-bar-wrap">
@@ -675,6 +732,18 @@ function renderRCPanel(data) {
     </div>`;
   });
   document.getElementById('panel-rc').innerHTML = html;
+
+  // 타뷸러 고정폭 롤링 티커 애니메이션 트리거 (Zero-Jitter Tabular Numbers)
+  if (top && !top.verified) {
+    const topEl = document.getElementById('top-score-ticker');
+    if (topEl) animateNumber(topEl, 0, top.final_score, 3, 380);
+  }
+  data.results.forEach((r, idx) => {
+    if (!r.verified) {
+      const el = document.getElementById(`rc-score-${idx}`);
+      if (el) animateNumber(el, 0, r.final_score, 3, 380);
+    }
+  });
 }
 
 function renderDTCPanel(data) {
@@ -881,15 +950,97 @@ function buildNetwork(data) {
       network.on('stabilizationIterationsDone', () => {
         network.setOptions({physics:{enabled:false}});
         physicsOn = false;
-        network.fit({animation:{duration:400}});
+        network.fit({animation:{duration:450, easingFunction:'easeInOutQuad'}});
       });
     } else {
       network.once('afterDrawing', () => {
         applySelectiveEdgeSmooth(vn, ve);
-        network.fit({animation:{duration:400}});
+        network.fit({animation:{duration:450, easingFunction:'easeInOutQuad'}});
       });
     }
+
+    // ④ [모빌리티 테크 명품] AI_HW_WIRE 살아있는 펄스 전류 (Live Nano Signal Flow) 등록
+    network.on('afterDrawing', drawLiveNanoSignalFlow);
+    startNanoSignalLoop();
   });
+}
+
+// ── ④ [모빌리티 테크 명품] AI_HW_WIRE 살아있는 펄스 전류 (Live Nano Signal Flow) ──
+let nanoAnimFrameId = null;
+
+function drawLiveNanoSignalFlow(ctx) {
+  if (!ve || !network) return;
+  const pos = network.getPositions();
+  const edges = ve.get();
+  const now = performance.now();
+  // 1.8초 주기로 ECU -> Connector 방향으로 흐르는 펄스 위상 (0.0 ~ 1.0)
+  const t = (now % 1800) / 1800;
+
+  edges.forEach(e => {
+    const isAiWire = (e.title && e.title.includes('AI_HW_WIRE')) || e.dashes;
+    if (!isAiWire || e.hidden) return;
+
+    const pFrom = pos[e.from];
+    const pTo = pos[e.to];
+    if (!pFrom || !pTo) return;
+
+    let x, y;
+    if (hierarchicalOn) {
+      const roundness = (e.smooth && typeof e.smooth.roundness === 'number') ? e.smooth.roundness : 0.6;
+      const dx = (pTo.x - pFrom.x) * roundness;
+      const cp1x = pFrom.x + dx, cp1y = pFrom.y;
+      const cp2x = pTo.x - dx,   cp2y = pTo.y;
+
+      const u = 1 - t;
+      const tt = t * t;
+      const uu = u * u;
+      const uuu = uu * u;
+      const ttt = tt * t;
+
+      x = uuu * pFrom.x + 3 * uu * t * cp1x + 3 * u * tt * cp2x + ttt * pTo.x;
+      y = uuu * pFrom.y + 3 * uu * t * cp1y + 3 * u * tt * cp2y + ttt * pTo.y;
+    } else {
+      x = pFrom.x + (pTo.x - pFrom.x) * t;
+      y = pFrom.y + (pTo.y - pFrom.y) * t;
+    }
+
+    ctx.save();
+    // 사파이어/스카이블루 나노 펄스 빛 방출
+    const auraGrad = ctx.createRadialGradient(x, y, 0, x, y, 10);
+    auraGrad.addColorStop(0, 'rgba(56, 189, 248, 0.95)');
+    auraGrad.addColorStop(0.4, 'rgba(14, 165, 233, 0.4)');
+    auraGrad.addColorStop(1, 'rgba(14, 165, 233, 0)');
+    ctx.fillStyle = auraGrad;
+    ctx.beginPath();
+    ctx.arc(x, y, 10, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 중심 코어 고휘도 백색 발광 핵
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.arc(x, y, 2.5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  });
+}
+
+function startNanoSignalLoop() {
+  if (nanoAnimFrameId) cancelAnimationFrame(nanoAnimFrameId);
+  function step() {
+    const container = document.getElementById('network');
+    if (network && container && container.style.display !== 'none') {
+      network.redraw();
+    }
+    nanoAnimFrameId = requestAnimationFrame(step);
+  }
+  nanoAnimFrameId = requestAnimationFrame(step);
+}
+
+function stopNanoSignalLoop() {
+  if (nanoAnimFrameId) {
+    cancelAnimationFrame(nanoAnimFrameId);
+    nanoAnimFrameId = null;
+  }
 }
 
 // ── 겹치는 HW_map 선만 선별적 아치형 우회 적용 ─────────────────────
@@ -942,7 +1093,7 @@ function applySelectiveEdgeSmooth(vn, ve) {
   }
 }
 
-function fitNetwork() { if (network) network.fit({animation:{duration:400}}); }
+function fitNetwork() { if (network) network.fit({animation:{duration:450, easingFunction:'easeInOutQuad'}}); }
 
 function toggleViewMode() {
   hierarchicalOn = !hierarchicalOn;
@@ -997,7 +1148,7 @@ function focusConn(connId) {
   switchTab('rc');
   try {
     network.selectNodes([connId]);
-    network.focus(connId, {scale:1.6, animation:{duration:500}});
+    network.focus(connId, {scale:1.6, animation:{duration:500, easingFunction:'easeInOutQuad'}});
   } catch(e) {}
 }
 
