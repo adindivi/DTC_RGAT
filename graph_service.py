@@ -416,86 +416,87 @@ class KnowledgeGraphService:
             )
 
         # Level 0 (DTC) -> Level 1 (ECU) -> Level 2 (Connector) 경로 구축
+        # [원칙 1] 입력된 모든 DTC는 1열(Level 0)에 100% 무조건 등록 (전수 표기)
+        # [원칙 2] 각 DTC의 담당 ECU(Level 1)를 연결하며, Top 5와 무관한 ECU는 독립 브랜치로 표시
+        # [원칙 3] DTC -> Connector 직접 연결(HW_MAP) 관계 보존 (웹앱에서 아치형 우회 곡선으로 렌더링)
         for info in dtc_info:
             code = info["code"]
             cat = info.get("cat", "") or "기타"
+            dtc_vis_id = f"VIS_DTC::{code}"
+            dtc_title = f"DTC: {code}\n카테고리: {cat}\n{info.get('desc', '')}"
 
-            for nid in info["nids"]:
-                ecu_name_inst = self.node_by_id.get(nid, {}).get("ecu_name", "?")
-                dtc_vis_id = f"VIS_DTC::{nid}"
-                dtc_label = code
-                dtc_title = (
-                    f"DTC: {code}  ECU: {ecu_name_inst}\n"
-                    f"카테고리: {cat}\n{info['desc']}"
+            # 1. Level 0: DTC 노드 무조건 생성 (전수 표기 보장)
+            add_node(
+                dtc_vis_id,
+                code,
+                "dtc_input",
+                dtc_title,
+                size=22,
+                shape="box",
+                level=0,
+            )
+
+            # 이 코드에 속한 지식 그래프 내부 DTC 인스턴스 nids 수집
+            nids = self.code_to_nids.get(code, [])
+            all_ecus: list[str] = []
+            for nid in nids:
+                for eid in self.dtc_to_ecus.get(nid, ()):
+                    if eid not in all_ecus:
+                        all_ecus.append(eid)
+
+            # Top 5 커넥터와 물리 배선(HW_WIRE)이 닿는 ECU를 최우선 선택
+            connected_ecus = [
+                eid for eid in all_ecus
+                if (self.ecu_to_conns.get(eid, set()) & top5_conn_ids)
+            ]
+            # 만약 Top 5와 연결된 ECU가 없다면(독립 계통), 1순위 대표 ECU 표시 (예: BCM, ICCU 등)
+            target_ecus = connected_ecus if connected_ecus else (all_ecus[:1] if all_ecus else [])
+
+            for ecu_id in target_ecus:
+                ecu_name = self.node_by_id.get(ecu_id, {}).get("name", "?")
+                add_node(
+                    ecu_id,
+                    ecu_name,
+                    "ecu",
+                    f"ECU: {ecu_name}",
+                    size=20,
+                    shape="box",
+                    level=1,
+                )
+                # DTC -> ECU (SW_LOGIC 진단 로직)
+                add_edge(
+                    dtc_vis_id,
+                    ecu_id,
+                    "#8e8e93",
+                    "SW_LOGIC (진단 로직)",
+                    width=1.5,
+                    dashes=False,
                 )
 
-                # 경로 A: DTC -> ECU -> Connector (2-Hop 물리/논리 배선 경로)
-                for ecu_id in self.dtc_to_ecus.get(nid, ()):
-                    connecting_conns = (
-                        self.ecu_to_conns.get(ecu_id, set()) & top5_conn_ids
-                    )
-                    if not connecting_conns:
-                        continue
-
-                    ecu_name = self.node_by_id.get(ecu_id, {}).get("name", "?")
-                    add_node(
-                        dtc_vis_id,
-                        dtc_label,
-                        "dtc_input",
-                        dtc_title,
-                        size=22,
-                        shape="box",
-                        level=0,
-                    )
-                    add_node(
+                # ECU -> Top 5 커넥터 (HW_WIRE 물리 배선)
+                connecting_conns = self.ecu_to_conns.get(ecu_id, set()) & top5_conn_ids
+                for conn_id in connecting_conns:
+                    is_direct = any(conn_id in self.dtc_to_conns.get(nid, set()) for nid in nids)
+                    add_edge(
                         ecu_id,
-                        ecu_name,
-                        "ecu",
-                        f"ECU: {ecu_name}",
-                        size=20,
-                        shape="box",
-                        level=1,
+                        conn_id,
+                        "#0071e3",
+                        "HW_WIRE (물리 배선)",
+                        width=2.5,
+                        dashes=(not is_direct),
                     )
+
+            # 경로 B: DTC -> Connector 직접 연결 (HW_MAP 마스터 직접 검증 링크 보존)
+            for nid in nids:
+                direct_conns = self.dtc_to_conns.get(nid, set()) & top5_conn_ids
+                for conn_id in direct_conns:
                     add_edge(
                         dtc_vis_id,
-                        ecu_id,
-                        "#8e8e93",
-                        "SW_LOGIC (진단 로직)",
-                        width=1.5,
+                        conn_id,
+                        "#2563eb",
+                        "HW_MAP (직접·검증)",
+                        width=2.5,
                         dashes=False,
                     )
-
-                    for conn_id in connecting_conns:
-                        is_direct = conn_id in self.dtc_to_conns.get(nid, ())
-                        add_edge(
-                            ecu_id,
-                            conn_id,
-                            "#0071e3",
-                            "HW_WIRE (물리 배선)",
-                            width=2.5,
-                            dashes=(not is_direct),
-                        )
-
-                # 경로 B: DTC -> Connector 직접 연결 (마스터 검증 링크)
-                direct_conns = self.dtc_to_conns.get(nid, set()) & top5_conn_ids
-                if direct_conns:
-                    add_node(
-                        dtc_vis_id,
-                        dtc_label,
-                        "dtc_input",
-                        dtc_title,
-                        size=22,
-                        shape="box",
-                        level=0,
-                    )
-                    for conn_id in direct_conns:
-                        add_edge(
-                            dtc_vis_id,
-                            conn_id,
-                            "#0071e3",
-                            "HW_MAP (직접·검증)",
-                            width=2.5,
-                            dashes=False,
-                        )
 
         return vis_nodes, vis_edges

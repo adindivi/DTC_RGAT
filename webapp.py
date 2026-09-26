@@ -379,13 +379,9 @@ header{background:var(--surface);border-bottom:1px solid var(--hairline);padding
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"></polyline><polyline points="9 21 3 21 3 15"></polyline><line x1="21" y1="3" x2="14" y2="10"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>
         전체 보기
       </button>
-      <button class="tb-btn" id="layout-btn" onclick="toggleLayout()">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="6" y1="3" x2="6" y2="15"></line><circle cx="18" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><path d="M18 9a9 9 0 0 1-9 9"></path></svg>
-        <span>계층형 마인드맵</span>
-      </button>
-      <button class="tb-btn" onclick="togglePhysics()">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
-        물리엔진 켜기/끄기
+      <button class="tb-btn" id="mode-btn" onclick="toggleViewMode()" title="계층형 마인드맵과 자유 방사형 네트워크 간 모드 전환">
+        <span id="mode-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="6" y1="3" x2="6" y2="15"></line><circle cx="18" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><path d="M18 9a9 9 0 0 1-9 9"></path></svg></span>
+        <span id="mode-text">계층형 마인드맵</span>
       </button>
       <span id="node-count-info">노드 0개 · 엣지 0개</span>
       <div class="legend">
@@ -393,9 +389,10 @@ header{background:var(--surface);border-bottom:1px solid var(--hairline);padding
         <div class="leg-item"><div class="leg-pill" style="background:#ffedd5;border:1.5px solid #fb923c;"></div>담당 ECU</div>
         <div class="leg-item"><div class="leg-pill" style="background:#e0f2fe;border:1.5px solid #7dd3fc;"></div>커넥터</div>
         <div class="leg-item"><div class="leg-pill" style="background:#1e293b;border:1.5px solid #0f172a;"></div>#1 근본원인</div>
-        <div class="leg-item"><div style="width:16px;height:0;border-top:2px solid #8e8e93;"></div>SW_LOGIC</div>
-        <div class="leg-item"><div style="width:16px;height:0;border-top:2px solid #0071e3;"></div>검증 배선</div>
-        <div class="leg-item"><div style="width:16px;height:0;border-top:2px dashed #8e8e93;"></div>추론 배선</div>
+        <div class="leg-item"><div style="width:16px;height:0;border-top:2px solid #64748b;"></div>SW_LOGIC (진단)</div>
+        <div class="leg-item"><div style="width:16px;height:0;border-top:2px solid #2563eb;"></div>HW_MAP 아치선 (직접검증)</div>
+        <div class="leg-item"><div style="width:16px;height:0;border-top:2px solid #3b82f6;"></div>HW_WIRE (물리배선)</div>
+        <div class="leg-item"><div style="width:16px;height:0;border-top:2px dashed #93c5fd;"></div>추론 배선</div>
       </div>
     </div>
     <div id="network-wrap" style="flex:1;position:relative;min-height:0;">
@@ -806,19 +803,29 @@ function buildNetwork(data) {
   const ve = new vis.DataSet(data.vis_edges.map((e,i) => {
     const isDirect = e.title && e.title.includes('HW_MAP');
     const isWire = e.title && e.title.includes('HW_WIRE');
-    let edgeColor = '#94a3b8';
+    let edgeColor = '#64748b';
     if (isDirect) edgeColor = '#2563eb';
     else if (isWire) edgeColor = e.dashes ? '#93c5fd' : '#3b82f6';
-    else edgeColor = '#cbd5e1';
+    else edgeColor = '#64748b';
+
+    // [계층형 마인드맵 엣지 기본 곡률]
+    // 기본적으로 vis-network의 단아한 수평 S-Curve(cubicBezier)를 적용하고,
+    // 렌더링 완료 후 중간 ECU 노드와 Y축이 겹치는 HW_map 선만 선별하여 아치형(curvedCW)으로 우회
+    let smoothOpt;
+    if (hierarchicalOn) {
+      smoothOpt = { enabled: true, type: 'cubicBezier', forceDirection: 'horizontal', roundness: 0.6 };
+    } else {
+      smoothOpt = { enabled: true, type: 'continuous', roundness: 0.3 };
+    }
 
     return {
       id: i, from: e.from, to: e.to,
       color: { color: edgeColor, highlight: '#2563eb', hover: '#2563eb' },
-      width: isDirect ? 2.8 : (isWire ? 2.2 : 1.8),
+      width: isDirect ? 2.5 : (isWire ? 2.2 : 1.8),
       arrows: { to: { enabled: false } },
       title: e.title,
       dashes: e.dashes || false,
-      smooth: { type: 'cubicBezier', forceDirection: 'horizontal', roundness: 0.6 },
+      smooth: smoothOpt,
     };
   }));
 
@@ -850,7 +857,7 @@ function buildNetwork(data) {
       },
       interaction: {hover:true, tooltipDelay:60, navigationButtons:false, keyboard:true},
       nodes: {borderWidth:1.5},
-      edges: {shadow:false, hoverWidth:2.5},
+      edges: {shadow:false, hoverWidth:2.5, smooth: {enabled: true}},
     });
 
     physicsOn = !hierarchicalOn;
@@ -861,25 +868,77 @@ function buildNetwork(data) {
         network.fit({animation:{duration:400}});
       });
     } else {
-      network.once('afterDrawing', () => network.fit({animation:{duration:400}}));
+      network.once('afterDrawing', () => {
+        applySelectiveEdgeSmooth(vn, ve);
+        network.fit({animation:{duration:400}});
+      });
     }
   });
 }
 
-function fitNetwork() { if (network) network.fit({animation:{duration:400}}); }
-function togglePhysics() {
-  if (!network) return;
-  physicsOn = !physicsOn;
-  network.setOptions({physics:{enabled:physicsOn}});
+// ── 겹치는 HW_map 선만 선별적 아치형 우회 적용 ─────────────────────
+function applySelectiveEdgeSmooth(vn, ve) {
+  if (!network || !hierarchicalOn) return;
+  const pos = network.getPositions();
+  const allNodes = vn.get();
+  const ecuNodes = allNodes.filter(n => n.level === 1);
+
+  const updates = [];
+  ve.get().forEach(e => {
+    const isDirect = e.title && e.title.includes('HW_MAP');
+    if (!isDirect) return;
+
+    const pFrom = pos[e.from];
+    const pTo = pos[e.to];
+    if (!pFrom || !pTo) return;
+
+    // 중간 ECU(Level 1) 노드 중 Y좌표가 겹쳐서 관통(Collision) 위험이 있는 노드 탐색
+    // (동일한 수평 라인: Y좌표 차이 25px 이내 및 X좌표가 From과 To 사이에 위치)
+    const isColliding = ecuNodes.some(ecu => {
+      const pEcu = pos[ecu.id];
+      if (!pEcu) return false;
+      const minX = Math.min(pFrom.x, pTo.x);
+      const maxX = Math.max(pFrom.x, pTo.x);
+      const isBetweenX = pEcu.x > minX && pEcu.x < maxX;
+      const isSameRow = Math.abs(pEcu.y - pFrom.y) < 25 && Math.abs(pEcu.y - pTo.y) < 25;
+      return isBetweenX && isSameRow;
+    });
+
+    if (isColliding) {
+      // [사용자 요구사항] 실제로 중간 ECU와 겹치는 HW_map 선만 위로 우회하는 아치형 다리선(Bridge Arc) 적용!
+      updates.push({
+        id: e.id,
+        smooth: { enabled: true, type: 'curvedCW', roundness: 0.22 }
+      });
+    } else {
+      // 겹치지 않고 대각선으로 자연스럽게 뻗어나가는 선들은 일반 수평 S-Curve(cubicBezier) 유지!
+      updates.push({
+        id: e.id,
+        smooth: { enabled: true, type: 'cubicBezier', forceDirection: 'horizontal', roundness: 0.6 }
+      });
+    }
+  });
+
+  if (updates.length > 0) {
+    ve.update(updates);
+  }
 }
-function toggleLayout() {
+
+function fitNetwork() { if (network) network.fit({animation:{duration:400}}); }
+
+function toggleViewMode() {
   hierarchicalOn = !hierarchicalOn;
-  const label = hierarchicalOn ? '계층형 마인드맵' : '자유 방사형';
-  const span = document.querySelector('#layout-btn span');
-  if (span) {
-    span.textContent = label;
+  const modeText = document.getElementById('mode-text');
+  const modeIcon = document.getElementById('mode-icon');
+  
+  if (hierarchicalOn) {
+    if (modeText) modeText.textContent = '계층형 마인드맵';
+    if (modeIcon) modeIcon.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="6" y1="3" x2="6" y2="15"></line><circle cx="18" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><path d="M18 9a9 9 0 0 1-9 9"></path></svg>`;
+    showToast('계층형 마인드맵 모드로 전환되었습니다.', 'info');
   } else {
-    document.getElementById('layout-btn').textContent = label;
+    if (modeText) modeText.textContent = '자유 방사형 네트워크';
+    if (modeIcon) modeIcon.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>`;
+    showToast('자유 방사형 네트워크 모드로 전환되었습니다.', 'info');
   }
   if (lastResult) buildNetwork(lastResult);
 }
@@ -928,6 +987,16 @@ function showToast(msg, type = 'info') {
     setTimeout(() => t.remove(), 300);
   }, 2800);
 }
+
+// URL 쿼리 파라미터(?codes=C136887,B160300...) 자동 입력 및 분석 지원
+window.addEventListener('DOMContentLoaded', () => {
+  const params = new URLSearchParams(window.location.search);
+  const codesParam = params.get('codes') || params.get('q');
+  if (codesParam) {
+    addTag(codesParam);
+    doAnalyze();
+  }
+});
 </script>
 </body>
 </html>"""
