@@ -688,16 +688,19 @@
   <!-- 현대적인 세그먼트 탭 바 -->
   <div class="tab-nav">
     <button class="tab-btn active" id="btn-tab1" onclick="openTab('tab1')">
-      <span>📊</span> 1. 진단 원리 & 핵심 성과
+      <span>📊</span> 1. 진단 원리 & 성과
     </button>
     <button class="tab-btn" id="btn-tab2" onclick="openTab('tab2')">
-      <span>🧠</span> 2. 64차원 AI & 정답 검증
+      <span>🧠</span> 2. 64차원 AI 검증
     </button>
     <button class="tab-btn" id="btn-tab3" onclick="openTab('tab3')">
-      <span>🔬</span> 3. 2-Hop GNN 추론 심층
+      <span>🔬</span> 3. 2-Hop GNN 추론
     </button>
     <button class="tab-btn" id="btn-tab4" onclick="openTab('tab4')">
-      <span>⚡</span> 4. 실전 다발 고장 실증 (ACU_B) <span class="tab-badge">NEW</span>
+      <span>⚡</span> 4. 다발 고장 실증 (ACU_B)
+    </button>
+    <button class="tab-btn" id="btn-tab5" onclick="openTab('tab5')">
+      <span>📖</span> 5. 서브타입 대백과 & 단선·ECU 고장 <span class="tab-badge">NEW</span>
     </button>
   </div>
 
@@ -1734,6 +1737,894 @@
     </div>
 
   </div> <!-- // end of content-tab4 -->
+
+  <!-- ══════════════════════════════════════════════════════════════════ -->
+  <!-- 탭 5 : 서브타입 대백과사전 & 단선·ECU 고장 완전정복 (제13장) [NEW] -->
+  <!-- ══════════════════════════════════════════════════════════════════ -->
+  <div id="content-tab5" class="tab-content">
+
+    <!-- 13-1. 서브타입 대백과 개요 -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon">📖</div>
+        <div class="card-title">13. 7자리 DTC 암호 뒤 2자리 완전 해부 ➔ "모든 서브타입(Fault Type Byte) 총정리 대백과사전"</div>
+      </div>
+
+      <div class="cascade-hero" style="background:linear-gradient(135deg, #065f46, #047857, #1e3a8a);">
+        <div class="cascade-hero-title">
+          <span>🔍 뒤 2자리(서브타입)가 스스로 말해주는 "3대 고장 유형의 비밀"</span>
+        </div>
+        <p style="opacity:0.95;font-size:15px;line-height:1.6;">
+          국제 자동차 표준(SAE J2019 / ISO 14229-1 UDS 규격)에서 고장 코드의 뒤 2자리는 단순한 일련번호가 아니라, <strong>"고장의 물리적 원인이 배선 단선인지, 커넥터 결합 불량인지, 아니면 컴퓨터(ECU) 본체 사망인지"</strong>를 스스로 자백하는 핵심 암호(Fault Type Byte)입니다. 우리 시스템 데이터셋에 존재하는 <strong>모든 서브타입(총 62종)의 실차 정비 표</strong>를 완벽 공개합니다!
+        </p>
+      </div>
+
+      <!-- 3대 고장 유형 판별 비유 카드 -->
+      <div style="font-size:16px;font-weight:800;color:#1e293b;margin:22px 0 10px 0;">
+        🚗 중학생도 단번에 구분하는 자동차 3대 고장의 결정적 차이
+      </div>
+      <div class="ecu-grid">
+        <div class="ecu-card" style="border-left:5px solid #10b981;">
+          <div class="ecu-card-header">
+            <span class="ecu-name">1. 커넥터 접촉 불량</span>
+            <span class="pill pill-green">30초 해결</span>
+          </div>
+          <div style="font-size:13px;color:#475569;margin-bottom:8px;">
+            <strong>대표 서브타입:</strong> <code class="tag-code">52</code>, <code class="tag-code">87</code><br>
+            <strong>💡 비유:</strong> 헐거워진 멀티탭 플러그.<br>
+            <strong>처방:</strong> 부품은 멀쩡하므로 커넥터 핀 세척 후 '딸깍' 다시 꽂으면 4개 경고등이 즉시 완치!
+          </div>
+        </div>
+
+        <div class="ecu-card" style="border-left:5px solid #f59e0b;">
+          <div class="ecu-card-header">
+            <span class="ecu-name">2. 배선 단선 (중간 끊어짐)</span>
+            <span class="pill pill-yellow">도통 시험</span>
+          </div>
+          <div style="font-size:13px;color:#475569;margin-bottom:8px;">
+            <strong>대표 서브타입:</strong> <code class="tag-code">11</code>, <code class="tag-code">12</code>, <code class="tag-code">13</code>, <code class="tag-code">16</code><br>
+            <strong>💡 비유:</strong> 쥐가 갉아먹은 인터넷 랜선.<br>
+            <strong>처방:</strong> 방바닥을 깰 수 없듯, AI가 알려준 양쪽 커넥터 핀에 테스터기를 대고 저항(Ω)을 측정하여 끊긴 전선을 찾아냄!
+          </div>
+        </div>
+
+        <div class="ecu-card" style="border-left:5px solid #ef4444;">
+          <div class="ecu-card-header">
+            <span class="ecu-name">3. 컴퓨터 (ECU) 본체 사망</span>
+            <span class="pill pill-red">ECU 교체</span>
+          </div>
+          <div style="font-size:13px;color:#475569;margin-bottom:8px;">
+            <strong>대표 서브타입:</strong> <code class="tag-code">41~49</code>, <code class="tag-code">55</code>, <code class="tag-code">04</code><br>
+            <strong>💡 비유:</strong> 벼락 맞아 메인보드가 탄 컴퓨터 본체.<br>
+            <strong>처방:</strong> 커넥터에서 전원/접지가 12V로 정상 공급되는데도 컴퓨터가 반응이 없으면 ECU 본체 신품 교체!
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- 그룹: ⚡ 1. 배선 단선 및 전원/접지 단락 계통 (전선 물리 결함 ➔ 도통 시험 필요) -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon">📂</div>
+        <div class="card-title">⚡ 1. 배선 단선 및 전원/접지 단락 계통 (전선 물리 결함 ➔ 도통 시험 필요)</div>
+      </div>
+      <p style="margin-bottom:14px;color:#475569;">전선 피복이 벗겨져 차체 철판에 닿았거나(접지 쇼트), 쥐가 갉아먹어 끊어진 경우(단선)입니다. 양쪽 커넥터 사이에서 저항(Ω)을 측정하여 끊어진 구간을 찾아냅니다.</p>
+
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:130px;">DTC 코드</th>
+              <th style="width:110px;">뒤 2자리 (서브타입)</th>
+              <th style="width:220px;">시스템 표준 서브타입 명칭</th>
+              <th>실제 부품 설명문 (원천 데이터)</th>
+              <th style="width:150px;">정비 판정 및 진단 처방</th>
+            </tr>
+          </thead>
+          <tbody>
+    
+            <tr>
+              <td><code class="tag-code" style="color:#d97706;font-size:13.5px;">C112811</code></td>
+              <td><strong style="color:#d97706;font-size:15px;font-family:monospace;">11</strong></td>
+              <td><strong>단락 (그라운드 쇼트)</strong></td>
+              <td style="color:#334155;">전방/전측방 초음파센서 공급전원 이상 - 회로 그라운드 쇼트</td>
+              <td><span class="pill pill-yellow" title="양 커넥터 간 도통 시험 (저항 측정) 후 배선 수리/바이패스">배선 도통 시험</span></td>
+            </tr>
+        
+            <tr>
+              <td><code class="tag-code" style="color:#d97706;font-size:13.5px;">C152812</code></td>
+              <td><strong style="color:#d97706;font-size:15px;font-family:monospace;">12</strong></td>
+              <td><strong>단락 (배터리 쇼트)</strong></td>
+              <td style="color:#334155;">주차 안전 버튼 인디케이터 이상 - 회로 배터리 쇼트</td>
+              <td><span class="pill pill-yellow" title="양 커넥터 간 도통 시험 (저항 측정) 후 배선 수리/바이패스">배선 도통 시험</span></td>
+            </tr>
+        
+            <tr>
+              <td><code class="tag-code" style="color:#d97706;font-size:13.5px;">B120813</code></td>
+              <td><strong style="color:#d97706;font-size:15px;font-family:monospace;">13</strong></td>
+              <td><strong>단락 (그라운드 쇼트)</strong></td>
+              <td style="color:#334155;">내외기 액추에이터 위치센서 단선(신호값 낮음)</td>
+              <td><span class="pill pill-yellow" title="양 커넥터 간 도통 시험 (저항 측정) 후 배선 수리/바이패스">배선 도통 시험</span></td>
+            </tr>
+        
+            <tr>
+              <td><code class="tag-code" style="color:#d97706;font-size:13.5px;">B151114</code></td>
+              <td><strong style="color:#d97706;font-size:15px;font-family:monospace;">14</strong></td>
+              <td><strong>회로 그라운드 쇼트 또는 단선</strong></td>
+              <td style="color:#334155;">1열 운전석 버클 스위치 - 회로 그라운드 쇼트 또는 단선</td>
+              <td><span class="pill pill-yellow" title="양 커넥터 간 도통 시험 (저항 측정) 후 배선 수리/바이패스">배선 도통 시험</span></td>
+            </tr>
+        
+            <tr>
+              <td><code class="tag-code" style="color:#d97706;font-size:13.5px;">C120B15</code></td>
+              <td><strong style="color:#d97706;font-size:15px;font-family:monospace;">15</strong></td>
+              <td><strong>회로 배터리 쇼트 또는 단선</strong></td>
+              <td style="color:#334155;">우측 인디케이터 (아웃 사이드 미러) 전원단락 및 단선</td>
+              <td><span class="pill pill-yellow" title="양 커넥터 간 도통 시험 (저항 측정) 후 배선 수리/바이패스">배선 도통 시험</span></td>
+            </tr>
+        
+            <tr>
+              <td><code class="tag-code" style="color:#d97706;font-size:13.5px;">C110516</code></td>
+              <td><strong style="color:#d97706;font-size:15px;font-family:monospace;">16</strong></td>
+              <td><strong>단선/개방 회로</strong></td>
+              <td style="color:#334155;">이그니션 전원 낮음 - 회로 전압이 임계값(기준값) 보다 낮음</td>
+              <td><span class="pill pill-yellow" title="양 커넥터 간 도통 시험 (저항 측정) 후 배선 수리/바이패스">배선 도통 시험</span></td>
+            </tr>
+        
+            <tr>
+              <td><code class="tag-code" style="color:#d97706;font-size:13.5px;">C110417</code></td>
+              <td><strong style="color:#d97706;font-size:15px;font-family:monospace;">17</strong></td>
+              <td><strong>개방 회로</strong></td>
+              <td style="color:#334155;">이그니션 전원 높음 - 회로 전압이 임계값(기준값) 보다 높음</td>
+              <td><span class="pill pill-yellow" title="양 커넥터 간 도통 시험 (저항 측정) 후 배선 수리/바이패스">배선 도통 시험</span></td>
+            </tr>
+        
+            <tr>
+              <td><code class="tag-code" style="color:#d97706;font-size:13.5px;">B186C19</code></td>
+              <td><strong style="color:#d97706;font-size:15px;font-family:monospace;">19</strong></td>
+              <td><strong>전압 범위 이상</strong></td>
+              <td style="color:#334155;">HVAC BLDC 모터 - 전류값 높음</td>
+              <td><span class="pill pill-yellow" title="양 커넥터 간 도통 시험 (저항 측정) 후 배선 수리/바이패스">배선 도통 시험</span></td>
+            </tr>
+        
+            <tr>
+              <td><code class="tag-code" style="color:#d97706;font-size:13.5px;">B13461A</code></td>
+              <td><strong style="color:#d97706;font-size:15px;font-family:monospace;">1A</strong></td>
+              <td><strong>전압 높음</strong></td>
+              <td style="color:#334155;">운전석 에어백(1단계) - 회로 저항이 임계값(기준값) 보다 낮음</td>
+              <td><span class="pill pill-yellow" title="양 커넥터 간 도통 시험 (저항 측정) 후 배선 수리/바이패스">배선 도통 시험</span></td>
+            </tr>
+        
+            <tr>
+              <td><code class="tag-code" style="color:#d97706;font-size:13.5px;">B13461B</code></td>
+              <td><strong style="color:#d97706;font-size:15px;font-family:monospace;">1B</strong></td>
+              <td><strong>전압 낮음</strong></td>
+              <td style="color:#334155;">운전석 에어백(1단계) - 회로 저항이 임계값(기준값) 보다 높음</td>
+              <td><span class="pill pill-yellow" title="양 커넥터 간 도통 시험 (저항 측정) 후 배선 수리/바이패스">배선 도통 시험</span></td>
+            </tr>
+        
+            <tr>
+              <td><code class="tag-code" style="color:#d97706;font-size:13.5px;">C11311C</code></td>
+              <td><strong style="color:#d97706;font-size:15px;font-family:monospace;">1C</strong></td>
+              <td><strong>단락/개방 회로</strong></td>
+              <td style="color:#334155;">광각 카메라 전원 공급 이상 - 회로 전압이 범위를 벗어남</td>
+              <td><span class="pill pill-yellow" title="양 커넥터 간 도통 시험 (저항 측정) 후 배선 수리/바이패스">배선 도통 시험</span></td>
+            </tr>
+        
+            <tr>
+              <td><code class="tag-code" style="color:#d97706;font-size:13.5px;">C15011F</code></td>
+              <td><strong style="color:#d97706;font-size:15px;font-family:monospace;">1F</strong></td>
+              <td><strong>회로 간헐적 결함 (스위치 이상)</strong></td>
+              <td style="color:#334155;">스위치 이상</td>
+              <td><span class="pill pill-yellow" title="양 커넥터 간 도통 시험 (저항 측정) 후 배선 수리/바이패스">배선 도통 시험</span></td>
+            </tr>
+        
+            <tr>
+              <td><code class="tag-code" style="color:#2563eb;font-size:13.5px;">C110921</code></td>
+              <td><strong style="color:#2563eb;font-size:15px;font-family:monospace;">21</strong></td>
+              <td><strong>신호 진폭 낮음 (단선)</strong></td>
+              <td style="color:#334155;">이그니션 단선</td>
+              <td><span class="pill pill-yellow" title="양 커넥터 간 도통 시험 (저항 측정) 후 배선 수리/바이패스">배선 도통 시험</span></td>
+            </tr>
+        
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+
+    <!-- 그룹: 🧠 2. 컴퓨터(ECU) 본체 및 내부 메모리 결함 계통 (컴퓨터 사망 ➔ ECU 교체 필요) -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon">📂</div>
+        <div class="card-title">🧠 2. 컴퓨터(ECU) 본체 및 내부 메모리 결함 계통 (컴퓨터 사망 ➔ ECU 교체 필요)</div>
+      </div>
+      <p style="margin-bottom:14px;color:#475569;">외부 전선은 멀쩡하지만 컴퓨터 기판 내부의 마이크로프로세서(CPU), 프로그램 메모리(EEPROM/ROM)가 타버리거나 연산 오류가 난 경우입니다. 전원과 접지가 정상인데도 발생하면 ECU 본체 교체가 유일한 해결책입니다.</p>
+
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:130px;">DTC 코드</th>
+              <th style="width:110px;">뒤 2자리 (서브타입)</th>
+              <th style="width:220px;">시스템 표준 서브타입 명칭</th>
+              <th>실제 부품 설명문 (원천 데이터)</th>
+              <th style="width:150px;">정비 판정 및 진단 처방</th>
+            </tr>
+          </thead>
+          <tbody>
+    
+            <tr>
+              <td><code class="tag-code" style="color:#dc2626;font-size:13.5px;">P060141</code></td>
+              <td><strong style="color:#dc2626;font-size:15px;font-family:monospace;">41</strong></td>
+              <td><strong>일반적인 체크섬 오류</strong></td>
+              <td style="color:#334155;">EEPROM - 일반적인 체크섬 오류</td>
+              <td><span class="pill pill-red" title="커넥터 전원/접지 확인 후 ECU 컴퓨터 본체 교체 및 코딩">ECU 단품 교체</span></td>
+            </tr>
+        
+            <tr>
+              <td><code class="tag-code" style="color:#dc2626;font-size:13.5px;">U079842</code></td>
+              <td><strong style="color:#dc2626;font-size:15px;font-family:monospace;">42</strong></td>
+              <td><strong>일반적인 메모리 오류</strong></td>
+              <td style="color:#334155;">LDC 제어 모듈 "A" - 일반적인 메모리 오류</td>
+              <td><span class="pill pill-red" title="커넥터 전원/접지 확인 후 ECU 컴퓨터 본체 교체 및 코딩">ECU 단품 교체</span></td>
+            </tr>
+        
+            <tr>
+              <td><code class="tag-code" style="color:#dc2626;font-size:13.5px;">C172144</code></td>
+              <td><strong style="color:#dc2626;font-size:15px;font-family:monospace;">44</strong></td>
+              <td><strong>데이터 메모리 오류 (EEPROM 체크섬 불일치)</strong></td>
+              <td style="color:#334155;">ECU 하드웨어 고장 (EEPROM 체크섬 불일치)</td>
+              <td><span class="pill pill-red" title="커넥터 전원/접지 확인 후 ECU 컴퓨터 본체 교체 및 코딩">ECU 단품 교체</span></td>
+            </tr>
+        
+            <tr>
+              <td><code class="tag-code" style="color:#dc2626;font-size:13.5px;">P1A9245</code></td>
+              <td><strong style="color:#dc2626;font-size:15px;font-family:monospace;">45</strong></td>
+              <td><strong>시스템 프로그램 메모리 오류</strong></td>
+              <td style="color:#334155;">LDC 제어 유닛 메모리 에러 - 시스템 프로그램 메모리 오류</td>
+              <td><span class="pill pill-red" title="커넥터 전원/접지 확인 후 ECU 컴퓨터 본체 교체 및 코딩">ECU 단품 교체</span></td>
+            </tr>
+        
+            <tr>
+              <td><code class="tag-code" style="color:#dc2626;font-size:13.5px;">C139846</code></td>
+              <td><strong style="color:#dc2626;font-size:15px;font-family:monospace;">46</strong></td>
+              <td><strong>시스템 프로그램 보정/매개 변수 메모리 오류</strong></td>
+              <td style="color:#334155;">광각 카메라 보정 실패 - 시스템 프로그램 보정/매개 변수 메모리 오류</td>
+              <td><span class="pill pill-red" title="커넥터 전원/접지 확인 후 ECU 컴퓨터 본체 교체 및 코딩">ECU 단품 교체</span></td>
+            </tr>
+        
+            <tr>
+              <td><code class="tag-code" style="color:#dc2626;font-size:13.5px;">P060147</code></td>
+              <td><strong style="color:#dc2626;font-size:15px;font-family:monospace;">47</strong></td>
+              <td><strong>마이컴 강제 리셋 오류</strong></td>
+              <td style="color:#334155;">기능 안전 레벨3 고장 - 마이컴 강제 리셋 오류</td>
+              <td><span class="pill pill-red" title="커넥터 전원/접지 확인 후 ECU 컴퓨터 본체 교체 및 코딩">ECU 단품 교체</span></td>
+            </tr>
+        
+            <tr>
+              <td><code class="tag-code" style="color:#dc2626;font-size:13.5px;">C160648</code></td>
+              <td><strong style="color:#dc2626;font-size:15px;font-family:monospace;">48</strong></td>
+              <td><strong>ECU 소프트웨어 이상</strong></td>
+              <td style="color:#334155;">ECU 소프트웨어 이상</td>
+              <td><span class="pill pill-red" title="커넥터 전원/접지 확인 후 ECU 컴퓨터 본체 교체 및 코딩">ECU 단품 교체</span></td>
+            </tr>
+        
+            <tr>
+              <td><code class="tag-code" style="color:#dc2626;font-size:13.5px;">C160449</code></td>
+              <td><strong style="color:#dc2626;font-size:15px;font-family:monospace;">49</strong></td>
+              <td><strong>시스템 내부 전기적 고장</strong></td>
+              <td style="color:#334155;">ECU 하드웨어 이상 - 시스템 내부 전기적 고장</td>
+              <td><span class="pill pill-red" title="커넥터 전원/접지 확인 후 ECU 컴퓨터 본체 교체 및 코딩">ECU 단품 교체</span></td>
+            </tr>
+        
+            <tr>
+              <td><code class="tag-code" style="color:#2563eb;font-size:13.5px;">C16064A</code></td>
+              <td><strong style="color:#2563eb;font-size:15px;font-family:monospace;">4A</strong></td>
+              <td><strong>사양 설정 오류 (잘못된 부품 장착)</strong></td>
+              <td style="color:#334155;">ECU 소프트웨어 이상</td>
+              <td><span class="pill pill-red" title="커넥터 전원/접지 확인 후 ECU 컴퓨터 본체 교체 및 코딩">ECU 단품 교체</span></td>
+            </tr>
+        
+            <tr>
+              <td><code class="tag-code" style="color:#2563eb;font-size:13.5px;">B18784B</code></td>
+              <td><strong style="color:#2563eb;font-size:15px;font-family:monospace;">4B</strong></td>
+              <td><strong>과열</strong></td>
+              <td style="color:#334155;">HVAC BLDC 모터 - 과열</td>
+              <td><span class="pill pill-red" title="커넥터 전원/접지 확인 후 ECU 컴퓨터 본체 교체 및 코딩">ECU 단품 교체</span></td>
+            </tr>
+        
+            <tr>
+              <td><code class="tag-code" style="color:#2563eb;font-size:13.5px;">U00AD4C</code></td>
+              <td><strong style="color:#2563eb;font-size:15px;font-family:monospace;">4C</strong></td>
+              <td><strong>메모리 가득 참</strong></td>
+              <td style="color:#334155;">OTA 리프로그래밍 제어 모듈 - 메모리 가득 참</td>
+              <td><span class="pill pill-red" title="커넥터 전원/접지 확인 후 ECU 컴퓨터 본체 교체 및 코딩">ECU 단품 교체</span></td>
+            </tr>
+        
+            <tr>
+              <td><code class="tag-code" style="color:#dc2626;font-size:13.5px;">C170255</code></td>
+              <td><strong style="color:#dc2626;font-size:15px;font-family:monospace;">55</strong></td>
+              <td><strong>부품 교정 필요</strong></td>
+              <td style="color:#334155;">사양 설정 오류</td>
+              <td><span class="pill pill-red" title="커넥터 전원/접지 확인 후 ECU 컴퓨터 본체 교체 및 코딩">ECU 단품 교체</span></td>
+            </tr>
+        
+            <tr>
+              <td><code class="tag-code" style="color:#dc2626;font-size:13.5px;">C160404</code></td>
+              <td><strong style="color:#dc2626;font-size:15px;font-family:monospace;">04</strong></td>
+              <td><strong>성능 저하</strong></td>
+              <td style="color:#334155;">ECU 하드웨어 이상</td>
+              <td><span class="pill pill-red" title="커넥터 전원/접지 확인 후 ECU 컴퓨터 본체 교체 및 코딩">ECU 단품 교체</span></td>
+            </tr>
+        
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+
+    <!-- 그룹: 🔌 3. 커넥터 결합 불량 및 유니트 코딩/학습 누락 계통 (결속 & 소프트웨어 설정) -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon">📂</div>
+        <div class="card-title">🔌 3. 커넥터 결합 불량 및 유니트 코딩/학습 누락 계통 (결속 & 소프트웨어 설정)</div>
+      </div>
+      <p style="margin-bottom:14px;color:#475569;">커넥터 플러그가 덜 꽂혔거나(52), 공장에서 조립 후 초기 사양 등록(EOL 코딩/캘리브레이션)을 하지 않아 컴퓨터가 부품을 못 알아보는 상태입니다.</p>
+
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:130px;">DTC 코드</th>
+              <th style="width:110px;">뒤 2자리 (서브타입)</th>
+              <th style="width:220px;">시스템 표준 서브타입 명칭</th>
+              <th>실제 부품 설명문 (원천 데이터)</th>
+              <th style="width:150px;">정비 판정 및 진단 처방</th>
+            </tr>
+          </thead>
+          <tbody>
+    
+            <tr>
+              <td><code class="tag-code" style="color:#2563eb;font-size:13.5px;">B100252</code></td>
+              <td><strong style="color:#2563eb;font-size:15px;font-family:monospace;">52</strong></td>
+              <td><strong>유니트 미장착 또는 커넥터 불량</strong></td>
+              <td style="color:#334155;">EPB 스캔 에러 - 유니트 미장착 또는 커넥터 불량</td>
+              <td><span class="pill pill-green" title="커넥터 '딸깍' 재체결(52) 또는 진단기로 EOL 사양 학습 및 센서 보정(51,54)">커넥터 체결 / EOL 코딩</span></td>
+            </tr>
+        
+            <tr>
+              <td><code class="tag-code" style="color:#2563eb;font-size:13.5px;">B100051</code></td>
+              <td><strong style="color:#2563eb;font-size:15px;font-family:monospace;">51</strong></td>
+              <td><strong>프로그램되지 않음 (EOL 미학습)</strong></td>
+              <td style="color:#334155;">EOL 미학습</td>
+              <td><span class="pill pill-green" title="커넥터 '딸깍' 재체결(52) 또는 진단기로 EOL 사양 학습 및 센서 보정(51,54)">커넥터 체결 / EOL 코딩</span></td>
+            </tr>
+        
+            <tr>
+              <td><code class="tag-code" style="color:#2563eb;font-size:13.5px;">C128354</code></td>
+              <td><strong style="color:#2563eb;font-size:15px;font-family:monospace;">54</strong></td>
+              <td><strong>보정/학습값 누락됨 (캘리브레이션 미실시)</strong></td>
+              <td style="color:#334155;">횡가속도/종가속도/요레이트 신호이상</td>
+              <td><span class="pill pill-green" title="커넥터 '딸깍' 재체결(52) 또는 진단기로 EOL 사양 학습 및 센서 보정(51,54)">커넥터 체결 / EOL 코딩</span></td>
+            </tr>
+        
+            <tr>
+              <td><code class="tag-code" style="color:#2563eb;font-size:13.5px;">B132656</code></td>
+              <td><strong style="color:#2563eb;font-size:15px;font-family:monospace;">56</strong></td>
+              <td><strong>잘못된/호환되지 않은 사양 입력됨</strong></td>
+              <td style="color:#334155;">운전석 정면 충돌 센서 - 잘못된/호환되지 않은 사양 입력됨</td>
+              <td><span class="pill pill-green" title="커넥터 '딸깍' 재체결(52) 또는 진단기로 EOL 사양 학습 및 센서 보정(51,54)">커넥터 체결 / EOL 코딩</span></td>
+            </tr>
+        
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+
+    <!-- 그룹: 📡 4. C-CAN 차체 통신망 두절 및 메시지 누락 계통 (고속 네트워크 마비) -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon">📂</div>
+        <div class="card-title">📡 4. C-CAN 차체 통신망 두절 및 메시지 누락 계통 (고속 네트워크 마비)</div>
+      </div>
+      <p style="margin-bottom:14px;color:#475569;">차량 컴퓨터들이 서로 대화를 주고받는 C-CAN 통신 고속도로에서 특정 컴퓨터의 응답이 뚝 끊긴 경우(87)입니다. 중간 분기 커넥터나 종단저항(60Ω)을 점검합니다.</p>
+
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:130px;">DTC 코드</th>
+              <th style="width:110px;">뒤 2자리 (서브타입)</th>
+              <th style="width:220px;">시스템 표준 서브타입 명칭</th>
+              <th>실제 부품 설명문 (원천 데이터)</th>
+              <th style="width:150px;">정비 판정 및 진단 처방</th>
+            </tr>
+          </thead>
+          <tbody>
+    
+            <tr>
+              <td><code class="tag-code" style="color:#2563eb;font-size:13.5px;">C164281</code></td>
+              <td><strong style="color:#2563eb;font-size:15px;font-family:monospace;">81</strong></td>
+              <td><strong>유효하지 않은 직렬 데이터 (CAN 신호)</strong></td>
+              <td style="color:#334155;">브레이크 CAN 신호 이상</td>
+              <td><span class="pill pill-purple" title="CAN 종단저항(60Ω) 측정 및 통신 하네스 분기 커넥터 점검">CAN 버스 점검</span></td>
+            </tr>
+        
+            <tr>
+              <td><code class="tag-code" style="color:#2563eb;font-size:13.5px;">U041182</code></td>
+              <td><strong style="color:#2563eb;font-size:15px;font-family:monospace;">82</strong></td>
+              <td><strong>신호 범위 초과 (High)</strong></td>
+              <td style="color:#334155;">FCU-MCU 간 통신 데이터 신뢰성 오류</td>
+              <td><span class="pill pill-purple" title="CAN 종단저항(60Ω) 측정 및 통신 하네스 분기 커넥터 점검">CAN 버스 점검</span></td>
+            </tr>
+        
+            <tr>
+              <td><code class="tag-code" style="color:#2563eb;font-size:13.5px;">C128383</code></td>
+              <td><strong style="color:#2563eb;font-size:15px;font-family:monospace;">83</strong></td>
+              <td><strong>신호 범위 미달 (Low)</strong></td>
+              <td style="color:#334155;">횡가속도/종가속도/요레이트 신호이상</td>
+              <td><span class="pill pill-purple" title="CAN 종단저항(60Ω) 측정 및 통신 하네스 분기 커넥터 점검">CAN 버스 점검</span></td>
+            </tr>
+        
+            <tr>
+              <td><code class="tag-code" style="color:#2563eb;font-size:13.5px;">C161C86</code></td>
+              <td><strong style="color:#2563eb;font-size:15px;font-family:monospace;">86</strong></td>
+              <td><strong>신호 이상</strong></td>
+              <td style="color:#334155;">HCU/VCU/FCU 측 CAN 신호 이상 - 잘못된 신호 발생</td>
+              <td><span class="pill pill-purple" title="CAN 종단저항(60Ω) 측정 및 통신 하네스 분기 커넥터 점검">CAN 버스 점검</span></td>
+            </tr>
+        
+            <tr>
+              <td><code class="tag-code" style="color:#2563eb;font-size:13.5px;">C136887</code></td>
+              <td><strong style="color:#2563eb;font-size:15px;font-family:monospace;">87</strong></td>
+              <td><strong>신호 메시지 누락</strong></td>
+              <td style="color:#334155;">후방 좌외측 초음파센서 이상 - 신호 메시지 누락</td>
+              <td><span class="pill pill-purple" title="CAN 종단저항(60Ω) 측정 및 통신 하네스 분기 커넥터 점검">CAN 버스 점검</span></td>
+            </tr>
+        
+            <tr>
+              <td><code class="tag-code" style="color:#2563eb;font-size:13.5px;">C161688</code></td>
+              <td><strong style="color:#2563eb;font-size:15px;font-family:monospace;">88</strong></td>
+              <td><strong>신호 범위 이상</strong></td>
+              <td style="color:#334155;">C-CAN 버스 Off - 통신 버스 차단</td>
+              <td><span class="pill pill-purple" title="CAN 종단저항(60Ω) 측정 및 통신 하네스 분기 커넥터 점검">CAN 버스 점검</span></td>
+            </tr>
+        
+            <tr>
+              <td><code class="tag-code" style="color:#2563eb;font-size:13.5px;">U08678B</code></td>
+              <td><strong style="color:#2563eb;font-size:15px;font-family:monospace;">8B</strong></td>
+              <td><strong>잘못된 메시지 구조 / 길이</strong></td>
+              <td style="color:#334155;">이모빌라이저 제어 모듈 - 잘못된 메시지 구조 / 길이</td>
+              <td><span class="pill pill-purple" title="CAN 종단저항(60Ω) 측정 및 통신 하네스 분기 커넥터 점검">CAN 버스 점검</span></td>
+            </tr>
+        
+            <tr>
+              <td><code class="tag-code" style="color:#2563eb;font-size:13.5px;">P0A1F8C</code></td>
+              <td><strong style="color:#2563eb;font-size:15px;font-family:monospace;">8C</strong></td>
+              <td><strong>통신 끊김</strong></td>
+              <td style="color:#334155;">고전압 배터리 제어 모듈 "A" - 통신 끊김</td>
+              <td><span class="pill pill-purple" title="CAN 종단저항(60Ω) 측정 및 통신 하네스 분기 커넥터 점검">CAN 버스 점검</span></td>
+            </tr>
+        
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+
+    <!-- 그룹: 📈 5. 센서 전기 신호 및 파형 왜곡 계통 (센서 전압 고착 & 신호 노이즈) -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon">📂</div>
+        <div class="card-title">📈 5. 센서 전기 신호 및 파형 왜곡 계통 (센서 전압 고착 & 신호 노이즈)</div>
+      </div>
+      <p style="margin-bottom:14px;color:#475569;">센서가 측정값을 보내기는 하지만, 값이 바닥에 붙었거나(Low 고착 23), 하늘로 치솟았거나(High 고착 24), 노이즈가 섞여 타당성이 없는 상태입니다.</p>
+
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:130px;">DTC 코드</th>
+              <th style="width:110px;">뒤 2자리 (서브타입)</th>
+              <th style="width:220px;">시스템 표준 서브타입 명칭</th>
+              <th>실제 부품 설명문 (원천 데이터)</th>
+              <th style="width:150px;">정비 판정 및 진단 처방</th>
+            </tr>
+          </thead>
+          <tbody>
+    
+            <tr>
+              <td><code class="tag-code" style="color:#2563eb;font-size:13.5px;">B14A023</code></td>
+              <td><strong style="color:#2563eb;font-size:15px;font-family:monospace;">23</strong></td>
+              <td><strong>신호가 Low 상태로 고정됨</strong></td>
+              <td style="color:#334155;">RH PSD 드라이브 유닛 홀센서 1 - 신호가 Low 상태로 고정됨</td>
+              <td><span class="pill pill-blue" title="오실로스코프 신호 파형 측정 및 센서 기준 전압(5V/12V) 점검">센서 파형 점검</span></td>
+            </tr>
+        
+            <tr>
+              <td><code class="tag-code" style="color:#2563eb;font-size:13.5px;">B14A024</code></td>
+              <td><strong style="color:#2563eb;font-size:15px;font-family:monospace;">24</strong></td>
+              <td><strong>신호가 High 상태로 고정됨</strong></td>
+              <td style="color:#334155;">RH PSD 드라이브 유닛 홀센서 1 - 신호가 High 상태로 고정됨</td>
+              <td><span class="pill pill-blue" title="오실로스코프 신호 파형 측정 및 센서 기준 전압(5V/12V) 점검">센서 파형 점검</span></td>
+            </tr>
+        
+            <tr>
+              <td><code class="tag-code" style="color:#2563eb;font-size:13.5px;">C240527</code></td>
+              <td><strong style="color:#2563eb;font-size:15px;font-family:monospace;">27</strong></td>
+              <td><strong>신호 변화율 오류 (엔코더 센서 이상)</strong></td>
+              <td style="color:#334155;">엔코더 센서 이상</td>
+              <td><span class="pill pill-blue" title="오실로스코프 신호 파형 측정 및 센서 기준 전압(5V/12V) 점검">센서 파형 점검</span></td>
+            </tr>
+        
+            <tr>
+              <td><code class="tag-code" style="color:#2563eb;font-size:13.5px;">C240428</code></td>
+              <td><strong style="color:#2563eb;font-size:15px;font-family:monospace;">28</strong></td>
+              <td><strong>신호 바이어스 범위 벗어남 (모터 전류 이상)</strong></td>
+              <td style="color:#334155;">서보 모터 회로 단선</td>
+              <td><span class="pill pill-blue" title="오실로스코프 신호 파형 측정 및 센서 기준 전압(5V/12V) 점검">센서 파형 점검</span></td>
+            </tr>
+        
+            <tr>
+              <td><code class="tag-code" style="color:#2563eb;font-size:13.5px;">C183129</code></td>
+              <td><strong style="color:#2563eb;font-size:15px;font-family:monospace;">29</strong></td>
+              <td><strong>잘못된 신호 발생 (신호 무효)</strong></td>
+              <td style="color:#334155;">NAVI CAN 신호 이상</td>
+              <td><span class="pill pill-blue" title="오실로스코프 신호 파형 측정 및 센서 기준 전압(5V/12V) 점검">센서 파형 점검</span></td>
+            </tr>
+        
+            <tr>
+              <td><code class="tag-code" style="color:#2563eb;font-size:13.5px;">B13952B</code></td>
+              <td><strong style="color:#2563eb;font-size:15px;font-family:monospace;">2B</strong></td>
+              <td><strong>신호가 섞여서 간섭됨</strong></td>
+              <td style="color:#334155;">Integrated Safety Control Module 회로 - 신호가 섞여서 간섭됨</td>
+              <td><span class="pill pill-blue" title="오실로스코프 신호 파형 측정 및 센서 기준 전압(5V/12V) 점검">센서 파형 점검</span></td>
+            </tr>
+        
+            <tr>
+              <td><code class="tag-code" style="color:#2563eb;font-size:13.5px;">P1AD42E</code></td>
+              <td><strong style="color:#2563eb;font-size:15px;font-family:monospace;">2E</strong></td>
+              <td><strong>신호 측정 비율 초과 (열폭주 감지)</strong></td>
+              <td style="color:#334155;">배터리 비정상 거동 감지 : 열폭주(써멀 런어웨이)</td>
+              <td><span class="pill pill-blue" title="오실로스코프 신호 파형 측정 및 센서 기준 전압(5V/12V) 점검">센서 파형 점검</span></td>
+            </tr>
+        
+            <tr>
+              <td><code class="tag-code" style="color:#2563eb;font-size:13.5px;">C136231</code></td>
+              <td><strong style="color:#2563eb;font-size:15px;font-family:monospace;">31</strong></td>
+              <td><strong>신호 없음</strong></td>
+              <td style="color:#334155;">광각 카메라 신호 이상 - 신호 없음</td>
+              <td><span class="pill pill-blue" title="오실로스코프 신호 파형 측정 및 센서 기준 전압(5V/12V) 점검">센서 파형 점검</span></td>
+            </tr>
+        
+            <tr>
+              <td><code class="tag-code" style="color:#2563eb;font-size:13.5px;">P0D9038</code></td>
+              <td><strong style="color:#2563eb;font-size:15px;font-family:monospace;">38</strong></td>
+              <td><strong>신호의 주파수 값이 부정확함</strong></td>
+              <td style="color:#334155;">배터리 충전기 입력 주파수 이상 - 신호의 주파수 값이 부정확함</td>
+              <td><span class="pill pill-blue" title="오실로스코프 신호 파형 측정 및 센서 기준 전압(5V/12V) 점검">센서 파형 점검</span></td>
+            </tr>
+        
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+
+    <!-- 그룹: ⚙️ 6. 액추에이터 모터 고착 및 기계적 파손 계통 (기계 부품 물리 고장) -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon">📂</div>
+        <div class="card-title">⚙️ 6. 액추에이터 모터 고착 및 기계적 파손 계통 (기계 부품 물리 고장)</div>
+      </div>
+      <p style="margin-bottom:14px;color:#475569;">전기 신호는 정상적으로 보냈으나 모터 기어가 이물질에 걸려 안 돌거나(71, 77), 릴레이 접점이 녹아붙어 닫힌 채로 융착된(73) 기계적 고장입니다.</p>
+
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:130px;">DTC 코드</th>
+              <th style="width:110px;">뒤 2자리 (서브타입)</th>
+              <th style="width:220px;">시스템 표준 서브타입 명칭</th>
+              <th>실제 부품 설명문 (원천 데이터)</th>
+              <th style="width:150px;">정비 판정 및 진단 처방</th>
+            </tr>
+          </thead>
+          <tbody>
+    
+            <tr>
+              <td><code class="tag-code" style="color:#2563eb;font-size:13.5px;">C222071</code></td>
+              <td><strong style="color:#2563eb;font-size:15px;font-family:monospace;">71</strong></td>
+              <td><strong>액추에이터 고착</strong></td>
+              <td style="color:#334155;">뒤좌측 엑츄에이터 이상</td>
+              <td><span class="pill pill-yellow" title="모터 이물질 고착 해제 또는 릴레이/액추에이터 단품 교체">기계 부품 교체</span></td>
+            </tr>
+        
+            <tr>
+              <td><code class="tag-code" style="color:#2563eb;font-size:13.5px;">P0D0972</code></td>
+              <td><strong style="color:#2563eb;font-size:15px;font-family:monospace;">72</strong></td>
+              <td><strong>액추에이터 열린 상태로 고착</strong></td>
+              <td style="color:#334155;">고전압 배터리 전압과 OBC 출력전압 편차 높음 - 액추에이터 열린 상태로 고착</td>
+              <td><span class="pill pill-yellow" title="모터 이물질 고착 해제 또는 릴레이/액추에이터 단품 교체">기계 부품 교체</span></td>
+            </tr>
+        
+            <tr>
+              <td><code class="tag-code" style="color:#2563eb;font-size:13.5px;">P1E0C73</code></td>
+              <td><strong style="color:#2563eb;font-size:15px;font-family:monospace;">73</strong></td>
+              <td><strong>액추에이터 닫힌 상태로 고착</strong></td>
+              <td style="color:#334155;">배터리 충전기 입력 릴레이 융착 - 액추에이터 닫힌 상태로 고착</td>
+              <td><span class="pill pill-yellow" title="모터 이물질 고착 해제 또는 릴레이/액추에이터 단품 교체">기계 부품 교체</span></td>
+            </tr>
+        
+            <tr>
+              <td><code class="tag-code" style="color:#2563eb;font-size:13.5px;">C222074</code></td>
+              <td><strong style="color:#2563eb;font-size:15px;font-family:monospace;">74</strong></td>
+              <td><strong>액추에이터 슬립</strong></td>
+              <td style="color:#334155;">뒤좌측 엑츄에이터 이상</td>
+              <td><span class="pill pill-yellow" title="모터 이물질 고착 해제 또는 릴레이/액추에이터 단품 교체">기계 부품 교체</span></td>
+            </tr>
+        
+            <tr>
+              <td><code class="tag-code" style="color:#2563eb;font-size:13.5px;">B128577</code></td>
+              <td><strong style="color:#2563eb;font-size:15px;font-family:monospace;">77</strong></td>
+              <td><strong>지시 위치 도달 불가 (모터 고착)</strong></td>
+              <td style="color:#334155;">AUTO Defog 토출구(MODE) 컨트롤 모터 이상(옵션사양)</td>
+              <td><span class="pill pill-yellow" title="모터 이물질 고착 해제 또는 릴레이/액추에이터 단품 교체">기계 부품 교체</span></td>
+            </tr>
+        
+            <tr>
+              <td><code class="tag-code" style="color:#2563eb;font-size:13.5px;">C12687A</code></td>
+              <td><strong style="color:#2563eb;font-size:15px;font-family:monospace;">7A</strong></td>
+              <td><strong>브레이크액 누유 또는 씰 파손</strong></td>
+              <td style="color:#334155;">브레이크액 누유</td>
+              <td><span class="pill pill-yellow" title="모터 이물질 고착 해제 또는 릴레이/액추에이터 단품 교체">기계 부품 교체</span></td>
+            </tr>
+        
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+
+    <!-- 그룹: 🔍 7. 부품 단품 내부 소자 파손 및 배터리 전원 전압 이상 계통 -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon">📂</div>
+        <div class="card-title">🔍 7. 부품 단품 내부 소자 파손 및 배터리 전원 전압 이상 계통</div>
+      </div>
+      <p style="margin-bottom:14px;color:#475569;">센서 내부 칩 자체가 수명을 다해 망가졌거나(96), 차량 배터리 전압이 너무 낮거나(A2) 높아(A3) 시스템이 오작동하는 경우입니다.</p>
+
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:130px;">DTC 코드</th>
+              <th style="width:110px;">뒤 2자리 (서브타입)</th>
+              <th style="width:220px;">시스템 표준 서브타입 명칭</th>
+              <th>실제 부품 설명문 (원천 데이터)</th>
+              <th style="width:150px;">정비 판정 및 진단 처방</th>
+            </tr>
+          </thead>
+          <tbody>
+    
+            <tr>
+              <td><code class="tag-code" style="color:#2563eb;font-size:13.5px;">C222092</code></td>
+              <td><strong style="color:#2563eb;font-size:15px;font-family:monospace;">92</strong></td>
+              <td><strong>신호 고착</strong></td>
+              <td style="color:#334155;">뒤좌측 액츄에이터 이상</td>
+              <td><span class="pill pill-blue" title="센서 단품 교체(96) 또는 12V 배터리 충전 및 알터네이터 전압 점검(A1~A3)">단품 교체 / 배터리</span></td>
+            </tr>
+        
+            <tr>
+              <td><code class="tag-code" style="color:#2563eb;font-size:13.5px;">C150193</code></td>
+              <td><strong style="color:#2563eb;font-size:15px;font-family:monospace;">93</strong></td>
+              <td><strong>동작 스위치 상태 불량</strong></td>
+              <td style="color:#334155;">스위치 이상</td>
+              <td><span class="pill pill-blue" title="센서 단품 교체(96) 또는 12V 배터리 충전 및 알터네이터 전압 점검(A1~A3)">단품 교체 / 배터리</span></td>
+            </tr>
+        
+            <tr>
+              <td><code class="tag-code" style="color:#2563eb;font-size:13.5px;">C222094</code></td>
+              <td><strong style="color:#2563eb;font-size:15px;font-family:monospace;">94</strong></td>
+              <td><strong>예기치 않은 작동/오작동</strong></td>
+              <td style="color:#334155;">뒤좌측 엑츄에이터 이상</td>
+              <td><span class="pill pill-blue" title="센서 단품 교체(96) 또는 12V 배터리 충전 및 알터네이터 전압 점검(A1~A3)">단품 교체 / 배터리</span></td>
+            </tr>
+        
+            <tr>
+              <td><code class="tag-code" style="color:#2563eb;font-size:13.5px;">C136896</code></td>
+              <td><strong style="color:#2563eb;font-size:15px;font-family:monospace;">96</strong></td>
+              <td><strong>부품 내부 고장</strong></td>
+              <td style="color:#334155;">후방 좌외측 초음파센서 이상 - 부품 내부 고장</td>
+              <td><span class="pill pill-blue" title="센서 단품 교체(96) 또는 12V 배터리 충전 및 알터네이터 전압 점검(A1~A3)">단품 교체 / 배터리</span></td>
+            </tr>
+        
+            <tr>
+              <td><code class="tag-code" style="color:#2563eb;font-size:13.5px;">C2A2697</code></td>
+              <td><strong style="color:#2563eb;font-size:15px;font-family:monospace;">97</strong></td>
+              <td><strong>감지가 제한된 상태 (가림)</strong></td>
+              <td style="color:#334155;">후측방 레이더 외부 가림</td>
+              <td><span class="pill pill-blue" title="센서 단품 교체(96) 또는 12V 배터리 충전 및 알터네이터 전압 점검(A1~A3)">단품 교체 / 배터리</span></td>
+            </tr>
+        
+            <tr>
+              <td><code class="tag-code" style="color:#2563eb;font-size:13.5px;">C222798</code></td>
+              <td><strong style="color:#2563eb;font-size:15px;font-family:monospace;">98</strong></td>
+              <td><strong>시스템 및 부품 과열</strong></td>
+              <td style="color:#334155;">브레이크 디스크 과열</td>
+              <td><span class="pill pill-blue" title="센서 단품 교체(96) 또는 12V 배터리 충전 및 알터네이터 전압 점검(A1~A3)">단품 교체 / 배터리</span></td>
+            </tr>
+        
+            <tr>
+              <td><code class="tag-code" style="color:#2563eb;font-size:13.5px;">U2A0299</code></td>
+              <td><strong style="color:#2563eb;font-size:15px;font-family:monospace;">99</strong></td>
+              <td><strong>시스템 학습 제한 초과</strong></td>
+              <td style="color:#334155;">Integrated Safety Control Module 베리언트 코딩(EOL 프로그래밍 모드) - 시스템 학습 제한 초과</td>
+              <td><span class="pill pill-blue" title="센서 단품 교체(96) 또는 12V 배터리 충전 및 알터네이터 전압 점검(A1~A3)">단품 교체 / 배터리</span></td>
+            </tr>
+        
+            <tr>
+              <td><code class="tag-code" style="color:#2563eb;font-size:13.5px;">P091E9E</code></td>
+              <td><strong style="color:#2563eb;font-size:15px;font-family:monospace;">9E</strong></td>
+              <td><strong>동작 스위치 등의 상태가 ON 으로 고착됨</strong></td>
+              <td style="color:#334155;">배터리 히터 - 동작 스위치 등의 상태가 ON 으로 고착됨</td>
+              <td><span class="pill pill-blue" title="센서 단품 교체(96) 또는 12V 배터리 충전 및 알터네이터 전압 점검(A1~A3)">단품 교체 / 배터리</span></td>
+            </tr>
+        
+            <tr>
+              <td><code class="tag-code" style="color:#2563eb;font-size:13.5px;">U2B01A1</code></td>
+              <td><strong style="color:#2563eb;font-size:15px;font-family:monospace;">A1</strong></td>
+              <td><strong>시스템 전압 이상</strong></td>
+              <td style="color:#334155;">IGN1 - 시스템 전압 이상</td>
+              <td><span class="pill pill-blue" title="센서 단품 교체(96) 또는 12V 배터리 충전 및 알터네이터 전압 점검(A1~A3)">단품 교체 / 배터리</span></td>
+            </tr>
+        
+            <tr>
+              <td><code class="tag-code" style="color:#2563eb;font-size:13.5px;">U3003A2</code></td>
+              <td><strong style="color:#2563eb;font-size:15px;font-family:monospace;">A2</strong></td>
+              <td><strong>범위/타당성 이상</strong></td>
+              <td style="color:#334155;">배터리 전압 - 시스템 전압 낮음</td>
+              <td><span class="pill pill-blue" title="센서 단품 교체(96) 또는 12V 배터리 충전 및 알터네이터 전압 점검(A1~A3)">단품 교체 / 배터리</span></td>
+            </tr>
+        
+            <tr>
+              <td><code class="tag-code" style="color:#2563eb;font-size:13.5px;">U3003A3</code></td>
+              <td><strong style="color:#2563eb;font-size:15px;font-family:monospace;">A3</strong></td>
+              <td><strong>범위 초과</strong></td>
+              <td style="color:#334155;">배터리 전압 - 시스템 전압 높음</td>
+              <td><span class="pill pill-blue" title="센서 단품 교체(96) 또는 12V 배터리 충전 및 알터네이터 전압 점검(A1~A3)">단품 교체 / 배터리</span></td>
+            </tr>
+        
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+
+    <!-- 그룹: 📋 8. 기본 고장 및 일반 시스템 계통 (세부 유형 미지정 기본 고장) -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon">📂</div>
+        <div class="card-title">📋 8. 기본 고장 및 일반 시스템 계통 (세부 유형 미지정 기본 고장)</div>
+      </div>
+      <p style="margin-bottom:14px;color:#475569;">세부적인 단선/단락 증상이 특정되지 않은 표준 기본 결함(00)이나 일반 전기/신호 오류입니다.</p>
+
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:130px;">DTC 코드</th>
+              <th style="width:110px;">뒤 2자리 (서브타입)</th>
+              <th style="width:220px;">시스템 표준 서브타입 명칭</th>
+              <th>실제 부품 설명문 (원천 데이터)</th>
+              <th style="width:150px;">정비 판정 및 진단 처방</th>
+            </tr>
+          </thead>
+          <tbody>
+    
+            <tr>
+              <td><code class="tag-code" style="color:#2563eb;font-size:13.5px;">C133A00</code></td>
+              <td><strong style="color:#2563eb;font-size:15px;font-family:monospace;">00</strong></td>
+              <td><strong>세부 유형 없음 (기본 고장)</strong></td>
+              <td style="color:#334155;">광각-전방 카메라 락 핀 오류 - 세부 특이사항 없음</td>
+              <td><span class="pill pill-green" title="시스템 기능 점검 매뉴얼(GSW) 기본 진단 트리 절차 수행">기본 절차 점검</span></td>
+            </tr>
+        
+            <tr>
+              <td><code class="tag-code" style="color:#2563eb;font-size:13.5px;">P0ABF01</code></td>
+              <td><strong style="color:#2563eb;font-size:15px;font-family:monospace;">01</strong></td>
+              <td><strong>성능 이상</strong></td>
+              <td style="color:#334155;">고전압 배터리 전류센서 성능이상</td>
+              <td><span class="pill pill-green" title="시스템 기능 점검 매뉴얼(GSW) 기본 진단 트리 절차 수행">기본 절차 점검</span></td>
+            </tr>
+        
+            <tr>
+              <td><code class="tag-code" style="color:#2563eb;font-size:13.5px;">C120102</code></td>
+              <td><strong style="color:#2563eb;font-size:15px;font-family:monospace;">02</strong></td>
+              <td><strong>일반 신호 오류</strong></td>
+              <td style="color:#334155;">앞좌측 휠속도센서 간헐적 작동범위/성능이상</td>
+              <td><span class="pill pill-green" title="시스템 기능 점검 매뉴얼(GSW) 기본 진단 트리 절차 수행">기본 절차 점검</span></td>
+            </tr>
+        
+            <tr>
+              <td><code class="tag-code" style="color:#2563eb;font-size:13.5px;">U00AD05</code></td>
+              <td><strong style="color:#2563eb;font-size:15px;font-family:monospace;">05</strong></td>
+              <td><strong>시스템 프로그램 고장</strong></td>
+              <td style="color:#334155;">OTA 리프로그래밍 제어 모듈 - 시스템 프로그램 고장</td>
+              <td><span class="pill pill-green" title="시스템 기능 점검 매뉴얼(GSW) 기본 진단 트리 절차 수행">기본 절차 점검</span></td>
+            </tr>
+        
+            <tr>
+              <td><code class="tag-code" style="color:#2563eb;font-size:13.5px;">C240207</code></td>
+              <td><strong style="color:#2563eb;font-size:15px;font-family:monospace;">07</strong></td>
+              <td><strong>기구적/기계적 고장</strong></td>
+              <td style="color:#334155;">모터펌프(전기계통) 이상</td>
+              <td><span class="pill pill-green" title="시스템 기능 점검 매뉴얼(GSW) 기본 진단 트리 절차 수행">기본 절차 점검</span></td>
+            </tr>
+        
+            <tr>
+              <td><code class="tag-code" style="color:#2563eb;font-size:13.5px;">C163808</code></td>
+              <td><strong style="color:#2563eb;font-size:15px;font-family:monospace;">08</strong></td>
+              <td><strong>통신 버스 신호/메시지 오류</strong></td>
+              <td style="color:#334155;">SCC 통신 이상</td>
+              <td><span class="pill pill-green" title="시스템 기능 점검 매뉴얼(GSW) 기본 진단 트리 절차 수행">기본 절차 점검</span></td>
+            </tr>
+        
+            <tr>
+              <td><code class="tag-code" style="color:#2563eb;font-size:13.5px;">B25020A</code></td>
+              <td><strong style="color:#2563eb;font-size:15px;font-family:monospace;">0A</strong></td>
+              <td><strong>2 : 배선 등 DC 회로 고장</strong></td>
+              <td style="color:#334155;">동승석 에어백 텔테일 램프(H/WIRE) - 일반적인 전기적인 고장 -2 : 배선 등 DC 회로 고장</td>
+              <td><span class="pill pill-green" title="시스템 기능 점검 매뉴얼(GSW) 기본 진단 트리 절차 수행">기본 절차 점검</span></td>
+            </tr>
+        
+            <tr>
+              <td><code class="tag-code" style="color:#2563eb;font-size:13.5px;">C110362</code></td>
+              <td><strong style="color:#2563eb;font-size:15px;font-family:monospace;">62</strong></td>
+              <td><strong>신호 비교 실패 (신호 불일치)</strong></td>
+              <td style="color:#334155;">이그니션 전원 이상</td>
+              <td><span class="pill pill-green" title="시스템 기능 점검 매뉴얼(GSW) 기본 진단 트리 절차 수행">기본 절차 점검</span></td>
+            </tr>
+        
+            <tr>
+              <td><code class="tag-code" style="color:#2563eb;font-size:13.5px;">C128364</code></td>
+              <td><strong style="color:#2563eb;font-size:15px;font-family:monospace;">64</strong></td>
+              <td><strong>신호 타당성 오류</strong></td>
+              <td style="color:#334155;">횡가속도/종가속도/요레이트 신호이상</td>
+              <td><span class="pill pill-green" title="시스템 기능 점검 매뉴얼(GSW) 기본 진단 트리 절차 수행">기본 절차 점검</span></td>
+            </tr>
+        
+            <tr>
+              <td><code class="tag-code" style="color:#2563eb;font-size:13.5px;">B164968</code></td>
+              <td><strong style="color:#2563eb;font-size:15px;font-family:monospace;">68</strong></td>
+              <td><strong>데이터 오류</strong></td>
+              <td style="color:#334155;">롤오버 충돌(SRSCM 교환) - 이벤트 정보</td>
+              <td><span class="pill pill-green" title="시스템 기능 점검 매뉴얼(GSW) 기본 진단 트리 절차 수행">기본 절차 점검</span></td>
+            </tr>
+        
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+
+    <!-- 서브타입 1초 판독 처방전 -->
+    <div class="rx-box">
+      <div class="rx-title">
+        <span>👨‍🔧 현장 정비사를 위한 1초 서브타입 판독 공식</span>
+      </div>
+      <ul class="rx-list">
+        <li><strong>뒤 2자리가 10번대(11~17, 1C)라면:</strong> 부품을 바꾸지 말고, <strong>양쪽 커넥터 핀 사이에 멀티미터 테스터기를 대고 도통 시험(저항 측정)</strong>을 하여 끊어진 전선을 찾아냅니다.</li>
+        <li><strong>뒤 2자리가 40번대(41~49) 또는 55, 04라면:</strong> <strong>컴퓨터(ECU) 기판 내부 불량</strong>이므로, 커넥터에서 전원/접지가 12V로 정상인지 확인한 후 안심하고 <strong>ECU 본체 단품을 교체</strong>합니다.</li>
+        <li><strong>뒤 2자리가 52번 또는 87번이라면:</strong> 부품은 정상이며 <strong>커넥터 결합 불량 또는 통신선 접촉 문제</strong>이므로, 커넥터를 세척하고 '딸깍' 소리가 나도록 다시 체결하여 해결합니다.</li>
+      </ul>
+    </div>
+
+  </div> <!-- // end of content-tab5 -->
+
 
 
   <footer>

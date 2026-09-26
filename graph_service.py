@@ -395,15 +395,15 @@ class KnowledgeGraphService:
             cnm = r["name"]
             rank_n = r["rank"]
             n_hit = r["n_hit"]
-            vtag = "✓검증 " if r.get("verified") else ""
+            vtag = "[검증] " if r.get("verified") else ""
             group = (
                 "conn_top1"
                 if rank_n == 1
                 else ("conn_top" if rank_n <= 3 else "conn")
             )
-            size = 42 if rank_n == 1 else (26 if rank_n <= 3 else 20)
-            shape = "star" if rank_n == 1 else "dot"
-            display_name = cnm[:20] + ("…" if len(cnm) > 20 else "")
+            size = 32 if rank_n == 1 else (24 if rank_n <= 3 else 18)
+            short_name = cnm.split("/")[0].strip() if "/" in cnm else cnm
+            display_name = short_name[:18] + ("…" if len(short_name) > 18 else "")
 
             add_node(
                 nid=cid,
@@ -411,7 +411,7 @@ class KnowledgeGraphService:
                 group=group,
                 title=f"{vtag}커넥터: {cnm}\n연결 DTC: {n_hit}/{n_valid}개\n순위: #{rank_n}\n점수: {r['final_score']}",
                 size=size,
-                shape=shape,
+                shape="box",
                 level=2,
             )
 
@@ -423,7 +423,7 @@ class KnowledgeGraphService:
             for nid in info["nids"]:
                 ecu_name_inst = self.node_by_id.get(nid, {}).get("ecu_name", "?")
                 dtc_vis_id = f"VIS_DTC::{nid}"
-                dtc_label = f"{code}\n[{ecu_name_inst}]"
+                dtc_label = code
                 dtc_title = (
                     f"DTC: {code}  ECU: {ecu_name_inst}\n"
                     f"카테고리: {cat}\n{info['desc']}"
@@ -443,8 +443,8 @@ class KnowledgeGraphService:
                         dtc_label,
                         "dtc_input",
                         dtc_title,
-                        size=24,
-                        shape="diamond",
+                        size=22,
+                        shape="box",
                         level=0,
                     )
                     add_node(
@@ -484,8 +484,8 @@ class KnowledgeGraphService:
                         dtc_label,
                         "dtc_input",
                         dtc_title,
-                        size=24,
-                        shape="diamond",
+                        size=22,
+                        shape="box",
                         level=0,
                     )
                     for conn_id in direct_conns:

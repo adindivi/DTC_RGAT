@@ -182,14 +182,14 @@ header{background:var(--surface);border-bottom:1px solid var(--hairline);padding
 .tag-input-wrap{flex:1;min-width:260px;background:var(--fog);border:1px solid var(--hairline-strong);border-radius:10px;padding:6px 10px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;cursor:text;min-height:40px;}
 .tag-input-wrap:focus-within{border-color:var(--primary);box-shadow:0 0 0 3px rgba(0,113,227,.12);}
 .dtc-tag{background:rgba(0,113,227,.1);border:1px solid rgba(0,113,227,.25);color:var(--primary);padding:3px 10px;border-radius:980px;font-size:12px;font-weight:600;display:flex;align-items:center;gap:5px;}
-.dtc-tag .rm{cursor:pointer;color:var(--muted);font-size:13px;line-height:1;}
-.dtc-tag .rm:hover{color:var(--danger);}
+.dtc-tag .rm{cursor:pointer;color:var(--muted);width:15px;height:15px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;transition:all .15s ease;margin-left:2px;}
+.dtc-tag .rm:hover{background:rgba(255,59,48,.12);color:var(--danger);}
 .tag-input-wrap input{border:none;background:transparent;color:var(--fg);font-size:13px;outline:none;min-width:140px;flex:1;font-family:inherit;}
 .tag-input-wrap input::placeholder{color:var(--muted);}
-.btn-analyze{background:var(--primary);color:var(--on-primary);border:none;border-radius:980px;padding:10px 22px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;transition:background .15s ease;font-family:inherit;}
+.btn-analyze{background:var(--primary);color:var(--on-primary);border:none;border-radius:980px;padding:10px 22px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;transition:background .15s ease;font-family:inherit;display:inline-flex;align-items:center;justify-content:center;gap:6px;}
 .btn-analyze:hover{background:#0077ed;}
 .btn-analyze:disabled{background:#c7c7cc;color:#8e8e93;cursor:not-allowed;}
-.btn-clear{background:transparent;color:var(--link);border:1px solid var(--link);border-radius:980px;padding:9px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:background .15s ease;}
+.btn-clear{background:transparent;color:var(--link);border:1px solid var(--link);border-radius:980px;padding:9px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:background .15s ease;display:inline-flex;align-items:center;justify-content:center;gap:6px;}
 .btn-clear:hover{background:rgba(0,102,204,.06);}
 
 /* 자동완성 드롭다운 */
@@ -211,7 +211,7 @@ header{background:var(--surface);border-bottom:1px solid var(--hairline);padding
 .main{display:flex;flex:1;overflow:hidden;}
 .left-panel{width:310px;min-width:310px;background:var(--surface);border-right:1px solid var(--hairline);display:flex;flex-direction:column;overflow:hidden;}
 .tabs-wrap{display:flex;border-bottom:1px solid var(--hairline);}
-.tab-btn{flex:1;padding:11px;text-align:center;font-size:12px;font-weight:600;cursor:pointer;color:var(--muted);border-bottom:2px solid transparent;}
+.tab-btn{flex:1;padding:11px;text-align:center;font-size:12px;font-weight:600;cursor:pointer;color:var(--muted);border-bottom:2px solid transparent;display:flex;align-items:center;justify-content:center;gap:6px;}
 .tab-btn.active{color:var(--primary);border-bottom-color:var(--primary);}
 .panel-body{flex:1;overflow-y:auto;padding:12px;}
 .panel-body::-webkit-scrollbar{width:4px;}
@@ -242,18 +242,17 @@ header{background:var(--surface);border-bottom:1px solid var(--hairline);padding
 .dtc-desc{font-size:11px;color:var(--muted);margin-top:3px;}
 
 /* ── 중앙: 마인드맵 ── */
-.map-area{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;min-height:0;background:var(--fog);}
-.map-toolbar{padding:8px 14px;background:var(--surface);border-bottom:1px solid var(--hairline);display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.map-area{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;min-height:0;background:#f8fafc;}
+.map-toolbar{padding:8px 16px;background:var(--surface);border-bottom:1px solid var(--hairline);display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
 .map-toolbar span{font-size:12px;color:var(--muted);}
-.tb-btn{background:var(--surface);border:1px solid var(--hairline-strong);color:var(--fg);border-radius:980px;padding:6px 14px;font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;transition:all .15s ease;}
+.tb-btn{background:var(--surface);border:1px solid var(--hairline-strong);color:var(--fg);border-radius:980px;padding:6px 14px;font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;transition:all .15s ease;display:inline-flex;align-items:center;justify-content:center;gap:6px;}
 .tb-btn:hover{border-color:var(--primary);color:var(--primary);}
-.legend{display:flex;gap:14px;flex-wrap:wrap;margin-left:auto;}
-.leg-item{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted);}
-.leg-dot{width:8px;height:8px;border-radius:50%;}
+.legend{display:flex;gap:12px;flex-wrap:wrap;margin-left:auto;}
+.leg-item{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted);font-weight:500;}
+.leg-pill{width:14px;height:8px;border-radius:980px;display:inline-block;}
 #network{flex:1;}
 
-.state-msg{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:10px;color:var(--muted);}
-.state-msg .mark{width:40px;height:40px;border-radius:50%;border:1.5px solid var(--hairline-strong);display:flex;align-items:center;justify-content:center;color:var(--primary);font-size:16px;font-weight:600;}
+.state-msg{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:8px;color:var(--muted);text-align:center;padding:20px;}
 .state-msg p{font-size:13px;}
 
 /* ── 로딩 오버레이 ── */
@@ -266,10 +265,10 @@ header{background:var(--surface);border-bottom:1px solid var(--hairline);padding
 .modal-overlay.active{opacity:1;pointer-events:auto;}
 .modal-card{background:var(--surface);width:90%;max-width:440px;border-radius:16px;padding:24px;box-shadow:0 12px 32px rgba(0,0,0,.15);display:flex;flex-direction:column;gap:16px;}
 .modal-header{display:flex;align-items:center;gap:10px;}
-.modal-icon{font-size:22px;}
+.modal-icon{display:flex;align-items:center;justify-content:center;}
 .modal-title{font-size:16px;font-weight:600;color:var(--fg);flex:1;}
-.modal-close{background:none;border:none;font-size:18px;color:var(--muted);cursor:pointer;padding:4px;}
-.modal-close:hover{color:var(--fg);}
+.modal-close{background:none;border:none;color:var(--muted);cursor:pointer;padding:6px;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:all .15s ease;}
+.modal-close:hover{background:var(--fog);color:var(--fg);}
 .modal-body{font-size:13px;color:var(--secondary);line-height:1.5;}
 .modal-highlight-box{background:var(--fog);border:1px solid var(--hairline-strong);border-radius:8px;padding:10px 12px;margin-top:8px;font-family:monospace;color:var(--danger);font-size:12px;word-break:break-all;}
 .modal-footer{display:flex;gap:8px;justify-content:flex-end;margin-top:6px;}
@@ -300,9 +299,11 @@ header{background:var(--surface);border-bottom:1px solid var(--hairline);padding
 <div class="modal-overlay" id="app-modal">
   <div class="modal-card">
     <div class="modal-header">
-      <div class="modal-icon" id="modal-icon">⚠️</div>
+      <div class="modal-icon" id="modal-icon"></div>
       <h3 class="modal-title" id="modal-title">알림</h3>
-      <button class="modal-close" onclick="closeModal()">✕</button>
+      <button class="modal-close" onclick="closeModal()" aria-label="닫기">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
     </div>
     <div class="modal-body" id="modal-body"></div>
     <div class="modal-footer" id="modal-footer">
@@ -319,12 +320,21 @@ header{background:var(--surface);border-bottom:1px solid var(--hairline);padding
   <div class="logo display"><span class="mark"></span>DTC Knowledge Graph</div>
   <div class="input-area">
     <div class="tag-input-wrap" id="tag-wrap" onclick="document.getElementById('dtc-input').focus()">
-      <input id="dtc-input" placeholder="DTC 코드 입력 (예: C136887)  ↵ Enter" autocomplete="off" spellcheck="false">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--muted);flex-shrink:0;margin-left:2px;"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+      <input id="dtc-input" placeholder="DTC 코드 입력 (예: C136887, Enter 추가)" autocomplete="off" spellcheck="false">
     </div>
     <div class="autocomplete" id="ac-dropdown"></div>
     <button class="btn-analyze" id="btn-analyze" onclick="doAnalyze()">분석하기</button>
-    <button class="btn-clear" onclick="clearAll()">초기화</button>
-    <a href="/report" target="_blank" style="text-decoration:none;"><button class="btn-clear" style="color:var(--primary);font-weight:700;">📖 원리해설서</button></a>
+    <button class="btn-clear" onclick="clearAll()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
+      초기화
+    </button>
+    <a href="/report" target="_blank" style="text-decoration:none;">
+      <button class="btn-clear" style="color:var(--primary);font-weight:700;">
+        원리해설서
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
+      </button>
+    </a>
   </div>
 </header>
 
@@ -332,7 +342,7 @@ header{background:var(--surface);border-bottom:1px solid var(--hairline);padding
 <div class="examples-bar">
   <span style="font-size:11px;color:var(--muted);font-weight:600;">예시</span>
   <div class="examples">
-    <button class="ex-btn" style="border-color:#2563eb;color:#2563eb;font-weight:700;" onclick="setExample(['B100552','C128387','C164387','C166987'])">⚡ ACU_B 연쇄 폭발 (4개 제어기)</button>
+    <button class="ex-btn" style="border-color:#2563eb;color:#2563eb;font-weight:700;" onclick="setExample(['B100552','C128387','C164387','C166987'])">ACU_B 연쇄 고장 (4개 제어기)</button>
     <button class="ex-btn" onclick="setExample(['C136887','B160300','C128387','U029387'])">B-CAN 통신 다발</button>
     <button class="ex-btn" onclick="setExample(['C162887','C161487','C128387','C161C86'])">C-CAN 관련 다발</button>
     <button class="ex-btn" onclick="setExample(['B160300','C110216','C110117'])">배터리 전원 관련</button>
@@ -345,8 +355,14 @@ header{background:var(--surface);border-bottom:1px solid var(--hairline);padding
   <!-- 좌측 패널 -->
   <div class="left-panel">
     <div class="tabs-wrap">
-      <div id="tab-rc" class="tab-btn active" onclick="switchTab('rc')">근본원인 순위</div>
-      <div id="tab-dtc" class="tab-btn" onclick="switchTab('dtc')">DTC 정보</div>
+      <div id="tab-rc" class="tab-btn active" onclick="switchTab('rc')">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+        근본원인 순위
+      </div>
+      <div id="tab-dtc" class="tab-btn" onclick="switchTab('dtc')">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+        DTC 정보
+      </div>
     </div>
     <div class="panel-body" id="panel-rc">
       <div style="color:var(--muted);font-size:13px;margin-top:20px;text-align:center;">DTC 코드를 입력하고<br>분석하기를 눌러주세요</div>
@@ -359,25 +375,41 @@ header{background:var(--surface);border-bottom:1px solid var(--hairline);padding
   <!-- 중앙 마인드맵 -->
   <div class="map-area">
     <div class="map-toolbar">
-      <button class="tb-btn" onclick="fitNetwork()">전체 보기</button>
-      <button class="tb-btn" id="layout-btn" onclick="toggleLayout()">계층형 보기</button>
-      <button class="tb-btn" onclick="togglePhysics()">물리엔진 켜기/끄기</button>
+      <button class="tb-btn" onclick="fitNetwork()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"></polyline><polyline points="9 21 3 21 3 15"></polyline><line x1="21" y1="3" x2="14" y2="10"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>
+        전체 보기
+      </button>
+      <button class="tb-btn" id="layout-btn" onclick="toggleLayout()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="6" y1="3" x2="6" y2="15"></line><circle cx="18" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><path d="M18 9a9 9 0 0 1-9 9"></path></svg>
+        <span>계층형 마인드맵</span>
+      </button>
+      <button class="tb-btn" onclick="togglePhysics()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+        물리엔진 켜기/끄기
+      </button>
       <span id="node-count-info">노드 0개 · 엣지 0개</span>
       <div class="legend">
-        <div class="leg-item"><div class="leg-dot" style="background:#ffffff;border:1.5px solid var(--danger);border-radius:2px;transform:rotate(45deg);width:8px;height:8px;"></div>입력 DTC (◆)</div>
-        <div class="leg-item"><div class="leg-dot" style="background:#ffffff;border:1.5px solid var(--secondary);border-radius:2px;width:10px;height:8px;"></div>ECU (▭)</div>
-        <div class="leg-item"><div class="leg-dot" style="background:#ffffff;border:1.5px solid #86868b;"></div>커넥터 (●)</div>
-        <div class="leg-item"><div class="leg-dot" style="background:var(--primary);border:2px solid var(--primary);width:11px;height:11px;"></div>#1 근본원인 (★)</div>
-        <div class="leg-item"><div style="width:18px;height:0;border-top:2px solid #8e8e93;"></div>SW_LOGIC (진단 로직)</div>
-        <div class="leg-item"><div style="width:18px;height:0;border-top:2px solid var(--primary);"></div>검증된 배선</div>
-        <div class="leg-item"><div style="width:18px;height:0;border-top:2px dashed var(--muted);"></div>추론된 배선</div>
+        <div class="leg-item"><div class="leg-pill" style="background:#fee2e2;border:1.5px solid #f87171;"></div>증상 DTC</div>
+        <div class="leg-item"><div class="leg-pill" style="background:#ffedd5;border:1.5px solid #fb923c;"></div>담당 ECU</div>
+        <div class="leg-item"><div class="leg-pill" style="background:#e0f2fe;border:1.5px solid #7dd3fc;"></div>커넥터</div>
+        <div class="leg-item"><div class="leg-pill" style="background:#1e293b;border:1.5px solid #0f172a;"></div>#1 근본원인</div>
+        <div class="leg-item"><div style="width:16px;height:0;border-top:2px solid #8e8e93;"></div>SW_LOGIC</div>
+        <div class="leg-item"><div style="width:16px;height:0;border-top:2px solid #0071e3;"></div>검증 배선</div>
+        <div class="leg-item"><div style="width:16px;height:0;border-top:2px dashed #8e8e93;"></div>추론 배선</div>
       </div>
     </div>
     <div id="network-wrap" style="flex:1;position:relative;min-height:0;">
       <div class="state-msg" id="state-msg" style="position:absolute;inset:0;display:flex;">
-        <div class="mark">→</div>
-        <p>위에서 DTC 코드를 입력하고 <strong>분석하기</strong>를 클릭하세요</p>
-        <p style="font-size:12px;">예시 버튼을 눌러 빠르게 시작할 수 있습니다</p>
+        <div style="width:48px;height:48px;border-radius:14px;background:rgba(0,113,227,0.06);border:1px solid rgba(0,113,227,0.14);display:flex;align-items:center;justify-content:center;margin-bottom:6px;">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="6" y1="3" x2="6" y2="15"></line>
+            <circle cx="18" cy="6" r="3"></circle>
+            <circle cx="6" cy="18" r="3"></circle>
+            <path d="M18 9a9 9 0 0 1-9 9"></path>
+          </svg>
+        </div>
+        <p style="font-weight:600;color:var(--fg);font-size:14px;">DTC 진단 코드를 입력하고 분석하세요</p>
+        <p style="font-size:12px;color:var(--muted);">상단 예시 버튼을 클릭하면 3단계 계층 마인드맵이 즉시 펼쳐집니다</p>
       </div>
       <div id="network" style="position:absolute;inset:0;display:none;"></div>
     </div>
@@ -417,7 +449,7 @@ function addTag(inputStr) {
       const span = document.createElement('span');
       span.className = 'dtc-tag';
       span.dataset.code = code;
-      span.innerHTML = `${code} <span class="rm" onclick="removeTag('${code}')">✕</span>`;
+      span.innerHTML = `${code} <span class="rm" onclick="removeTag('${code}')"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></span>`;
       wrap.insertBefore(span, inp);
     }
   });
@@ -551,7 +583,7 @@ async function doAnalyze() {
   } catch(e) {
     showModal({
       title: '네트워크 연결 오류',
-      icon: '🔌',
+      type: 'error',
       body: `서버와 통신할 수 없습니다.<br><small style="color:var(--muted);">${e.message}</small>`,
       confirmText: '확인'
     });
@@ -565,7 +597,7 @@ function handleApiError(data) {
   if (data.unknown && data.unknown.length > 0) {
     showModal({
       title: '미등록 DTC 코드 안내',
-      icon: '⚠️',
+      type: 'warn',
       body: `입력하신 다음 코드는 지식 그래프 마스터 데이터에 등록되어 있지 않습니다:
              <div class="modal-highlight-box">${data.unknown.join(', ')}</div>
              <p style="margin-top:8px;">입력창의 자동완성 추천 목록에서 올바른 표준 코드를 선택해주세요.</p>`,
@@ -574,7 +606,7 @@ function handleApiError(data) {
   } else {
     showModal({
       title: '분석 요청 실패',
-      icon: '❌',
+      type: 'error',
       body: `<p>${data.error || '요청을 처리할 수 없습니다.'}</p>${data.detail ? `<div class="modal-highlight-box">${data.detail}</div>` : ''}`,
       confirmText: '확인'
     });
@@ -584,7 +616,7 @@ function handleApiError(data) {
 function showUnknownCodesModal(unknownCodes, validData) {
   showModal({
     title: '미등록 코드 안내',
-    icon: 'ℹ️',
+    type: 'info',
     body: `다음 코드는 마스터 데이터에 없어 분석에서 제외되었습니다:
            <div class="modal-highlight-box">${unknownCodes.join(', ')}</div>
            <p style="margin-top:8px;">나머지 유효한 <strong>${validData.dtc_info.length}개 코드</strong>로 정상 분석을 수행했습니다.</p>`,
@@ -606,7 +638,7 @@ function renderRCPanel(data) {
   const n   = data.dtc_info.length;
   let html = '';
   if (top) {
-    const vbadge = top.verified ? ' <span style="font-size:10px;background:rgba(0,113,227,.1);color:var(--primary);padding:1px 8px;border-radius:980px;font-weight:600;">마스터 검증</span>' : '';
+    const vbadge = top.verified ? ' <span style="font-size:10px;background:rgba(0,113,227,.1);color:var(--primary);padding:2px 8px;border-radius:980px;font-weight:600;display:inline-flex;align-items:center;gap:3px;"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><polyline points="9 12 11 14 15 10"></polyline></svg>마스터 검증</span>' : '';
     html += `<div style="background:rgba(0,113,227,.05);border:1px solid rgba(0,113,227,.2);border-radius:12px;padding:12px 14px;margin-bottom:12px;">
       <div style="font-size:10px;font-weight:600;color:var(--primary);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px;">1순위 근본원인 후보</div>
       <div style="font-size:14px;font-weight:600;word-break:break-all;color:var(--fg);">${top.name}${vbadge}</div>
@@ -618,7 +650,7 @@ function renderRCPanel(data) {
     const rnk = r.rank===1 ? 'r1' : '';
     const dots = data.dtc_info.map(d =>
       `<span class="rc-dot ${r.hit_codes.includes(d.code)?'hit':'miss'}">${d.code}</span>`).join('');
-    const vmark = r.verified ? '<span style="font-size:10px;background:rgba(0,113,227,.1);color:var(--primary);padding:1px 7px;border-radius:980px;margin-left:6px;font-weight:600;">검증</span>' : '';
+    const vmark = r.verified ? '<span style="font-size:10px;background:rgba(0,113,227,.1);color:var(--primary);padding:1px 7px;border-radius:980px;margin-left:6px;font-weight:600;display:inline-flex;align-items:center;gap:3px;"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><polyline points="9 12 11 14 15 10"></polyline></svg>검증</span>' : '';
     const reachBadge = (!r.verified && r.is_reachable) ? '<span style="font-size:10px;background:rgba(52,199,89,.12);color:#2e7d32;padding:1px 7px;border-radius:980px;margin-left:6px;font-weight:600;">배선일치</span>' : '';
     const scoreStr = r.verified ? '<span style="font-size:11px;color:var(--primary);font-weight:600;">마스터 직접 매핑</span>' : r.final_score.toFixed(3);
     html += `<div class="rc-card ${cls}" onclick="focusConn('${r.conn_id}')">
@@ -667,37 +699,128 @@ function renderDTCPanel(data) {
   document.getElementById('panel-dtc').innerHTML = html;
 }
 
-// ── vis.js 시각화 ──────────────────────────────────────────
+// ── vis.js 마인드맵 스타일 시각화 ─────────────────────────────
 const GROUPS = {
-  ecu:       {color:{background:'#ffffff',border:'#6e6e73'},shape:'box',borderWidth:1.5,font:{color:'#1d1d1f',size:12,face:'SF Pro Text, -apple-system, sans-serif'}},
-  conn:      {color:{background:'#ffffff',border:'#86868b'},shape:'dot',borderWidth:1.5,font:{color:'#1d1d1f',size:10,face:'SF Pro Text, -apple-system, sans-serif'}},
-  conn_top:  {color:{background:'#ffffff',border:'#0071e3'},shape:'dot',borderWidth:2,font:{color:'#1d1d1f',size:11,face:'SF Pro Text, -apple-system, sans-serif'}},
-  conn_top1: {color:{background:'#0071e3',border:'#0071e3',highlight:{background:'#0077ed',border:'#0077ed'}},shape:'star',borderWidth:3,font:{color:'#ffffff',size:13,bold:true,face:'SF Pro Text, -apple-system, sans-serif'}},
+  dtc_input: {
+    shape: 'box',
+    shapeProperties: { borderRadius: 20 },
+    margin: { top: 9, bottom: 9, left: 18, right: 18 },
+    color: {
+      background: '#fee2e2',
+      border: '#fca5a5',
+      highlight: { background: '#fecaca', border: '#f87171' }
+    },
+    borderWidth: 1.5,
+    font: {
+      color: '#991b1b',
+      size: 13,
+      bold: true,
+      face: 'Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
+    },
+    shadow: { enabled: true, color: 'rgba(0,0,0,0.04)', size: 6, x: 0, y: 2 }
+  },
+  ecu: {
+    shape: 'box',
+    shapeProperties: { borderRadius: 20 },
+    margin: { top: 9, bottom: 9, left: 18, right: 18 },
+    color: {
+      background: '#ffedd5',
+      border: '#fdba74',
+      highlight: { background: '#fed7aa', border: '#fb923c' }
+    },
+    borderWidth: 1.5,
+    font: {
+      color: '#9a3412',
+      size: 13,
+      bold: true,
+      face: 'Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
+    },
+    shadow: { enabled: true, color: 'rgba(0,0,0,0.04)', size: 6, x: 0, y: 2 }
+  },
+  conn_top1: {
+    shape: 'box',
+    shapeProperties: { borderRadius: 22 },
+    margin: { top: 11, bottom: 11, left: 22, right: 22 },
+    color: {
+      background: '#1e293b',
+      border: '#0f172a',
+      highlight: { background: '#0f172a', border: '#020617' }
+    },
+    borderWidth: 2,
+    font: {
+      color: '#ffffff',
+      size: 14,
+      bold: true,
+      face: 'Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
+    },
+    shadow: { enabled: true, color: 'rgba(30,41,59,0.35)', size: 10, x: 0, y: 3 }
+  },
+  conn_top: {
+    shape: 'box',
+    shapeProperties: { borderRadius: 20 },
+    margin: { top: 8, bottom: 8, left: 16, right: 16 },
+    color: {
+      background: '#e0f2fe',
+      border: '#7dd3fc',
+      highlight: { background: '#bae6fd', border: '#38bdf8' }
+    },
+    borderWidth: 1.5,
+    font: {
+      color: '#0369a1',
+      size: 12,
+      bold: true,
+      face: 'Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
+    },
+    shadow: { enabled: true, color: 'rgba(0,0,0,0.04)', size: 5, x: 0, y: 2 }
+  },
+  conn: {
+    shape: 'box',
+    shapeProperties: { borderRadius: 20 },
+    margin: { top: 7, bottom: 7, left: 14, right: 14 },
+    color: {
+      background: '#f1f5f9',
+      border: '#cbd5e1',
+      highlight: { background: '#e2e8f0', border: '#94a3b8' }
+    },
+    borderWidth: 1,
+    font: {
+      color: '#475569',
+      size: 11,
+      face: 'Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
+    }
+  }
 };
 
 function buildNetwork(data) {
-  const vn = new vis.DataSet(data.vis_nodes.map(n => {
-    const base = {
-      id: n.id, label: n.label, title: n.title, size: n.size,
-      shape: n.shape, level: n.level,
-      font: {face:'SF Pro Text, -apple-system, sans-serif'},
-    };
-    if (n.group === 'dtc_input') {
-      base.color = {background:'#ffffff', border:'#ff3b30', highlight:{background:'#fff5f4', border:'#ff3b30'}};
-      base.font  = {color:'#1d1d1f', size:11, face:'SF Pro Text, -apple-system, sans-serif'};
-    } else {
-      base.group = n.group;
-    }
-    return base;
-  }));
-
-  const ve = new vis.DataSet(data.vis_edges.map((e,i) => ({
-    id: i, from: e.from, to: e.to,
-    color: e.color, width: e.width,
-    arrows: e.arrows, title: e.title,
-    dashes: e.dashes || false,
-    smooth: {type:'cubicBezier', forceDirection:'horizontal', roundness:.4},
+  const vn = new vis.DataSet(data.vis_nodes.map(n => ({
+    id: n.id,
+    label: n.label,
+    title: n.title,
+    shape: 'box',
+    shapeProperties: { borderRadius: n.group === 'conn_top1' ? 22 : 18 },
+    margin: n.group === 'conn_top1' ? { top: 11, bottom: 11, left: 22, right: 22 } : { top: 8, bottom: 8, left: 16, right: 16 },
+    level: n.level,
+    group: n.group
   })));
+
+  const ve = new vis.DataSet(data.vis_edges.map((e,i) => {
+    const isDirect = e.title && e.title.includes('HW_MAP');
+    const isWire = e.title && e.title.includes('HW_WIRE');
+    let edgeColor = '#94a3b8';
+    if (isDirect) edgeColor = '#2563eb';
+    else if (isWire) edgeColor = e.dashes ? '#93c5fd' : '#3b82f6';
+    else edgeColor = '#cbd5e1';
+
+    return {
+      id: i, from: e.from, to: e.to,
+      color: { color: edgeColor, highlight: '#2563eb', hover: '#2563eb' },
+      width: isDirect ? 2.8 : (isWire ? 2.2 : 1.8),
+      arrows: { to: { enabled: false } },
+      title: e.title,
+      dashes: e.dashes || false,
+      smooth: { type: 'cubicBezier', forceDirection: 'horizontal', roundness: 0.6 },
+    };
+  }));
 
   const container = document.getElementById('network');
   document.getElementById('state-msg').style.display = 'none';
@@ -713,9 +836,9 @@ function buildNetwork(data) {
           enabled: hierarchicalOn,
           direction: 'LR',
           sortMethod: 'directed',
-          levelSeparation: 220,
-          nodeSpacing: 90,
-          treeSpacing: 130,
+          levelSeparation: 260,
+          nodeSpacing: 70,
+          treeSpacing: 90,
           blockShifting: true,
           edgeMinimization: true,
         },
@@ -725,8 +848,8 @@ function buildNetwork(data) {
         barnesHut: {gravitationalConstant:-4000, centralGravity:.3, springLength:200, damping:.1},
         stabilization: {iterations:350, fit:true},
       },
-      interaction: {hover:true, tooltipDelay:80, navigationButtons:false, keyboard:true},
-      nodes: {borderWidth:2, shadow:false},
+      interaction: {hover:true, tooltipDelay:60, navigationButtons:false, keyboard:true},
+      nodes: {borderWidth:1.5},
       edges: {shadow:false, hoverWidth:2.5},
     });
 
@@ -751,8 +874,13 @@ function togglePhysics() {
 }
 function toggleLayout() {
   hierarchicalOn = !hierarchicalOn;
-  document.getElementById('layout-btn').textContent =
-    hierarchicalOn ? '계층형 보기' : '자유 배치';
+  const label = hierarchicalOn ? '계층형 마인드맵' : '자유 방사형';
+  const span = document.querySelector('#layout-btn span');
+  if (span) {
+    span.textContent = label;
+  } else {
+    document.getElementById('layout-btn').textContent = label;
+  }
   if (lastResult) buildNetwork(lastResult);
 }
 function focusConn(connId) {
@@ -765,9 +893,19 @@ function focusConn(connId) {
 }
 
 // ── 모달 & 토스트 시스템 ──────────────────────────────────────
-function showModal({title, icon, body, confirmText}) {
+function showModal({title, type = 'info', icon, body, confirmText}) {
   document.getElementById('modal-title').textContent = title || '알림';
-  document.getElementById('modal-icon').textContent = icon || 'ℹ️';
+  
+  // 핀테크 스타일 고정밀 벡터 아이콘 렌더링
+  let iconSvg = '';
+  if (type === 'warn' || icon === '⚠️') {
+    iconSvg = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>`;
+  } else if (type === 'error' || icon === '❌' || icon === '🔌') {
+    iconSvg = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>`;
+  } else {
+    iconSvg = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>`;
+  }
+  document.getElementById('modal-icon').innerHTML = iconSvg;
   document.getElementById('modal-body').innerHTML = body || '';
   const footer = document.getElementById('modal-footer');
   footer.innerHTML = `<button class="modal-btn primary" onclick="closeModal()">${confirmText || '확인'}</button>`;
