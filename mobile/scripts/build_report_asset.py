@@ -1,33 +1,18 @@
 # -*- coding: utf-8 -*-
 """
-Sync assets between web templates/static and Android main assets.
-- syncs index.html with local asset references
-- bundles whitepaper (최종정리.html) as report.html with sticky mobile nav bar
+Build and bundle mobile report.html from root 최종정리.html.
+Ensures 100% offline standalone capability on Android and mobile browsers.
 """
 from pathlib import Path
 
 ROOT_DIR = Path(__file__).resolve().parent.parent.parent
-TEMPLATE_INDEX = ROOT_DIR / "mobile" / "templates" / "index.html"
-ASSET_INDEX = ROOT_DIR / "mobile" / "app" / "src" / "main" / "assets" / "index.html"
 SOURCE_REPORT = ROOT_DIR / "최종정리.html"
 STATIC_REPORT = ROOT_DIR / "mobile" / "static" / "report.html"
 ASSET_REPORT = ROOT_DIR / "mobile" / "app" / "src" / "main" / "assets" / "report.html"
 
-def sync_index():
-    with open(TEMPLATE_INDEX, "r", encoding="utf-8") as f:
-        content = f.read()
-
-    asset_content = content.replace('src="/static/dtc_ondevice_engine.js"', 'src="dtc_ondevice_engine.js"')
-    asset_content = asset_content.replace('src="/static/vis-network.min.js"', 'src="vis-network.min.js"')
-
-    ASSET_INDEX.parent.mkdir(parents=True, exist_ok=True)
-    with open(ASSET_INDEX, "w", encoding="utf-8") as f:
-        f.write(asset_content)
-    print(f"Updated Android assets index.html successfully ({len(asset_content):,} bytes)")
-
-def sync_report():
+def main():
     if not SOURCE_REPORT.exists():
-        print(f"Warning: {SOURCE_REPORT} does not exist.")
+        print(f"Error: {SOURCE_REPORT} does not exist!")
         return
 
     with open(SOURCE_REPORT, "r", encoding="utf-8") as f:
@@ -40,7 +25,7 @@ def sync_report():
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
     DTC Mobile 진단으로 복귀
   </a>
-  <span style="font-size: 11px; font-weight: 700; color: #34d399; background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.3); padding: 3px 8px; border-radius: 980px; display: inline-flex; align-items: center; gap: 4px;"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>100% 오프라인 해설서</span>
+  <span style="font-size: 11px; font-weight: 700; color: #34d399; background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.3); padding: 3px 8px; border-radius: 980px;">⚡ 100% 오프라인 해설서</span>
 </div>
 """
 
@@ -88,18 +73,18 @@ body { margin: 0 !important; padding: 0 0 30px 0 !important; }
     if "<body>" in html:
         html = html.replace("<body>", "<body>\n" + mobile_nav_header, 1)
 
+    # Change root link to relative index.html
     html = html.replace('href="/" class="tool-btn primary"', 'href="index.html" class="tool-btn primary"')
 
     STATIC_REPORT.parent.mkdir(parents=True, exist_ok=True)
     with open(STATIC_REPORT, "w", encoding="utf-8") as f:
         f.write(html)
+    print(f"Generated {STATIC_REPORT} ({len(html):,} bytes)")
 
     ASSET_REPORT.parent.mkdir(parents=True, exist_ok=True)
     with open(ASSET_REPORT, "w", encoding="utf-8") as f:
         f.write(html)
-
-    print(f"Updated mobile static & android assets report.html successfully ({len(html):,} bytes)")
+    print(f"Generated {ASSET_REPORT} ({len(html):,} bytes)")
 
 if __name__ == "__main__":
-    sync_index()
-    sync_report()
+    main()

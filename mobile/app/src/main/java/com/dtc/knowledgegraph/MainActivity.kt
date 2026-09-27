@@ -74,6 +74,7 @@ class MainActivity : AppCompatActivity() {
         btnChangeIp = findViewById(R.id.btnChangeIp)
 
         swipeRefresh.setColorSchemeResources(R.color.primary)
+        swipeRefresh.isEnabled = false
         tvCurrentServer.text = currentUrl
     }
 
@@ -105,6 +106,20 @@ class MainActivity : AppCompatActivity() {
 
     private fun configureWebViewClients() {
         webView.webViewClient = object : WebViewClient() {
+            override fun shouldOverrideUrlLoading(
+                view: WebView?,
+                request: WebResourceRequest?
+            ): Boolean {
+                val url = request?.url?.toString() ?: return false
+                if (url.startsWith("file:///android_asset/")) {
+                    return false
+                }
+                if (url.startsWith("http://") || url.startsWith("https://")) {
+                    return false
+                }
+                return false
+            }
+
             override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
                 progressBar.visibility = View.VISIBLE
                 layoutError.visibility = View.GONE
@@ -121,10 +136,20 @@ class MainActivity : AppCompatActivity() {
                 error: WebResourceError?
             ) {
                 if (request?.isForMainFrame == true) {
-                    progressBar.visibility = View.GONE
-                    swipeRefresh.isRefreshing = false
-                    layoutError.visibility = View.VISIBLE
-                    tvCurrentServer.text = currentUrl
+                    val reqUrl = request.url?.toString() ?: ""
+                    if (reqUrl.startsWith("http://", ignoreCase = true) ||
+                        reqUrl.startsWith("https://", ignoreCase = true)
+                    ) {
+                        progressBar.visibility = View.GONE
+                        swipeRefresh.isRefreshing = false
+                        layoutError.visibility = View.VISIBLE
+                        tvCurrentServer.text = reqUrl
+                    } else if (reqUrl == DEFAULT_URL) {
+                        progressBar.visibility = View.GONE
+                        swipeRefresh.isRefreshing = false
+                        layoutError.visibility = View.VISIBLE
+                        tvCurrentServer.text = reqUrl
+                    }
                 }
             }
         }
@@ -140,9 +165,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupListeners() {
-        swipeRefresh.setOnRefreshListener {
-            loadServerUrl(currentUrl)
-        }
+        // Disable pull-to-refresh completely to prevent accidental reloads when sliding down
+        swipeRefresh.isEnabled = false
 
         btnRetry.setOnClickListener {
             loadServerUrl(currentUrl)

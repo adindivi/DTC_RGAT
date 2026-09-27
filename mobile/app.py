@@ -112,33 +112,14 @@ _mobile_report_cache: dict[str, Any] = {"mtime": 0.0, "content": ""}
 
 def get_mobile_report_html() -> str:
     """Reads engineering report HTML with mtime-based in-memory caching and mobile enhancements."""
-    report_path = config.REPORT_HTML_PATH
+    static_report = STATIC_DIR / "report.html"
+    report_path = static_report if static_report.exists() else config.REPORT_HTML_PATH
     if report_path.exists():
         mtime = report_path.stat().st_mtime
         if mtime != _mobile_report_cache["mtime"]:
             with open(report_path, "r", encoding="utf-8") as f:
                 raw_html = f.read()
-            mobile_enhancements = """
-<style>
-@media (max-width: 600px) {
-  body { padding: 14px 10px !important; font-size: 13.5px !important; line-height: 1.6 !important; }
-  header { padding: 26px 16px !important; margin-bottom: 20px !important; border-radius: 14px !important; }
-  header h1 { font-size: 20px !important; line-height: 1.35 !important; }
-  header p { font-size: 12.5px !important; }
-  .container { padding: 0 !important; width: 100% !important; max-width: 100% !important; }
-  table { display: block !important; width: 100% !important; overflow-x: auto !important; -webkit-overflow-scrolling: touch !important; }
-  pre, code { word-break: break-all !important; }
-  img { max-width: 100% !important; height: auto !important; }
-  .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr !important; }
-}
-</style>
-</head>
-"""
-            if "</head>" in raw_html:
-                enhanced_html = raw_html.replace("</head>", mobile_enhancements, 1)
-            else:
-                enhanced_html = raw_html
-            _mobile_report_cache["content"] = enhanced_html
+            _mobile_report_cache["content"] = raw_html
             _mobile_report_cache["mtime"] = mtime
         return _mobile_report_cache["content"]
     return ""
@@ -221,6 +202,7 @@ def index() -> Response | tuple[str, int]:
 
 
 @app.route("/report")
+@app.route("/report.html")
 def report() -> Response | tuple[str, int]:
     """Serves the engineering principle report (mobile compatible)."""
     content = get_mobile_report_html()

@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>커넥터 추가 확장 및 RGAT 재학습/모바일 탑재 파이프라인 가이드</title>
+<style>
+  :root {
+    --primary: #0071e3;
+    --primary-hover: #0077ed;
+    --primary-light: #eff6ff;
+    --primary-border: #bfdbfe;
+    --accent: #10b981;
+    --accent-light: #ecfdf5;
+    --purple: #8b5cf6;
+    --purple-light: #f5f3ff;
+    --amber: #f59e0b;
+    --amber-light: #fffbeb;
+    --dark: #0f172a;
+    --slate: #334155;
+    --muted: #64748b;
+    --border: #e2e8f0;
+    --card-bg: #ffffff;
+    --bg: #f8fafc;
+    --code-bg: #0b1120;
+    --radius-lg: 18px;
+    --radius-md: 12px;
+    --radius-sm: 8px;
+    --shadow-sm: 0 2px 4px rgba(0,0,0,0.04);
+    --shadow-md: 0 8px 24px rgba(0,0,0,0.06);
+    --shadow-lg: 0 16px 36px rgba(0,0,0,0.08);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; word-break: keep-all; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Pretendard", "Apple SD Gothic Neo", "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--dark);
+    line-height: 1.68;
+    padding: 32px 16px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .container {
+    max-width: 1040px;
+    margin: 0 auto;
+  }
+
+  /* ── 상단 히어로 배너 ── */
+  .hero-header {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0369a1 100%);
+    color: white;
+    padding: 44px 36px;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    margin-bottom: 32px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-header::before {
+    content: "";
+    position: absolute;
+    top: -50px;
+    right: -50px;
+    width: 240px;
+    height: 240px;
+    background: radial-gradient(circle, rgba(56, 189, 248, 0.25) 0%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+  }
+  .badge-top {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(8px);
+    padding: 4px 14px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    margin-bottom: 16px;
+    color: #38bdf8;
+  }
+  .hero-title {
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -0.8px;
+    line-height: 1.35;
+    margin-bottom: 12px;
+  }
+  .hero-desc {
+    font-size: 15px;
+    color: #cbd5e1;
+    max-width: 820px;
+    line-height: 1.6;
+  }
+
+  /* ── 하이라이트 요약 카드 ── */
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+  .summary-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 20px;
+    box-shadow: var(--shadow-sm);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .summary-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+  .summary-icon {
+    font-size: 26px;
+    margin-bottom: 10px;
+    display: inline-block;
+  }
+  .summary-card h4 {
+    font-size: 14px;
+    color: var(--muted);
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .summary-card .value {
+    font-size: 19px;
+    font-weight: 800;
+    color: var(--dark);
+  }
+
+  /* ── 파이프라인 섹션 공통 ── */
+  .section-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 32px;
+    margin-bottom: 28px;
+    box-shadow: var(--shadow-sm);
+  }
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .step-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: white;
+    font-weight: 800;
+    font-size: 15px;
+    flex-shrink: 0;
+  }
+  .section-title {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--dark);
+    letter-spacing: -0.4px;
+  }
+
+  /* ── 워크플로우 비주얼 바 ── */
+  .workflow-flow {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    border-radius: var(--radius-md);
+    padding: 16px;
+    margin-bottom: 24px;
+  }
+  .wf-step {
+    background: white;
+    border: 1px solid var(--border);
+    padding: 8px 14px;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--slate);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+  }
+  .wf-step.active {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+  }
+  .wf-arrow {
+    color: var(--muted);
+    font-weight: 800;
+    font-size: 14px;
+  }
+
+  /* ── 코드 블록 및 복사 버튼 ── */
+  .code-container {
+    position: relative;
+    margin: 16px 0;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    background: var(--code-bg);
+  }
+  .code-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #1e293b;
+    padding: 8px 16px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #94a3b8;
+    border-bottom: 1px solid #334155;
+  }
+  .btn-copy {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #e2e8f0;
+    padding: 3px 9px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .btn-copy:hover {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+  }
+  pre {
+    padding: 16px;
+    overflow-x: auto;
+    font-family: "JetBrains Mono", Consolas, "Courier New", monospace;
+    font-size: 13px;
+    line-height: 1.6;
+    color: #e2e8f0;
+  }
+  .hl-key { color: #38bdf8; }
+  .hl-str { color: #a7f3d0; }
+  .hl-num { color: #fbcfe8; }
+  .hl-com { color: #64748b; font-style: italic; }
+
+  /* ── 안내 박스 및 콜아웃 ── */
+  .callout {
+    padding: 16px 20px;
+    border-radius: var(--radius-md);
+    margin: 16px 0;
+    font-size: 13.5px;
+    line-height: 1.65;
+    border-left: 4px solid;
+  }
+  .callout-info {
+    background: var(--primary-light);
+    border-color: var(--primary);
+    color: #1e40af;
+  }
+  .callout-warning {
+    background: var(--amber-light);
+    border-color: var(--amber);
+    color: #92400e;
+  }
+  .callout-success {
+    background: var(--accent-light);
+    border-color: var(--accent);
+    color: #065f46;
+  }
+  .callout-title {
+    font-weight: 700;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  /* ── 데이터 테이블 ── */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+    font-size: 13px;
+  }
+  th, td {
+    padding: 12px 14px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+  th {
+    background: #f8fafc;
+    color: var(--slate);
+    font-weight: 700;
+  }
+  tr:hover td {
+    background: #f8fafc;
+  }
+
+  /* ── 푸터 ── */
+  footer {
+    text-align: center;
+    color: var(--muted);
+    font-size: 13px;
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- 상단 히어로 헤더 -->
+  <header class="hero-header">
+    <div class="badge-top">⚡ DTC_RGAT 파이프라인 가이드</div>
+    <h1 class="hero-title">커넥터 추가 확장 및 RGAT 재학습 / 모바일 탑재 완벽 가이드</h1>
+    <p class="hero-desc">
+      신규 하네스 커넥터 기입부터 Relational Graph Attention Network (RGAT) 신경망 재학습, 64차원 잠재공간 t-SNE 좌표 생성, 100% 온디바이스 초경량 JS 번들링 및 오프라인 안드로이드 APK 탑재까지의 전 과정을 원클릭 파이프라인으로 안내합니다.
+    </p>
+  </header>
+
+  <!-- 핵심 요약 메트릭 -->
+  <div class="summary-grid">
+    <div class="summary-card">
+      <span class="summary-icon">🔌</span>
+      <h4>지원 커넥터</h4>
+      <div class="value">375개 + 무제한 확장</div>
+    </div>
+    <div class="summary-card">
+      <span class="summary-icon">🧠</span>
+      <h4>GNN 신경망 차원</h4>
+      <div class="value">64차원 RGAT 임베딩</div>
+    </div>
+    <div class="summary-card">
+      <span class="summary-icon">⚡</span>
+      <h4>온디바이스 변환 속도</h4>
+      <div class="value">1초 미만 (0.8s)</div>
+    </div>
+    <div class="summary-card">
+      <span class="summary-icon">📱</span>
+      <h4>모바일 패키지 용량</h4>
+      <div class="value">5.9 MB (단독 실행)</div>
+    </div>
+  </div>
+
+  <!-- 파이프라인 전체 워크플로우 -->
+  <div class="workflow-flow">
+    <div class="wf-step active">1. JSON 커넥터 확장</div>
+    <div class="wf-arrow">➔</div>
+    <div class="wf-step">2. RGAT 신경망 재학습</div>
+    <div class="wf-arrow">➔</div>
+    <div class="wf-step">3. 2D t-SNE 좌표 갱신</div>
+    <div class="wf-arrow">➔</div>
+    <div class="wf-step">4. 온디바이스 JS 컴파일</div>
+    <div class="wf-arrow">➔</div>
+    <div class="wf-step">5. APK 패키징 & 배포</div>
+  </div>
+
+  <!-- Step 1: JSON 커넥터 확장 -->
+  <section class="section-card">
+    <div class="section-header">
+      <span class="step-num">1</span>
+      <h2 class="section-title">dtc_knowledge_graph.json에 신규 커넥터 기입</h2>
+    </div>
+    <p style="color:var(--slate); font-size:14px; margin-bottom:12px;">
+      DTC_RGAT 시스템은 완전한 데이터 기반(Data-Driven) 스키마를 사용하므로, <code>dtc_knowledge_graph.json</code> 파일의 <code>nodes</code> 배열과 <code>edges</code> 배열에 항목을 추가하는 것만으로 즉시 지식 그래프가 확장됩니다.
+    </p>
+
+    <h3 style="font-size:15px; margin:16px 0 8px; color:var(--dark);">① nodes 배열에 신규 커넥터 노드 추가</h3>
+    <div class="code-container">
+      <div class="code-header">
+        <span>dtc_knowledge_graph.json (nodes)</span>
+        <button class="btn-copy" onclick="copyCode(this)">코드 복사</button>
+      </div>
+      <pre><code>{
+  <span class="hl-key">"id"</span>: <span class="hl-str">"CONN::FLRS_NEW_CONN01"</span>,              <span class="hl-com">// 식별자: 반드시 "CONN::" 접두사 준수</span>
+  <span class="hl-key">"name"</span>: <span class="hl-str">"FLRS_NEW_CONN01 / NEW_FLRS02"</span>,       <span class="hl-com">// 화면 표시 명칭 (양방향 커넥터명)</span>
+  <span class="hl-key">"node_type"</span>: <span class="hl-str">"Connector"</span>,                    <span class="hl-com">// 노드 타입 고정값</span>
+  <span class="hl-key">"location"</span>: <span class="hl-str">"프론트 범퍼 하단 / 휠하우스"</span>,     <span class="hl-com">// 장착 물리 위치 메타데이터</span>
+  <span class="hl-key">"fault_category"</span>: <span class="hl-str">"CONN"</span>,                     <span class="hl-com">// 카테고리 (계통 필터용)</span>
+  <span class="hl-key">"domain"</span>: <span class="hl-str">"CONN"</span>,                             <span class="hl-com">// 잠재공간 도메인 색상 키</span>
+  <span class="hl-key">"description"</span>: <span class="hl-str">"신규 증설된 센서 통합 정션"</span>   <span class="hl-com">// 툴팁 및 상세 제원 설명</span>
+}</code></pre>
+    </div>
+
+    <h3 style="font-size:15px; margin:20px 0 8px; color:var(--dark);">② edges 배열에 물리 배선(HW_WIRE) 및 마스터 검증선(HW_MAP) 연결</h3>
+    <div class="code-container">
+      <div class="code-header">
+        <span>dtc_knowledge_graph.json (edges)</span>
+        <button class="btn-copy" onclick="copyCode(this)">코드 복사</button>
+      </div>
+      <pre><code><span class="hl-com">// 1. 제어기(ECU)와 커넥터 간의 물리 결선 (필수: 최소 1개 이상의 ECU와 연결 필요)</span>
+{
+  <span class="hl-key">"source"</span>: <span class="hl-str">"ECU::ADAS_PRK_MCU"</span>,
+  <span class="hl-key">"target"</span>: <span class="hl-str">"CONN::FLRS_NEW_CONN01"</span>,
+  <span class="hl-key">"rel"</span>: <span class="hl-str">"HW_WIRE"</span>,
+  <span class="hl-key">"weight"</span>: <span class="hl-num">1.0</span>
+},
+<span class="hl-com">// 2. DTC 고장 코드와 커넥터 간의 마스터 검증 직결선 (정답 데이터가 있는 경우 선택적 기입)</span>
+{
+  <span class="hl-key">"source"</span>: <span class="hl-str">"DTC::C136887::ADAS_PRK_MCU"</span>,
+  <span class="hl-key">"target"</span>: <span class="hl-str">"CONN::FLRS_NEW_CONN01"</span>,
+  <span class="hl-key">"rel"</span>: <span class="hl-str">"HW_MAP"</span>,
+  <span class="hl-key">"weight"</span>: <span class="hl-num">1.0</span>
+}</code></pre>
+    </div>
+
+    <div class="callout callout-warning">
+      <div class="callout-title">⚠️ 고립 노드(Isolated Node) 방지 원칙</div>
+      어떤 ECU와도 <code>HW_WIRE</code> 배선이 연결되지 않은 고립 커넥터는 시스템의 <strong>토폴로지 마스킹(Topology Masking)</strong>에 의해 도달 불가능 노이즈로 분류되어 랭킹 계산에서 자동 제외됩니다. 반드시 최소 1개 이상의 담당 ECU와 배선을 연결해 주세요.
+    </div>
+  </section>
+
+  <!-- Step 2: RGAT 신경망 재학습 -->
+  <section class="section-card">
+    <div class="section-header">
+      <span class="step-num">2</span>
+      <h2 class="section-title">RGAT 신경망 재학습 파이프라인 실행</h2>
+    </div>
+    <p style="color:var(--slate); font-size:14px; margin-bottom:14px;">
+      루트 디렉토리의 <code>train_rgat.py</code>를 실행하면, 신규 커넥터가 포함된 전체 지식 그래프의 다중 관계형 어텐션(Relational Graph Attention)을 100 Epoch 동안 학습하여 새로운 64차원 노드 임베딩 벡터를 도출합니다.
+    </p>
+
+    <div class="code-container">
+      <div class="code-header">
+        <span>Windows PowerShell / 터미널</span>
+        <button class="btn-copy" onclick="copyCode(this)">명령어 복사</button>
+      </div>
+      <pre><code><span class="hl-com"># PyTorch 기반 RGAT 신경망 재학습 실행</span>
+python train_rgat.py</code></pre>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>생성 산출물 파일</th>
+          <th>형식 / 규격</th>
+          <th>역할 및 활용처</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>rgat_model.pt</code></td>
+          <td>PyTorch Checkpoint</td>
+          <td>학습된 4-헤드 어텐션 GNN 신경망 가중치</td>
+        </tr>
+        <tr>
+          <td><code>rgat_embeddings.npy</code></td>
+          <td>NumPy Matrix (N × 64)</td>
+          <td>전체 노드의 고차원 시맨틱 특징 벡터 (PC 백엔드 실시간 추론용)</td>
+        </tr>
+        <tr>
+          <td><code>rgat_latent_2d.json</code></td>
+          <td>JSON (2D Coordinates)</td>
+          <td>64차원을 2차원 t-SNE로 축소한 산점도 좌표 (모바일 바텀시트 캔버스용)</td>
+        </tr>
+        <tr>
+          <td><code>training_curve.png</code></td>
+          <td>PNG 시각화 차트</td>
+          <td>학습 및 검증 손실(Loss) / ROC-AUC 수렴 곡선</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- Step 3 & 4: 모바일 온디바이스 엔진 자동 컴파일 -->
+  <section class="section-card">
+    <div class="section-header">
+      <span class="step-num">3</span>
+      <h2 class="section-title">모바일 온디바이스 엔진 번들 자동 컴파일</h2>
+    </div>
+    <p style="color:var(--slate); font-size:14px; margin-bottom:14px;">
+      스마트폰에서 파이썬이나 넘파이(NumPy) 라이브러리 없이도 0ms 즉각 진단이 가능하도록, <code>build_ondevice_bundle.py</code>가 신규 커넥터 그래프를 순수 자바스크립트 온디바이스 진단 엔진으로 1초 만에 압축 컴파일합니다.
+    </p>
+
+    <div class="code-container">
+      <div class="code-header">
+        <span>Windows PowerShell / 터미널</span>
+        <button class="btn-copy" onclick="copyCode(this)">명령어 복사</button>
+      </div>
+      <pre><code><span class="hl-com"># 신규 커넥터가 반영된 모바일 온디바이스 JS 엔진 빌드</span>
+python mobile/scripts/build_ondevice_bundle.py</code></pre>
+    </div>
+
+    <div class="callout callout-success">
+      <div class="callout-title">⚡ On-Device 컴파일러 자동 처리 내역</div>
+      • <strong>2-Hop 배선망 사전 색인</strong>: 신규 커넥터와 직결/간접 연결된 DTC 관계 자동 캐싱<br>
+      • <strong>t-SNE 산점도 병합</strong>: 1,705개 이상의 좌표를 경량 JSON으로 번들 내장<br>
+      • <strong>출력 파일</strong>: <code>mobile/static/dtc_ondevice_engine.js</code> (용량 약 930KB)
+    </div>
+  </section>
+
+  <!-- Step 5: 안드로이드 APK 빌드 & 배포 -->
+  <section class="section-card">
+    <div class="section-header">
+      <span class="step-num">4</span>
+      <h2 class="section-title">에셋 동기화 및 오프라인 독립형 APK 빌드</h2>
+    </div>
+    <p style="color:var(--slate); font-size:14px; margin-bottom:14px;">
+      생성된 자바스크립트 엔진과 모바일 UI를 안드로이드 네이티브 에셋 폴더에 동기화한 뒤 원클릭 배치 스크립트로 APK를 빌드합니다.
+    </p>
+
+    <div class="code-container">
+      <div class="code-header">
+        <span>Windows PowerShell / 터미널</span>
+        <button class="btn-copy" onclick="copyCode(this)">명령어 복사</button>
+      </div>
+      <pre><code><span class="hl-com"># 1. 최신 엔진 및 HTML을 안드로이드 네이티브 에셋(assets/)으로 동기화</span>
+python mobile/scripts/sync_assets.py
+
+<span class="hl-com"># 2. 안드로이드 스탠드얼론 APK 빌드 실행 (약 3~10초 소요)</span>
+cd mobile
+.\build_apk.bat</code></pre>
+    </div>
+
+    <div class="callout callout-info">
+      <div class="callout-title">📦 빌드 완료 산출물 위치</div>
+      <strong>디버그 패키지</strong>: <code>mobile/app/build/outputs/apk/debug/app-debug.apk</code> (약 5.9 MB)<br>
+      이 APK 파일을 갤럭시 스마트폰에 설치하면, <strong>PC가 꺼져 있거나 Wi-Fi / LTE가 차단된 지하 정비 현장에서도 신규 커넥터 진단이 100% 단독 실행</strong>됩니다.
+    </div>
+  </section>
+
+  <!-- Step 6: 자가 진단 및 무결성 검증 -->
+  <section class="section-card">
+    <div class="section-header">
+      <span class="step-num">5</span>
+      <h2 class="section-title">PC 웹앱 vs 모바일 결과 1:1 무결성 자동 검증</h2>
+    </div>
+    <p style="color:var(--slate); font-size:14px; margin-bottom:14px;">
+      커넥터 추가 후 PC 웹앱의 계산 결과와 스마트폰 모바일 앱의 계산 결과가 100% 동일한지 자동으로 대조 검증하는 스크립트를 제공합니다.
+    </p>
+
+    <div class="code-container">
+      <div class="code-header">
+        <span>Windows PowerShell / 터미널</span>
+        <button class="btn-copy" onclick="copyCode(this)">명령어 복사</button>
+      </div>
+      <pre><code><span class="hl-com"># 1. PC vs 모바일 1:1 패리티 심층 검증 스크립트 실행</span>
+python mobile/tests/verify_parity.py
+
+<span class="hl-com"># 2. 모바일 단위 테스트 전체 실행 (13개 테스트 전수 통과 확인)</span>
+pytest -v mobile/tests</code></pre>
+    </div>
+  </section>
+
+  <footer>
+    <p>DTC_RGAT Automotive AI Knowledge Graph System · All Rights Reserved.</p>
+  </footer>
+
+</div>
+
+<script>
+function copyCode(btn) {
+  const pre = btn.closest('.code-container').querySelector('pre');
+  navigator.clipboard.writeText(pre.innerText).then(() => {
+    const originalText = btn.textContent;
+    btn.textContent = "복사 완료! ✓";
+    btn.style.background = "#10b981";
+    btn.style.color = "#ffffff";
+    setTimeout(() => {
+      btn.textContent = originalText;
+      btn.style.background = "";
+      btn.style.color = "";
+    }, 1800);
+  });
+}
+</script>
+
+</body>
+</html>
