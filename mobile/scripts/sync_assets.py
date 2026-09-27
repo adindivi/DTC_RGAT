@@ -100,6 +100,18 @@ body { margin: 0 !important; padding: 0 0 30px 0 !important; }
 
     print(f"Updated mobile static & android assets report.html successfully ({len(html):,} bytes)")
 
+def sync_engine():
+    source_engine = ROOT_DIR / "mobile" / "static" / "dtc_ondevice_engine.js"
+    asset_engine = ROOT_DIR / "mobile" / "app" / "src" / "main" / "assets" / "dtc_ondevice_engine.js"
+    if source_engine.exists():
+        with open(source_engine, "r", encoding="utf-8") as f:
+            content = f.read()
+        asset_engine.parent.mkdir(parents=True, exist_ok=True)
+        with open(asset_engine, "w", encoding="utf-8") as f:
+            f.write(content)
+        print(f"Updated Android assets dtc_ondevice_engine.js successfully ({len(content):,} bytes)")
+
 if __name__ == "__main__":
     sync_index()
+    sync_engine()
     sync_report()

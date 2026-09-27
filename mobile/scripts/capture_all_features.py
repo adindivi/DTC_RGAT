@@ -40,7 +40,14 @@ FEATURE_SCENARIOS = [
         "url": "http://localhost:5050/?codes=B100552,C128387,C164387,C166987&tab=map",
         "wait_js": "window.network && window.network.body && Object.keys(window.network.body.nodes).length > 0",
         "action_js": "restoreMobileStyles(); fitMobileNetwork();",
-        "desc": "기능 4: 지식 그래프 캔버스 (토폴로지 가이드 바 및 2-Hop GNN 추론망)"
+        "desc": "기능 4: 지식 그래프 캔버스 (상단 고정 토폴로지 바, 컴팩트 HW_MAP 버튼 및 2-Hop GNN 추론망)"
+    },
+    {
+        "name": "feat_4b_hw_map_toggled.png",
+        "url": "http://localhost:5050/?codes=B100552,C128387,C164387,C166987&tab=map",
+        "wait_js": "window.network && window.network.body && Object.keys(window.network.body.nodes).length > 0",
+        "action_js": "restoreMobileStyles(); toggleMobileHwMap();",
+        "desc": "기능 4b: HW_MAP 토글 (노드 위치 100% 동결 및 DTC-커넥터 직결 검증선만 숨김)"
     },
     {
         "name": "feat_5_graph_xray.png",

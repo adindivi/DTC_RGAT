@@ -524,6 +524,42 @@ html, body {
   padding: 0;
   position: relative;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 상단 고정 인과관계 토폴로지 안내 바 (화면 상단 고정) */
+.graph-topology-header {
+  flex-shrink: 0;
+  height: 32px;
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--hairline-strong);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #334155;
+  z-index: 15;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
+}
+.topo-col { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
+.topo-dot { width: 7px; height: 7px; border-radius: 50%; }
+.topo-dot.dtc-dot { background: #ef4444; }
+.topo-dot.ecu-dot { background: #f97316; }
+.topo-dot.conn-dot { background: #2563eb; }
+.topo-arrow { color: #94a3b8; display: inline-flex; align-items: center; }
+
+/* 캔버스 및 플로팅 버튼 레이어 분리 컨테이너 */
+.map-canvas-container {
+  flex: 1;
+  position: relative;
+  width: 100%;
+  height: calc(100% - 32px);
+  overflow: hidden;
 }
 #network-canvas {
   width: 100%;
@@ -532,67 +568,60 @@ html, body {
 }
 .map-floating-bar {
   position: absolute;
-  top: 10px;
-  left: 10px;
-  right: 10px;
+  top: 8px;
+  left: 6px;
+  right: 6px;
   display: flex;
-  gap: 6px;
-  justify-content: space-between;
-  pointer-events: none;
+  gap: 4px;
+  align-items: center;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  -webkit-overflow-scrolling: touch;
+  pointer-events: auto;
+  touch-action: pan-x;
   z-index: 20;
+  padding: 2px 2px;
+}
+.map-floating-bar::-webkit-scrollbar {
+  display: none;
 }
 .floating-btn {
   pointer-events: auto;
-  background: rgba(255, 255, 255, 0.92);
+  background: rgba(255, 255, 255, 0.94);
   backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--hairline-strong);
   border-radius: 980px;
-  padding: 8px 12px;
-  font-size: 12px;
+  padding: 3px 8px;
+  font-size: 10.5px;
   font-weight: 600;
-  min-height: 36px;
+  height: 28px;
+  min-height: 28px;
   color: var(--fg);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 3.5px;
   cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: all 0.15s ease;
+}
+.floating-btn svg {
+  flex-shrink: 0;
 }
 .floating-btn.active {
   background: var(--primary);
   color: #ffffff;
   border-color: var(--primary);
+  box-shadow: 0 2px 8px rgba(0, 113, 227, 0.25);
 }
-.floating-btn:active { transform: scale(0.96); }
-
-/* 상단 토폴로지 인과관계 가이드 바 (Screen 4 & 5) */
-.graph-topology-header {
-  position: absolute;
-  top: 48px;
-  left: 10px;
-  right: 10px;
-  background: rgba(255, 255, 255, 0.92);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid var(--hairline-strong);
-  border-radius: 980px;
-  padding: 5px 12px;
-  display: flex;
-  align-items: center;
-  justify-content: space-around;
-  font-size: 10.5px;
-  font-weight: 700;
-  color: #334155;
-  z-index: 20;
-  pointer-events: none;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+.floating-btn:active {
+  transform: scale(0.95);
 }
-.topo-col { display: inline-flex; align-items: center; gap: 4px; }
-.topo-dot { width: 7px; height: 7px; border-radius: 50%; }
-.topo-dot.dtc-dot { background: #ef4444; }
-.topo-dot.ecu-dot { background: #f97316; }
-.topo-dot.conn-dot { background: #2563eb; }
-.topo-arrow { color: #94a3b8; font-size: 10px; }
 
 /* ── 탭 3: DTC 정보 (가독성 & 계통별 컬러 최적화) ── */
 .dtc-card-mobile {
@@ -913,7 +942,7 @@ html, body {
   .icon-btn { padding: 4px 6px; font-size: 10px; min-height: 28px; }
   .segmented-item { font-size: 12px; padding: 7px 3px; gap: 3px; min-height: 38px; }
   .preset-chip { font-size: 11px; padding: 5px 8px; }
-  .floating-btn { font-size: 11px; padding: 6px 8px; min-height: 32px; gap: 3px; }
+  .floating-btn { font-size: 10px; padding: 3px 8px; height: 26px; min-height: 26px; gap: 3px; }
   .rc-card-mobile { padding: 9px 10px; }
   .card-title { font-size: 12.5px; }
   .card-status-badge { font-size: 10.5px; padding: 2.5px 6px; }
@@ -1131,10 +1160,6 @@ html, body {
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
         공유
       </button>
-      <button class="icon-btn" onclick="toggleXRayMode()" id="btn-xray-mobile">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-        X-Ray
-      </button>
     </div>
   </header>
 
@@ -1206,36 +1231,45 @@ html, body {
 
     <!-- 2. 마인드맵 캔버스 뷰 -->
     <section class="tab-view" id="tab-map">
-      <div class="map-floating-bar">
-        <button class="floating-btn" onclick="fitMobileNetwork()">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
-          전체 맞춤
-        </button>
-        <button class="floating-btn active" id="btn-hw-wire" onclick="toggleMobileHwWires()">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="2" y1="12" x2="22" y2="12"></line></svg>
-          HW 결선
-        </button>
-        <button class="floating-btn active" id="btn-ai-wire" onclick="toggleMobileAiWires()">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-dasharray="3 3"><line x1="2" y1="12" x2="22" y2="12"></line></svg>
-          AI 결선
-        </button>
-        <button class="floating-btn" id="btn-toggle-immersive" onclick="toggleImmersiveMap()">
-          <span id="immersive-icon" style="display:inline-flex;align-items:center;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg></span>
-          <span id="immersive-text">몰입 모드</span>
-        </button>
-        <button class="floating-btn" onclick="openLatentSheet()">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><circle cx="19" cy="5" r="2"></circle><circle cx="5" cy="19" r="2"></circle><path d="M10.5 10.5L6.5 17.5M13.5 13.5L17.5 6.5"/></svg>
-          64D
-        </button>
-      </div>
+      <!-- 상단 고정 인과관계 토폴로지 안내 바 -->
       <div class="graph-topology-header" id="graph-topology-header">
-        <div class="topo-col"><span class="topo-dot dtc-dot"></span>고장 DTC (증상)</div>
+        <div class="topo-col"><span class="topo-dot dtc-dot"></span>고장 DTC</div>
         <div class="topo-arrow"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg></div>
         <div class="topo-col"><span class="topo-dot ecu-dot"></span>ECU 제어기</div>
         <div class="topo-arrow"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg></div>
-        <div class="topo-col"><span class="topo-dot conn-dot"></span>원인 커넥터 (Root Cause)</div>
+        <div class="topo-col"><span class="topo-dot conn-dot"></span>원인 커넥터</div>
       </div>
-      <div id="network-canvas"></div>
+
+      <!-- 캔버스 및 플로팅 컨트롤 컨테이너 -->
+      <div class="map-canvas-container">
+        <div class="map-floating-bar">
+          <button class="floating-btn" onclick="fitMobileNetwork()" title="전체 화면 맞춤">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+            전체
+          </button>
+          <button class="floating-btn active" id="btn-hw-map" onclick="toggleMobileHwMap()" title="DTC-커넥터 직결 검증선 토글">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+            HW_MAP
+          </button>
+          <button class="floating-btn active" id="btn-ai-wire" onclick="toggleMobileAiWires()" title="AI 가상 추론 결선 토글">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-dasharray="3 3"><line x1="2" y1="12" x2="22" y2="12"></line></svg>
+            AI 결선
+          </button>
+          <button class="floating-btn" onclick="openLatentSheet()" title="64차원 잠재 공간 t-SNE 투영 시트">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><circle cx="19" cy="5" r="2"></circle><circle cx="5" cy="19" r="2"></circle><path d="M10.5 10.5L6.5 17.5M13.5 13.5L17.5 6.5"/></svg>
+            64D
+          </button>
+          <button class="floating-btn active" id="btn-xray-map" onclick="toggleXRayMode()" title="결함 전파 X-Ray 포커스 토글">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+            X-Ray
+          </button>
+          <button class="floating-btn" id="btn-toggle-immersive" onclick="toggleImmersiveMap()" title="헤더 숨김 몰입 모드">
+            <span id="immersive-icon" style="display:inline-flex;align-items:center;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg></span>
+            <span id="immersive-text">몰입</span>
+          </button>
+        </div>
+        <div id="network-canvas"></div>
+      </div>
     </section>
 
     <!-- 3. DTC 상세 뷰 -->
@@ -1405,8 +1439,10 @@ const Utils = {
   syncCanvasDpr(canvas) {
     if (!canvas) return { width: 0, height: 0, dpr: 1 };
     const dpr = window.devicePixelRatio || CONFIG.DEFAULT_DPR;
-    const width = canvas.clientWidth * dpr;
-    const height = canvas.clientHeight * dpr;
+    const clientW = canvas.clientWidth || (canvas.parentElement ? canvas.parentElement.clientWidth : 0) || 360;
+    const clientH = canvas.clientHeight || 185;
+    const width = Math.round(clientW * dpr);
+    const height = Math.round(clientH * dpr);
     canvas.width = width;
     canvas.height = height;
     return { width, height, dpr };
@@ -1484,6 +1520,7 @@ const AppState = {
     activeEdgesSet: null,
     isDimmed: false,
     xrayMode: true,
+    hwMapVisible: true,
     hwWiresVisible: true,
     aiWiresVisible: true
   },
@@ -1530,6 +1567,7 @@ let selectedNodeId = AppState.latent.selectedNodeId;
 let radarRadius = AppState.latent.radarRadius;
 let radarAnim = AppState.latent.radarAnimationId;
 let acData = AppState.autocomplete.results;
+let hwMapVisible = AppState.graph.hwMapVisible;
 let hwWiresVisible = AppState.graph.hwWiresVisible;
 let aiWiresVisible = AppState.graph.aiWiresVisible;
 let activeLatentCategory = AppState.latent.activeCategory;
@@ -1986,18 +2024,21 @@ function renderMobileDtcInfo(data) {
 }
 
 // ──────────────────────────────────────────────────────────────
-// 9. 물리/AI 배선 필터 토글 제어
+// 9. HW_MAP 직접 검증선 및 AI 추론 결선 필터 토글 제어
 // ──────────────────────────────────────────────────────────────
-function toggleMobileHwWires() {
+function toggleMobileHwMap() {
   if (!AppState.graph.edgesDataSet) return;
-  AppState.graph.hwWiresVisible = !AppState.graph.hwWiresVisible;
-  hwWiresVisible = AppState.graph.hwWiresVisible;
+  AppState.graph.hwMapVisible = !AppState.graph.hwMapVisible;
+  hwMapVisible = AppState.graph.hwMapVisible;
 
-  const btnHwWire = document.getElementById('btn-hw-wire');
-  if (btnHwWire) btnHwWire.classList.toggle('active', AppState.graph.hwWiresVisible);
+  const btnHwMap = document.getElementById('btn-hw-map');
+  if (btnHwMap) btnHwMap.classList.toggle('active', AppState.graph.hwMapVisible);
   applyWireVisibilityFilter();
-  showToast(AppState.graph.hwWiresVisible ? 'HW 물리 결선 표시' : 'HW 물리 결선 숨김');
+  showToast(AppState.graph.hwMapVisible ? 'HW_MAP: 직접 검증선 표시' : 'HW_MAP: 직접 검증선 숨김 (노드 위치 유지)');
 }
+
+// 하위 호환성 별칭
+const toggleMobileHwWires = toggleMobileHwMap;
 
 function toggleMobileAiWires() {
   if (!AppState.graph.edgesDataSet) return;
@@ -2015,10 +2056,17 @@ function applyWireVisibilityFilter() {
   const updates = [];
 
   AppState.graph.edgesDataSet.get().forEach(edge => {
-    const isDirectPhysicalWire = !edge.dashes;
     let shouldBeVisible = true;
-    if (isDirectPhysicalWire && !AppState.graph.hwWiresVisible) shouldBeVisible = false;
-    if (!isDirectPhysicalWire && !AppState.graph.aiWiresVisible) shouldBeVisible = false;
+
+    // HW_MAP: DTC-커넥터 직접 연결 검증된 선만 필터링 (노드 위치는 100% 동결 보존)
+    if (edge.isDirectMap && !AppState.graph.hwMapVisible) {
+      shouldBeVisible = false;
+    }
+
+    // AI 결선 필터링
+    if (edge.isAiWire && !AppState.graph.aiWiresVisible) {
+      shouldBeVisible = false;
+    }
 
     updates.push({
       id: edge.id,
@@ -2127,8 +2175,14 @@ function buildMobileGraph(data) {
   })));
 
   AppState.graph.edgesDataSet = new vis.DataSet(data.vis_edges.map((edge, index) => {
-    const isDirectMap = edge.title && edge.title.includes('HW_MAP');
-    const isAiWire = (edge.title && edge.title.includes('AI_HW_WIRE')) || edge.dashes;
+    const isDirectMap = Boolean(
+      (edge.title && (edge.title.includes('HW_MAP') || edge.title.includes('검증매핑'))) ||
+      (edge.from && String(edge.from).startsWith('VIS_DTC::') && !String(edge.to).startsWith('ECU::'))
+    );
+    const isAiWire = Boolean(
+      (edge.title && edge.title.includes('AI_HW_WIRE')) ||
+      edge.dashes === true
+    );
     const edgeColor = isDirectMap ? '#2563eb' : (isAiWire ? '#93c5fd' : '#64748b');
 
     return {
@@ -2136,8 +2190,11 @@ function buildMobileGraph(data) {
       from: edge.from,
       to: edge.to,
       color: { color: edgeColor, highlight: '#2563eb' },
-      width: isDirectMap ? 2.5 : 1.8,
+      width: isDirectMap ? 2.5 : (isAiWire ? 1.8 : 2.0),
       dashes: isAiWire,
+      title: edge.title || '',
+      isDirectMap: isDirectMap,
+      isAiWire: isAiWire,
       smooth: { enabled: true, type: 'cubicBezier', forceDirection: 'horizontal', roundness: 0.6 }
     };
   }));
@@ -2213,7 +2270,7 @@ function toggleImmersiveMap() {
   const btnText = document.getElementById('immersive-text');
   const btnIcon = document.getElementById('immersive-icon');
 
-  if (btnText) btnText.textContent = isImmersive ? '일반 모드' : '몰입 모드';
+  if (btnText) btnText.textContent = isImmersive ? '일반' : '몰입';
   if (btnIcon) {
     btnIcon.innerHTML = isImmersive
       ? `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14h6v6M20 10h-6V4M14 10l7-7M3 21l7-7"/></svg>`
@@ -2374,20 +2431,12 @@ function toggleXRayMode() {
   AppState.graph.xrayMode = !AppState.graph.xrayMode;
   xrayMode = AppState.graph.xrayMode;
 
-  const btnXray = document.getElementById('btn-xray-mobile');
+  const btnXray = document.getElementById('btn-xray-map') || document.getElementById('btn-xray-mobile');
   if (btnXray) {
-    btnXray.innerHTML = `
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="12" cy="12" r="10"></circle>
-        <line x1="12" y1="8" x2="12" y2="12"></line>
-        <line x1="12" y1="16" x2="12.01" y2="16"></line>
-      </svg>
-      ${AppState.graph.xrayMode ? 'X-Ray' : 'X-Ray OFF'}
-    `;
     btnXray.classList.toggle('active', AppState.graph.xrayMode);
   }
 
-  showToast(AppState.graph.xrayMode ? '엑스레이 포커스 켜짐' : '엑스레이 포커스 꺼짐');
+  showToast(AppState.graph.xrayMode ? 'X-Ray 결함 전파 포커스 켜짐' : 'X-Ray 결함 전파 포커스 꺼짐');
   if (!AppState.graph.xrayMode && AppState.graph.isDimmed) restoreMobileStyles();
 }
 
@@ -2398,10 +2447,14 @@ async function openLatentSheet() {
   const overlay = document.getElementById('latent-sheet-overlay');
   if (overlay) overlay.classList.add('active');
 
-  if (!AppState.latent.points) {
-    // 1순위: 온디바이스 엔진에 내장된 1,705개 t-SNE 좌표 즉시 로드
-    if (window.DTCLocalEngine && window.DTCLocalEngine.latentData) {
+  // 1순위: 온디바이스 엔진에 내장된 1,705개 t-SNE 좌표 즉시 동기 로드 (0ms 지연, 100% 오프라인 보장)
+  if (!AppState.latent.points || !AppState.latent.points.length) {
+    if (window.DTCLocalEngine && typeof window.DTCLocalEngine.getLatentPoints === 'function') {
+      AppState.latent.points = window.DTCLocalEngine.getLatentPoints();
+    } else if (window.DTCLocalEngine && window.DTCLocalEngine.latentData) {
       AppState.latent.points = window.DTCLocalEngine.latentData.points || [];
+    } else if (typeof window.LATENT_POINTS !== 'undefined' && Array.isArray(window.LATENT_POINTS)) {
+      AppState.latent.points = window.LATENT_POINTS;
     } else {
       try {
         const response = await fetch('/api/latent-space');
@@ -2416,9 +2469,18 @@ async function openLatentSheet() {
 
   const canvas = document.getElementById('latent-canvas-mobile');
   Utils.syncCanvasDpr(canvas);
-
   renderLatentMobileCanvas();
   startMobileRadar();
+
+  // 바텀시트 슬라이드업 애니메이션(0.25s) 완료 후 캔버스 해상도 재보정 및 리렌더링
+  setTimeout(() => {
+    Utils.syncCanvasDpr(canvas);
+    renderLatentMobileCanvas();
+  }, 100);
+  setTimeout(() => {
+    Utils.syncCanvasDpr(canvas);
+    renderLatentMobileCanvas();
+  }, 300);
 }
 
 function closeLatentSheet(event) {
@@ -2474,7 +2536,24 @@ function filterLatentCategory(targetCategory) {
 
 function renderLatentMobileCanvas() {
   const canvas = document.getElementById('latent-canvas-mobile');
-  if (!canvas || !AppState.latent.points) return;
+  if (!canvas) return;
+
+  // 포인트가 아직 로드되지 않은 경우 로컬 엔진에서 즉시 폴백 복구
+  if (!AppState.latent.points || !AppState.latent.points.length) {
+    if (window.DTCLocalEngine && typeof window.DTCLocalEngine.getLatentPoints === 'function') {
+      AppState.latent.points = window.DTCLocalEngine.getLatentPoints();
+      latentPoints = AppState.latent.points;
+    } else if (typeof window.LATENT_POINTS !== 'undefined') {
+      AppState.latent.points = window.LATENT_POINTS;
+      latentPoints = AppState.latent.points;
+    }
+  }
+
+  if (!AppState.latent.points || !AppState.latent.points.length) return;
+
+  if (canvas.width === 0 || canvas.height === 0) {
+    Utils.syncCanvasDpr(canvas);
+  }
 
   const ctx = canvas.getContext('2d');
   const width = canvas.width;
@@ -2723,6 +2802,7 @@ window.addEventListener('DOMContentLoaded', () => {
   enableDragScroll(document.getElementById('header-actions-bar'));
   enableDragScroll(document.querySelector('.presets-scroll'));
   enableDragScroll(document.querySelector('.latent-filters'));
+  enableDragScroll(document.querySelector('.map-floating-bar'));
 
   const urlParams = new URLSearchParams(window.location.search);
   const codesParam = urlParams.get('codes') || urlParams.get('q');

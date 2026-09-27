@@ -36,6 +36,10 @@
       return LATENT_POINTS;
     },
 
+    get latentData() {
+      return { points: LATENT_POINTS, count: LATENT_POINTS.length };
+    },
+
     analyze(inputCodes, topK = 5) {
       const codes = Array.isArray(inputCodes) ? inputCodes : [];
       const dtc_info = [];
@@ -266,5 +270,6 @@
   };
 
   window.DTCLocalEngine = DTCLocalEngine;
+  window.LATENT_POINTS = LATENT_POINTS;
   console.log('[On-Device DTC Engine] Loaded successfully. Offline standalone ready.');
 })();
