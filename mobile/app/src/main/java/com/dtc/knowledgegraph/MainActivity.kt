@@ -43,7 +43,7 @@ class MainActivity : AppCompatActivity() {
     companion object {
         private const val PREFS_NAME = "dtc_prefs"
         private const val KEY_SERVER_URL = "server_url"
-        private const val DEFAULT_URL = "http://172.30.1.86:5050"
+        private const val DEFAULT_URL = "file:///android_asset/index.html"
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -78,17 +78,22 @@ class MainActivity : AppCompatActivity() {
     }
 
     @SuppressLint("SetJavaScriptEnabled")
+    @Suppress("DEPRECATION")
     private fun setupWebView() {
         configureWebSettings(webView.settings)
         configureWebViewClients()
     }
 
+    @Suppress("DEPRECATION")
     private fun configureWebSettings(settings: WebSettings) {
         settings.apply {
             javaScriptEnabled = true
             domStorageEnabled = true
             databaseEnabled = true
             allowFileAccess = true
+            allowContentAccess = true
+            allowFileAccessFromFileURLs = true
+            allowUniversalAccessFromFileURLs = true
             loadWithOverviewMode = true
             useWideViewPort = true
             builtInZoomControls = true
@@ -176,6 +181,9 @@ class MainActivity : AppCompatActivity() {
     private fun normalizeServerUrl(rawUrl: String): String {
         val trimmed = rawUrl.trim()
         if (trimmed.isEmpty()) return DEFAULT_URL
+        if (trimmed.startsWith("file://", ignoreCase = true)) {
+            return trimmed
+        }
 
         val withProtocol = if (!trimmed.startsWith("http://", ignoreCase = true) &&
             !trimmed.startsWith("https://", ignoreCase = true)
@@ -215,6 +223,10 @@ class MainActivity : AppCompatActivity() {
                         Toast.LENGTH_SHORT
                     ).show()
                 }
+            }
+            .setNeutralButton("📱 오프라인 모드") { _, _ ->
+                loadServerUrl(DEFAULT_URL)
+                Toast.makeText(this, "📱 100% 온디바이스 오프라인 모드로 전환되었습니다.", Toast.LENGTH_SHORT).show()
             }
             .setNegativeButton(getString(R.string.cancel), null)
             .show()

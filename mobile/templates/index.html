@@ -9,8 +9,8 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <title>DTC 지식 그래프 진단기 (갤럭시 모바일)</title>
 <link rel="manifest" href="/manifest.json">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.9/dist/vis-network.min.js"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.9/dist/dist/vis-network.min.css">
+<script src="/static/dtc_ondevice_engine.js"></script>
+<script src="/static/vis-network.min.js"></script>
 <style>
 :root {
   --primary: #0071e3;
@@ -832,16 +832,180 @@ html, body {
     box-shadow: 0 16px 48px rgba(0, 0, 0, 0.1);
   }
 }
+
+/* ── 온디바이스 엔진 상태 뱃지 ── */
+.ondevice-badge {
+  font-size: 9.5px;
+  font-weight: 700;
+  color: #047857;
+  background: #d1fae5;
+  border: 1px solid #a7f3d0;
+  padding: 1px 6px;
+  border-radius: 980px;
+  margin-left: 4px;
+}
+
+/* ── P1: 몰입형 모드 (상단 헤더 및 검색창 접힘) ── */
+.mobile-app.immersive-mode .app-header,
+.mobile-app.immersive-mode .search-container,
+.mobile-app.immersive-mode .segmented-tabs-bar {
+  display: none !important;
+}
+.floating-btn.immersive-btn {
+  background: #0f172a;
+  color: #38bdf8;
+  border-color: #38bdf8;
+  font-weight: 700;
+}
+
+/* ── P2: 1순위 랭킹 카드 골드/사파이어 글로우 및 네비게이션 액션 ── */
+.rc-card-mobile.rank1 {
+  border: 2px solid #2563eb !important;
+  background: linear-gradient(135deg, rgba(37,99,235,0.08) 0%, rgba(37,99,235,0.02) 100%) !important;
+  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.16) !important;
+}
+.card-top1-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  gap: 6px;
+}
+.top1-crown-badge {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #b45309;
+  background: #fef3c7;
+  border: 1px solid #fde68a;
+  border-radius: 980px;
+  padding: 2px 7px;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+.btn-goto-map {
+  background: rgba(0, 113, 227, 0.08);
+  color: var(--primary);
+  border: 1px solid rgba(0, 113, 227, 0.2);
+  border-radius: 980px;
+  padding: 3px 9px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+.btn-goto-map:active {
+  transform: scale(0.95);
+  background: var(--primary);
+  color: #fff;
+}
+.card-action-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid rgba(0, 0, 0, 0.04);
+}
+.ecu-chip-wrap {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 3px;
+}
+.ecu-chip {
+  font-size: 10px;
+  font-weight: 600;
+  background: #f1f5f9;
+  color: #334155;
+  border: 1px solid #e2e8f0;
+  padding: 1px 5px;
+  border-radius: 5px;
+  display: inline-block;
+}
+
+/* ── P3: 자동완성 배경 딤 (Backdrop Dim) ── */
+.ac-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.32);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  z-index: 45;
+  display: none;
+  transition: opacity 0.2s ease;
+}
+.ac-backdrop.active {
+  display: block;
+}
+.search-container {
+  z-index: 55;
+}
+.autocomplete {
+  z-index: 60;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.18);
+}
+
+/* ── P4: 잠재공간 바텀시트 2단계 높이 제스처 & 계통 필터 칩 ── */
+.bottom-sheet {
+  transition: max-height 0.3s cubic-bezier(0.16, 1, 0.3, 1), height 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  max-height: 55vh;
+}
+.bottom-sheet.full-height {
+  max-height: 88vh !important;
+  height: 88vh !important;
+}
+.sheet-toggle-size {
+  background: #1e293b;
+  border: 1px solid #334155;
+  color: #94a3b8;
+  border-radius: 6px;
+  padding: 2px 7px;
+  font-size: 12px;
+  cursor: pointer;
+  margin-right: 4px;
+}
+.latent-filters {
+  display: flex;
+  gap: 4px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  margin-bottom: 6px;
+  -webkit-overflow-scrolling: touch;
+}
+.latent-filters::-webkit-scrollbar { display: none; }
+.l-filter-btn {
+  background: #1e293b;
+  border: 1px solid #334155;
+  color: #94a3b8;
+  border-radius: 980px;
+  padding: 3px 8px;
+  font-size: 10px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.l-filter-btn.active {
+  background: #38bdf8;
+  border-color: #38bdf8;
+  color: #0f172a;
+  font-weight: 700;
+}
 </style>
 </head>
 <body>
 
-<div class="mobile-app">
+<div class="mobile-app" id="mobile-app-root">
   <!-- 상단 앱바 -->
   <header class="app-header">
     <div class="app-logo">
       <span class="status-dot"></span>
       <span>DTC Mobile</span>
+      <span class="ondevice-badge">⚡ 온디바이스 엔진</span>
     </div>
     <div class="header-actions">
       <a class="icon-btn" href="/report" target="_blank" style="text-decoration:none;color:inherit;display:inline-flex;align-items:center;gap:3px;">
@@ -850,7 +1014,7 @@ html, body {
       </a>
       <button class="icon-btn" onclick="openQrModal()">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
-        QR
+        공유
       </button>
       <button class="icon-btn" onclick="toggleXRayMode()" id="btn-xray-mobile">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
@@ -858,6 +1022,9 @@ html, body {
       </button>
     </div>
   </header>
+
+  <!-- P3: 자동완성 배경 딤 오버레이 -->
+  <div class="ac-backdrop" id="ac-backdrop" onclick="closeAC()"></div>
 
   <!-- DTC 입력창 & 추천 칩 -->
   <div class="search-container" style="position:relative;">
@@ -934,6 +1101,10 @@ html, body {
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-dasharray="3 3"><line x1="2" y1="12" x2="22" y2="12"></line></svg>
           AI 결선
         </button>
+        <button class="floating-btn" id="btn-toggle-immersive" onclick="toggleImmersiveMap()">
+          <span id="immersive-icon">⤢</span>
+          <span id="immersive-text">몰입 모드</span>
+        </button>
         <button class="floating-btn" onclick="openLatentSheet()">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
           64D
@@ -966,15 +1137,29 @@ html, body {
 
 <!-- 64D 잠재공간 바텀시트 모달 -->
 <div class="bottom-sheet-overlay" id="latent-sheet-overlay" onclick="closeLatentSheet(event)">
-  <div class="bottom-sheet" onclick="event.stopPropagation()">
-    <div class="sheet-handle"></div>
+  <div class="bottom-sheet" id="latent-sheet-panel" onclick="event.stopPropagation()">
+    <div class="sheet-handle" onclick="toggleSheetHeight()"></div>
     <div class="sheet-header">
       <div class="sheet-title">
         <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#10b981;"></span>
         64차원 잠재 공간 t-SNE 투영 (1,705 노드)
       </div>
-      <button class="sheet-close" onclick="closeLatentSheet()">&times;</button>
+      <div style="display:flex;align-items:center;gap:4px;">
+        <button class="sheet-toggle-size" id="btn-sheet-size" onclick="toggleSheetHeight()" title="화면 크기 전환">⤢</button>
+        <button class="sheet-close" onclick="closeLatentSheet()">&times;</button>
+      </div>
     </div>
+
+    <!-- P4: 계통별 필터 칩 바 -->
+    <div class="latent-filters">
+      <button class="l-filter-btn active" data-cat="ALL" onclick="filterLatentCategory('ALL')">전체</button>
+      <button class="l-filter-btn" data-cat="P" onclick="filterLatentCategory('P')">동력 (P)</button>
+      <button class="l-filter-btn" data-cat="C" onclick="filterLatentCategory('C')">섀시 (C)</button>
+      <button class="l-filter-btn" data-cat="B" onclick="filterLatentCategory('B')">바디 (B)</button>
+      <button class="l-filter-btn" data-cat="U" onclick="filterLatentCategory('U')">통신 (U)</button>
+      <button class="l-filter-btn" data-cat="CONN" onclick="filterLatentCategory('CONN')">커넥터</button>
+    </div>
+
     <div id="latent-mobile-status" style="font-size:12px;color:#94a3b8;min-height:18px;">
       노드 터치 시 실시간 하이라이트 동기화
     </div>
@@ -994,8 +1179,8 @@ html, body {
 <div class="modal-overlay" id="qr-modal-overlay" onclick="closeQrModal(event)">
   <div class="modal-card" onclick="event.stopPropagation()">
     <div style="font-size: 26px; line-height: 1;">📱</div>
-    <h3 style="font-size:16px;font-weight:700;color:var(--fg);letter-spacing:-0.3px;">갤럭시 모바일 접속</h3>
-    <p style="font-size:12px;color:var(--muted);line-height:1.5;word-break:keep-all;">동일한 Wi-Fi 또는 핫스팟에 연결된 갤럭시 카메라로 비추면 즉시 동기화됩니다.</p>
+    <h3 style="font-size:16px;font-weight:700;color:var(--fg);letter-spacing:-0.3px;">화면 공유 및 원격 접속</h3>
+    <p style="font-size:12px;color:var(--muted);line-height:1.5;word-break:keep-all;">💡 <strong>스마트폰 자체에서 100% 오프라인 단독 구동</strong>됩니다.<br>다른 스마트폰과 진단 결과를 공유하거나 PC로 열람할 때만 아래 QR/주소를 사용하세요.</p>
     <img id="qr-image" class="qr-code-img" src="" alt="접속 QR 코드">
     <div class="modal-url-box" id="mobile-url-text"></div>
     <div style="display:flex;gap:8px;margin-top:4px;">
@@ -1112,9 +1297,16 @@ inp.addEventListener('keydown', e => {
   }
 });
 
-// ── 모바일 자동완성 검색 연동 ────────────────────────────────
+// ── 모바일 자동완성 검색 연동 (P3: 하이라이트 & 배경 딤 & 온디바이스 0ms) ──
 let acTimer = null;
 let acData = [];
+
+function highlightMatchText(text, query) {
+  if (!text || !query) return text || '';
+  const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const regex = new RegExp(`(${escaped})`, 'gi');
+  return String(text).replace(regex, '<strong style="color:var(--primary);font-weight:800;">$1</strong>');
+}
 
 inp.addEventListener('input', () => {
   clearTimeout(acTimer);
@@ -1125,33 +1317,49 @@ inp.addEventListener('input', () => {
     return;
   }
   if (q.length < 1) { closeAC(); return; }
+
+  // 1순위: 온디바이스 로컬 검색 (0ms 레이턴시, 네트워크 없음)
+  if (window.DTCLocalEngine && typeof window.DTCLocalEngine.search === 'function') {
+    acData = window.DTCLocalEngine.search(q, 10);
+    renderAC(q);
+    return;
+  }
+
+  // 2순위: 서버 API 폴백
   acTimer = setTimeout(async () => {
     try {
       const res = await fetch(`/api/search?q=${encodeURIComponent(q)}`);
       acData = await res.json();
-      renderAC();
+      renderAC(q);
     } catch(err) {
       console.error("Autocomplete failed:", err);
     }
   }, 120);
 });
 
-function renderAC() {
+function renderAC(query) {
   const acd = document.getElementById('mobile-ac-dropdown');
+  const backdrop = document.getElementById('ac-backdrop');
   if (!acd || !acData.length) { closeAC(); return; }
+
   acd.style.display = 'block';
+  if (backdrop) backdrop.classList.add('active');
+
+  const q = query || inp.value.trim();
   acd.innerHTML = acData.map(d =>
     `<div class="ac-item" onclick="addTag('${d.code}'); closeAC();">
-      <span class="ac-code">${d.code}</span>
-      <span class="ac-ecu">${d.ecu}</span>
-      <span class="ac-desc">${d.desc}</span>
+      <span class="ac-code">${highlightMatchText(d.code, q)}</span>
+      <span class="ac-ecu">${highlightMatchText(d.ecu, q)}</span>
+      <span class="ac-desc">${highlightMatchText(d.desc, q)}</span>
     </div>`
   ).join('');
 }
 
 function closeAC() {
   const acd = document.getElementById('mobile-ac-dropdown');
+  const backdrop = document.getElementById('ac-backdrop');
   if (acd) acd.style.display = 'none';
+  if (backdrop) backdrop.classList.remove('active');
   acData = [];
 }
 
@@ -1182,7 +1390,7 @@ function switchMobileTab(tabName) {
   }
 }
 
-// ── 고장 진단 실행 ──────────────────────────────────────────
+// ── 고장 진단 실행 (온디바이스 우선 + 서버 폴백 하이브리드) ──
 async function executeAnalyze() {
   closeAC();
   if (inp.value.trim()) addTag(inp.value.trim());
@@ -1200,6 +1408,39 @@ async function executeAnalyze() {
     `;
   }
   document.getElementById('loading-overlay').style.display = 'flex';
+
+  // 1순위: 온디바이스 로컬 진단 엔진 (0ms 오프라인 완전 단독 구동)
+  if (window.DTCLocalEngine && typeof window.DTCLocalEngine.analyze === 'function') {
+    try {
+      const localData = window.DTCLocalEngine.analyze(tags);
+      if (localData && localData.results && localData.results.length > 0) {
+        currentResult = localData;
+        renderMobileRanking(localData);
+        renderMobileDtcInfo(localData);
+        buildMobileGraph(localData);
+
+        if (localData.unknown && localData.unknown.length > 0) {
+          showToast(`미등록 코드 제외됨: ${localData.unknown.join(', ')}`);
+        } else {
+          showToast(`⚡ 온디바이스 진단 완료 (1순위: ${localData.results[0]?.name || 'N/A'})`);
+        }
+
+        document.getElementById('loading-overlay').style.display = 'none';
+        if (btnAnalyze) {
+          btnAnalyze.disabled = false;
+          btnAnalyze.innerHTML = `
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            진단 분석 시작
+          `;
+        }
+        return;
+      }
+    } catch (localErr) {
+      console.warn("온디바이스 진단 엔진 오류, 서버 폴백:", localErr);
+    }
+  }
+
+  // 2순위: 서버 API 호출 폴백
   try {
     const res = await fetch('/api/analyze', {
       method: 'POST',
@@ -1237,7 +1478,7 @@ async function executeAnalyze() {
   }
 }
 
-// ── [Rule 2 & 4] 모바일 순위 카드 렌더링 ────────────────────
+// ── [P2 & Rule 2] 모바일 순위 카드 렌더링 ────────────────────
 function renderMobileRanking(data) {
   const container = document.getElementById('rc-cards-container');
   if (!data.results || !data.results.length) {
@@ -1254,12 +1495,34 @@ function renderMobileRanking(data) {
     const badgeText = r.verified ? '마스터 검증' : `점수 ${scoreVal.toFixed(3)}`;
     const badgeCls = r.verified ? 'card-status-badge' : 'card-status-badge score';
 
+    const rankBadgeHtml = isRank1
+      ? `<div style="display:flex;align-items:center;gap:5px;flex-shrink:0;">
+           <span class="card-rank-badge">#${r.rank}</span>
+           <span class="top1-crown-badge">👑 1순위 최우선 점검</span>
+         </div>`
+      : `<span class="card-rank-badge">#${r.rank}</span>`;
+
+    const ecuChipsHtml = (r.conn_ecus && r.conn_ecus.length)
+      ? `<div class="ecu-chip-wrap">
+           ${r.conn_ecus.map(ecu => `<span class="ecu-chip">${ecu}</span>`).join('')}
+         </div>`
+      : `<span style="font-size:11px;color:var(--muted);">정보 없음</span>`;
+
+    const actionBarHtml = isRank1
+      ? `<div class="card-action-bar">
+           <span style="font-size:11px;color:var(--muted);font-weight:600;">원인 신뢰도 <strong style="color:var(--primary);">${Math.round((r.n_hit/n)*100)}%</strong></span>
+           <button class="btn-goto-map" onclick="event.stopPropagation(); focusConnectorFromCard('${r.name}')">
+             지도에서 보기 ➔
+           </button>
+         </div>`
+      : '';
+
     html += `
     <div class="rc-card-mobile ${isRank1 ? 'rank1' : ''}" onclick="focusConnectorFromCard('${r.name}')">
       <!-- 1행: 타이틀 & 고정 뱃지 (Anti-Squishing) -->
       <div class="card-row-1">
         <div class="card-title-wrap">
-          <span class="card-rank-badge">#${r.rank}</span>
+          ${rankBadgeHtml}
           <span class="card-title" title="${r.name}">${r.name}</span>
         </div>
         <span class="${badgeCls}">${badgeText}</span>
@@ -1273,10 +1536,11 @@ function renderMobileRanking(data) {
           </div>
           <span style="font-size:11.5px;font-weight:700;color:var(--primary);min-width:32px;font-variant-numeric:tabular-nums;">${r.n_hit}/${n}</span>
         </div>
-        <div class="card-detail-text"><span>연결 제어기:</span> <strong>${r.conn_ecus ? r.conn_ecus.join(', ') : '정보 없음'}</strong></div>
+        <div class="card-detail-text"><span>연결 제어기:</span> ${ecuChipsHtml}</div>
         <div class="card-tags-row">
           ${data.dtc_info.map(d => `<span class="mini-pill ${r.hit_codes.includes(d.code)?'hit':'miss'}">${d.code}</span>`).join('')}
         </div>
+        ${actionBarHtml}
       </div>
     </div>`;
   });
@@ -1469,7 +1733,7 @@ function buildMobileGraph(data) {
         enabled: true,
         direction: 'LR',
         levelSeparation: 190,
-        nodeSpacing: 50,
+        nodeSpacing: 85,
         treeSpacing: 70
       }
     },
@@ -1503,6 +1767,25 @@ function buildMobileGraph(data) {
 
 function fitMobileNetwork() {
   if (network) network.fit({ animation: { duration: 350, easingFunction: 'easeInOutQuad' } });
+}
+
+// ── P1: 상단 헤더 접힘(Collapsible) 몰입형 모드 토글 ─────────
+function toggleImmersiveMap() {
+  const root = document.getElementById('mobile-app-root') || document.querySelector('.mobile-app');
+  if (!root) return;
+  const isImmersive = root.classList.toggle('immersive-mode');
+  const btnText = document.getElementById('immersive-text');
+  const btnIcon = document.getElementById('immersive-icon');
+  if (btnText) btnText.textContent = isImmersive ? '일반 모드' : '몰입 모드';
+  if (btnIcon) btnIcon.textContent = isImmersive ? '⤡' : '⤢';
+  showToast(isImmersive ? '몰입 모드: 헤더 숨김 및 캔버스 30% 확장' : '일반 모드 복원');
+  if (network) {
+    setTimeout(() => {
+      network.setSize('100%', '100%');
+      network.redraw();
+      network.fit({ animation: { duration: 300, easingFunction: 'easeInOutQuad' } });
+    }, 150);
+  }
 }
 
 // ── 엑스레이 디밍 (스트로크 왜곡 원천 차단) ─────────────────
@@ -1624,19 +1907,34 @@ function toggleXRayMode() {
   if (!xrayMode && isDimmed) restoreMobileStyles();
 }
 
-// ── 64차원 잠재 공간 바텀 시트 ──────────────────────────────
+// ── 64차원 잠재 공간 바텀 시트 (P4: 2단계 높이 제스처 & 계통 필터) ──
+let activeLatentCategory = 'ALL';
+
 async function openLatentSheet() {
   const overlay = document.getElementById('latent-sheet-overlay');
   overlay.classList.add('active');
 
   if (!latentPoints) {
-    try {
-      const res = await fetch('/api/latent-space');
-      const data = await res.json();
-      latentPoints = data.points || [];
-    } catch(err) {
-      console.error(err);
+    // 1순위: 온디바이스 엔진에 내장된 1,705개 t-SNE 좌표 즉시 로드
+    if (window.DTCLocalEngine && window.DTCLocalEngine.latentData) {
+      latentPoints = window.DTCLocalEngine.latentData.points || [];
+    } else {
+      try {
+        const res = await fetch('/api/latent-space');
+        const data = await res.json();
+        latentPoints = data.points || [];
+      } catch(err) {
+        console.error(err);
+      }
     }
+  }
+
+  // 캔버스 크기 모바일 고해상도(DPI) 동기화
+  const cvs = document.getElementById('latent-canvas-mobile');
+  if (cvs) {
+    const dpr = window.devicePixelRatio || 1;
+    cvs.width = cvs.clientWidth * dpr;
+    cvs.height = cvs.clientHeight * dpr;
   }
 
   renderLatentMobileCanvas();
@@ -1649,19 +1947,58 @@ function closeLatentSheet(e) {
   stopMobileRadar();
 }
 
+// ── P4: 2단계 바텀시트 높이 토글 (Half 55vh <-> Full 88vh) ───
+function toggleSheetHeight() {
+  const panel = document.getElementById('latent-sheet-panel');
+  const btn = document.getElementById('btn-sheet-size');
+  if (!panel) return;
+  const isFull = panel.classList.toggle('full-height');
+  if (btn) btn.textContent = isFull ? '⤡' : '⤢';
+  showToast(isFull ? '잠재 공간 전체 화면 (88vh)' : '잠재 공간 기본 크기 (55vh)');
+  setTimeout(() => {
+    const cvs = document.getElementById('latent-canvas-mobile');
+    if (cvs) {
+      const dpr = window.devicePixelRatio || 1;
+      cvs.width = cvs.clientWidth * dpr;
+      cvs.height = cvs.clientHeight * dpr;
+      renderLatentMobileCanvas();
+    }
+  }, 280);
+}
+
+// ── P4: 계통별 필터 토글 칩 (동력 P / 섀시 C / 바디 B / 통신 U / 커넥터) ──
+function filterLatentCategory(cat) {
+  activeLatentCategory = cat;
+  document.querySelectorAll('.l-filter-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.cat === cat);
+  });
+  renderLatentMobileCanvas();
+  const labelMap = { 'ALL':'전체 계통', 'P':'동력 (P)', 'C':'섀시 (C)', 'B':'바디 (B)', 'U':'통신 (U)', 'CONN':'커넥터' };
+  showToast(`계통 필터: ${labelMap[cat] || cat}`);
+}
+
 function renderLatentMobileCanvas() {
   const cvs = document.getElementById('latent-canvas-mobile');
   if (!cvs || !latentPoints) return;
   const ctx = cvs.getContext('2d');
   const W = cvs.width, H = cvs.height;
+  const dpr = window.devicePixelRatio || 1;
   ctx.clearRect(0, 0, W, H);
 
   const colors = { 'P':'#ef4444', 'C':'#f59e0b', 'B':'#8b5cf6', 'U':'#0284c7', 'CONN':'#10b981', 'ECU':'#94a3b8' };
   for (let i = 0; i < latentPoints.length; i++) {
     const pt = latentPoints[i];
-    ctx.fillStyle = colors[pt.domain] || '#64748b';
+    const ptCat = pt.domain || (pt.type === 'Connector' ? 'CONN' : (pt.type === 'ECU' ? 'ECU' : 'P'));
+
+    // P4: 계통별 필터링
+    if (activeLatentCategory !== 'ALL' && ptCat !== activeLatentCategory) {
+      continue;
+    }
+
+    ctx.fillStyle = colors[ptCat] || '#64748b';
     ctx.beginPath();
-    ctx.arc(pt.x * W, pt.y * H, pt.type === 'Connector' ? 2.2 : (pt.type === 'ECU' ? 2.8 : 1.6), 0, Math.PI * 2);
+    const r = (pt.type === 'Connector' ? 2.6 : (pt.type === 'ECU' ? 3.0 : 1.8)) * dpr;
+    ctx.arc(pt.x * W, pt.y * H, r, 0, Math.PI * 2);
     ctx.fill();
   }
 
@@ -1673,14 +2010,14 @@ function renderLatentMobileCanvas() {
       ctx.save();
       const alpha = Math.max(0, 1 - radarRadius / 18);
       ctx.strokeStyle = `rgba(20, 184, 166, ${alpha})`;
-      ctx.lineWidth = 2.5;
+      ctx.lineWidth = 2.5 * dpr;
       ctx.beginPath();
-      ctx.arc(px, py, radarRadius, 0, Math.PI * 2);
+      ctx.arc(px, py, radarRadius * dpr, 0, Math.PI * 2);
       ctx.stroke();
 
       ctx.fillStyle = '#14b8a6';
       ctx.beginPath();
-      ctx.arc(px, py, 4.5, 0, Math.PI * 2);
+      ctx.arc(px, py, 5.0 * dpr, 0, Math.PI * 2);
       ctx.fill();
       ctx.restore();
     }

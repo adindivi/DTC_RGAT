@@ -251,6 +251,22 @@ def service_worker() -> Response:
     return response
 
 
+@app.route("/dtc_ondevice_engine.js")
+def ondevice_engine() -> Response:
+    """Serves the standalone on-device DTC graph diagnosis engine."""
+    return send_from_directory(
+        STATIC_DIR, "dtc_ondevice_engine.js", mimetype="application/javascript"
+    )
+
+
+@app.route("/vis-network.min.js")
+def vis_network_js() -> Response:
+    """Serves the local bundled vis-network JavaScript library."""
+    return send_from_directory(
+        STATIC_DIR, "vis-network.min.js", mimetype="application/javascript"
+    )
+
+
 @app.route("/api/server-info")
 def server_info() -> Response:
     """Provides LAN IP and connection guidance for Galaxy mobile onboarding."""
